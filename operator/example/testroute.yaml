@@ -1,0 +1,7 @@
+apiVersion: keip.connexta.com/v1alpha1
+kind: IntegrationRoute
+metadata:
+  name: testroute
+spec:
+  routeConfigMap: test-route-xml
+  propsConfigMap: test-props

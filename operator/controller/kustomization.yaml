@@ -1,0 +1,10 @@
+# TODO: Test with a namespace
+# namespace: tester
+
+resources:
+  - integrationroute-controller.yaml
+
+configMapGenerator:
+  - name: integrationroute-sync-webhook
+    files:
+      - sync.py

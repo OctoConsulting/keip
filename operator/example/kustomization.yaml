@@ -1,0 +1,15 @@
+resources:
+  - testroute.yaml
+
+generatorOptions:
+ disableNameSuffixHash: true
+
+configMapGenerator:
+  - name: test-route-xml
+    files:
+      - integrationRoute.xml
+      # If the file is not named 'integrationRoute.xml', you will have to add a key with that name:
+      # - integrationRoute.xml=<path-to-file>
+  - name: test-props
+    files:
+      - application.yaml

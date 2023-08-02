@@ -1,0 +1,42 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: integrationroutes.keip.connexta.com
+spec:
+  group: keip.connexta.com
+  names:
+    kind: IntegrationRoute
+    plural: integrationroutes
+    singular: integrationroute
+    shortNames:
+      - ir
+  scope: Namespaced
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                routeConfigMap:
+                  description: "Name of a ConfigMap containing integration route definitions. The ConfigMap should be in the same namespace as the IntegrationRoute resource"
+                  type: string
+                propsConfigMap:
+                  description: "Name of a ConfigMap containing configuration properties for an integration route deployment. The ConfigMap should be in the same namespace as the IntegrationRoute resource"
+                  type: string
+                replicas: # not yet implemented
+                  description: "Number of containers running the integration route"
+                  type: integer
+                  minimum: 1
+                  maximum: 20 # TODO: Figure out a reasonable maximum
+                  default: 1
+              required:
+                - routeConfigMap
+          required:
+            - spec
+      subresources: # Can be used to add status information to CustomResource objects
+        status: {}
