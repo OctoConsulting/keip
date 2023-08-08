@@ -16,6 +16,7 @@ class VolumeConfig:
     def __init__(self, parent_spec) -> None:
         self._route_config = parent_spec["routeConfigMap"]
         self._props_config = parent_spec.get("propsConfigMap")
+        self._pvcs = parent_spec.get("persistentVolumeClaims")
 
     def get_volumes(self) -> List[Mapping]:
         volumes = [
@@ -37,6 +38,15 @@ class VolumeConfig:
                 }
             )
 
+        if self._pvcs is not None:
+            for pvc_spec in self._pvcs:
+                volumes.append(
+                    {
+                        "name": pvc_spec["claimName"],
+                        "persistentVolumeClaim": {"claimName": pvc_spec["claimName"]},
+                    }
+                )
+
         return volumes
 
     def get_mounts(self) -> List[Mapping]:
@@ -54,6 +64,15 @@ class VolumeConfig:
                     "mountPath": "/var/spring/config",
                 }
             )
+
+        if self._pvcs is not None:
+            for pvc_spec in self._pvcs:
+                volumeMounts.append(
+                    {
+                        "name": pvc_spec["claimName"],
+                        "mountPath": pvc_spec["mountPath"],
+                    }
+                )
 
         return volumeMounts
 

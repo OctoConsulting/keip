@@ -34,6 +34,19 @@ spec:
                   minimum: 1
                   maximum: 20 # TODO: Figure out a reasonable maximum
                   default: 1
+                persistentVolumeClaims:
+                  description: "List with the names of PersistentVolumeClaims and their mountPaths on the pod container"
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      claimName:
+                        type: string
+                      mountPath:
+                        type: string
+                    required:
+                      - claimName
+                      - mountPath
               required:
                 - routeConfigMap
           required:
