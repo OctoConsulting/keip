@@ -7,9 +7,9 @@ import org.springframework.integration.config.EnableIntegration;
 
 @SpringBootApplication
 @EnableIntegration
-@ImportResource(locations = "${integration.file.path:file:/var/spring/xml/integrationRoute.xml}")
-public class SpringIntegrationApplication {
+@ImportResource(locations = "${keip.integration.filepath:file:/var/spring/xml/integrationRoute.xml}")
+public class KeipApplication {
     public static void main(String[] args) {
-        SpringApplication.run(SpringIntegrationApplication.class);
+        SpringApplication.run(KeipApplication.class);
     }
 }
