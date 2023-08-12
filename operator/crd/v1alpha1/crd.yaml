@@ -25,9 +25,30 @@ spec:
                 routeConfigMap:
                   description: "Name of a ConfigMap containing integration route definitions. The ConfigMap should be in the same namespace as the IntegrationRoute resource"
                   type: string
-                propsConfigMap:
-                  description: "Name of a ConfigMap containing configuration properties for an integration route deployment. The ConfigMap should be in the same namespace as the IntegrationRoute resource"
-                  type: string
+                propSources:
+                  description: "List of names or labels referencing ConfigMap sources that will be included as Spring PropertySources. The ConfigMaps should be in the same namespace as the IntegrationRoute resource"
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                      labels:
+                        type: object
+                        additionalProperties:
+                          type: string
+                    oneOf:
+                      - properties:
+                        required:
+                          - name
+                      - properties:
+                        required:
+                          - labels
+                secretSources:
+                  description: "List of names referencing Secrets that will be mounted into the integration route container and included as Spring PropertySources. The Secrets should be in the same namespace as the IntegrationRoute resource"
+                  type: array
+                  items:
+                    type: string
                 replicas: # not yet implemented
                   description: "Number of containers running the integration route"
                   type: integer

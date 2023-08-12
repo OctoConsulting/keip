@@ -3,20 +3,29 @@
 import json
 import os
 from http.server import BaseHTTPRequestHandler, HTTPServer
-from typing import List, Mapping
+from pathlib import Path
+from typing import List, Mapping, Optional
 
 # TODO: Abstract configuration property resolution in a separate module
 INTEGRATION_IMAGE = os.getenv("INTEGRATION_IMAGE", "keip-integration")
 
+SECRETS_ROOT = "/etc/secrets"
+
 
 class VolumeConfig:
+    """
+    Handles creating a pod's volumes and volumeMounts based on the following IntegrationRoute inputs:
+        - routeConfigMap
+        - secretSources
+        - persistentVolumeClaims
+    """
+
     _route_vol_name = "integration-route-config"
-    _props_vol_name = "props-config"
 
     def __init__(self, parent_spec) -> None:
         self._route_config = parent_spec["routeConfigMap"]
-        self._props_config = parent_spec.get("propsConfigMap")
-        self._pvcs = parent_spec.get("persistentVolumeClaims")
+        self._secret_srcs = parent_spec.get("secretSources", [])
+        self._pvcs = parent_spec.get("persistentVolumeClaims", [])
 
     def get_volumes(self) -> List[Mapping]:
         volumes = [
@@ -28,24 +37,16 @@ class VolumeConfig:
             }
         ]
 
-        if self._props_config is not None:
+        for secret in self._secret_srcs:
+            volumes.append({"name": secret, "secret": {"secretName": secret}})
+
+        for pvc_spec in self._pvcs:
             volumes.append(
                 {
-                    "name": self._props_vol_name,
-                    "configMap": {
-                        "name": self._props_config,
-                    },
+                    "name": pvc_spec["claimName"],
+                    "persistentVolumeClaim": {"claimName": pvc_spec["claimName"]},
                 }
             )
-
-        if self._pvcs is not None:
-            for pvc_spec in self._pvcs:
-                volumes.append(
-                    {
-                        "name": pvc_spec["claimName"],
-                        "persistentVolumeClaim": {"claimName": pvc_spec["claimName"]},
-                    }
-                )
 
         return volumes
 
@@ -57,34 +58,63 @@ class VolumeConfig:
             }
         ]
 
-        if self._props_config is not None:
+        for secret in self._secret_srcs:
             volumeMounts.append(
                 {
-                    "name": self._props_vol_name,
-                    "mountPath": "/var/spring/config",
+                    "name": secret,
+                    "readOnly": True,
+                    "mountPath": str(Path(SECRETS_ROOT, secret)),
                 }
             )
 
-        if self._pvcs is not None:
-            for pvc_spec in self._pvcs:
-                volumeMounts.append(
-                    {
-                        "name": pvc_spec["claimName"],
-                        "mountPath": pvc_spec["mountPath"],
-                    }
-                )
+        for pvc_spec in self._pvcs:
+            volumeMounts.append(
+                {
+                    "name": pvc_spec["claimName"],
+                    "mountPath": pvc_spec["mountPath"],
+                }
+            )
 
         return volumeMounts
 
 
-def create_pod_template(parent_spec, labels, integration_image):
-    """TODO: Should add some resource constraints for containers. Add constraint values to CRD."""
+def spring_cloud_k8s_config(parent) -> Optional[Mapping]:
+    """Generates the spring-cloud-kubernetes config that's passed as an env var to the Spring app"""
+    metadata = parent["metadata"]
 
-    vol_config = VolumeConfig(parent_spec)
+    props_srcs = parent["spec"].get("propSources")
+    secret_srcs = parent["spec"].get("secretSources")
+
+    if not props_srcs and not secret_srcs:
+        return None
 
     return {
+        "spring": {
+            "config.import": "kubernetes:",
+            "application": {"name": metadata["name"]},
+            "cloud": {
+                "kubernetes": {
+                    "config": {
+                        "fail-fast": True,
+                        "namespace": metadata["namespace"],
+                        "sources": props_srcs,
+                    },
+                    "secrets": {"paths": SECRETS_ROOT},
+                }
+            },
+        }
+    }
+
+
+def create_pod_template(parent, labels, integration_image):
+    """TODO: Should add some resource constraints for containers. Add constraint values to CRD."""
+
+    vol_config = VolumeConfig(parent["spec"])
+
+    pod_template = {
         "metadata": {"labels": labels},
         "spec": {
+            "serviceAccountName": "spring-cloud-kubernetes",
             "containers": [
                 {
                     "name": "integration-app",
@@ -96,10 +126,20 @@ def create_pod_template(parent_spec, labels, integration_image):
         },
     }
 
+    spring_app_config = spring_cloud_k8s_config(parent)
+    if spring_app_config:
+        pod_template["spec"]["containers"][0]["env"] = [
+            {
+                "name": "SPRING_APPLICATION_JSON",
+                "value": json.dumps(spring_app_config),
+            }
+        ]
+
+    return pod_template
+
 
 def new_deployment(parent):
     parent_metadata = parent["metadata"]
-    parent_spec = parent["spec"]
 
     labels = {
         "app.kubernetes.io/managed-by": "integrationroute-controller",
@@ -112,7 +152,7 @@ def new_deployment(parent):
         "apiVersion": "apps/v1",
         "kind": "Deployment",
         "metadata": {
-            "name": f'{parent_metadata["name"]}',
+            "name": parent_metadata["name"],
             "labels": labels,
         },
         "spec": {
@@ -121,8 +161,8 @@ def new_deployment(parent):
                     "app.kubernetes.io/instance": labels["app.kubernetes.io/instance"]
                 }
             },
-            "replicas": parent_spec["replicas"],
-            "template": create_pod_template(parent_spec, labels, INTEGRATION_IMAGE),
+            "replicas": parent["spec"]["replicas"],
+            "template": create_pod_template(parent, labels, INTEGRATION_IMAGE),
         },
     }
 
@@ -131,6 +171,7 @@ def new_deployment(parent):
 
 # TODO: Consider using a production-ready server rather than the built-in http.server
 # TODO: Add some typing to request and response objects
+# TODO: Add some unit testing
 class ServiceRouteController(BaseHTTPRequestHandler):
     def sync(self, parent):
         desired = {"status": {}, "children": []}
@@ -152,4 +193,4 @@ class ServiceRouteController(BaseHTTPRequestHandler):
             self.wfile.write(json.dumps(desired).encode())
 
 
-HTTPServer(("", 80), ServiceRouteController).serve_forever()
+HTTPServer(("", 7080), ServiceRouteController).serve_forever()

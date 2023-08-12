@@ -4,4 +4,10 @@ metadata:
   name: testroute
 spec:
   routeConfigMap: test-route-xml
-  propsConfigMap: test-props
+  propSources:
+    - name: testroute-props
+    # Can also select ConfigMaps using labels:
+    # - labels:
+    #     group: abc
+  secretSources:
+    - testroute-secret

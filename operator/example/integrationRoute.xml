@@ -9,7 +9,7 @@
 
     <int:channel id="output"/>
 
-    <int:inbound-channel-adapter channel="output" expression="'${message}'">
+    <int:inbound-channel-adapter channel="output" expression="'${greeting}. I have a secret to share: (${test.secret})'">
         <int:poller fixed-rate="5000"/>
     </int:inbound-channel-adapter>
 

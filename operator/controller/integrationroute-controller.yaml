@@ -50,9 +50,15 @@ spec:
           volumeMounts:
             - name: hooks
               mountPath: /hooks
+          ports:
+            - containerPort: 7080
+              name: webhook-http
           env:
             - name: INTEGRATION_IMAGE
-              value: keip-integration:0.0.1-SNAPSHOT
+              valueFrom:
+                configMapKeyRef:
+                  name: keip-controller-props
+                  key: integration-image
           resources:
             requests:
               memory: "64Mi"
@@ -74,4 +80,4 @@ spec:
     app: integrationroute-webhook
   ports:
     - port: 80
-      targetPort: 80
+      targetPort: webhook-http

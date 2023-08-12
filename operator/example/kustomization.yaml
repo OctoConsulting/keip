@@ -2,7 +2,7 @@ resources:
   - testroute.yaml
 
 generatorOptions:
- disableNameSuffixHash: true
+  disableNameSuffixHash: true
 
 configMapGenerator:
   - name: test-route-xml
@@ -10,6 +10,11 @@ configMapGenerator:
       - integrationRoute.xml
       # If the file is not named 'integrationRoute.xml', you will have to add a key with that name:
       # - integrationRoute.xml=<path-to-file>
-  - name: test-props
+  - name: testroute-props
     files:
       - application.yaml
+
+secretGenerator:
+  - name: testroute-secret
+    literals:
+      - test.secret=pass123
