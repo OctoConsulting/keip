@@ -1,11 +1,9 @@
-# TODO: Test with a namespace
-# namespace: tester
-
 resources:
   - integrationroute-controller.yaml
   - spring-cloud-k8s-privileges.yaml
 
 configMapGenerator:
   - name: integrationroute-sync-webhook
+    namespace: metacontroller
     files:
       - sync.py

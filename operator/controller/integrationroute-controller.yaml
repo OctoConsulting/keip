@@ -25,14 +25,14 @@ spec:
   hooks:
     sync:
       webhook:
-        # TODO: Figure out how to avoid having to update when ns changes
-        url: http://integrationroute-webhook.default/sync
+        url: http://integrationroute-webhook.metacontroller/sync
         timeout: 10s
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: integrationroute-webhook
+  namespace: metacontroller
 spec:
   replicas: 1
   selector:
@@ -75,6 +75,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: integrationroute-webhook
+  namespace: metacontroller
 spec:
   selector:
     app: integrationroute-webhook
