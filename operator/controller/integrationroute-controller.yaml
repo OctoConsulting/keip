@@ -45,11 +45,7 @@ spec:
     spec:
       containers:
         - name: webhook
-          image: python:3.11.4-slim
-          command: ["python", "/hooks/sync.py"]
-          volumeMounts:
-            - name: hooks
-              mountPath: /hooks
+          image: integration-route-lambda-controller
           ports:
             - containerPort: 7080
               name: webhook-http
@@ -66,10 +62,6 @@ spec:
             limits:
               memory: "128Mi"
               cpu: "500m"
-      volumes:
-        - name: hooks
-          configMap:
-            name: integrationroute-sync-webhook
 ---
 apiVersion: v1
 kind: Service

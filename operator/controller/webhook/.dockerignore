@@ -1,0 +1,15 @@
+# Standard directives
+**/__pycache__
+**/*.pyc
+**/*.pyo
+**/*.pyd
+env
+pip-log.txt
+**/*.log
+.git
+.mypy_cache
+.pytest_cache
+
+# Local directives
+test
+dev-requirements.txt

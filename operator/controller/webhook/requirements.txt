@@ -1,0 +1,2 @@
+starlette~=0.31.1
+uvicorn[standard]~=0.23.2
