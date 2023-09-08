@@ -22,6 +22,16 @@ spec:
             spec:
               type: object
               properties:
+                annotations:
+                  description: "Annotations to add to the IntegrationRoute pod template"
+                  type: object
+                  additionalProperties:
+                    type: string
+                labels:
+                  description: "Labels to add to the IntegrationRoute pod template"
+                  type: object
+                  additionalProperties:
+                    type: string
                 routeConfigMap:
                   description: "Name of a ConfigMap containing integration route definitions. The ConfigMap should be in the same namespace as the IntegrationRoute resource"
                   type: string
