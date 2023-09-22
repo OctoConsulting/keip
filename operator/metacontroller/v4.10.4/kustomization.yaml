@@ -1,8 +1,0 @@
-commonLabels:
-  app.kubernetes.io/name: metacontroller
-
-resources:
-- metacontroller-namespace.yaml
-- metacontroller-rbac.yaml
-- metacontroller-crds-v1.yaml
-- metacontroller.yaml

@@ -35,7 +35,7 @@
             }
           },
           "spec": {
-            "serviceAccountName": "spring-cloud-kubernetes",
+            "serviceAccountName": "integrationroute-service",
             "containers": [
               {
                 "name": "integration-app",

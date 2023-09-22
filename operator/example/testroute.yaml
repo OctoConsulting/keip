@@ -3,7 +3,7 @@ kind: IntegrationRoute
 metadata:
   name: testroute
 spec:
-  routeConfigMap: test-route-xml
+  routeConfigMap: testroute-xml
   propSources:
     - name: testroute-props
     # Can also select ConfigMaps using labels:

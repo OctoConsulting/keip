@@ -112,7 +112,7 @@ def _create_pod_template(parent, labels, integration_image):
     pod_template = {
         "metadata": {"labels": labels},
         "spec": {
-            "serviceAccountName": "spring-cloud-kubernetes",
+            "serviceAccountName": "integrationroute-service",
             "containers": [
                 {
                     "name": "integration-app",

@@ -1,6 +1,7 @@
-VERSION ?= latest
+VERSION ?= 0.1.1
 HOST_PORT ?= 7080
 
+IMG_REPO := tempreg.local
 IMG_NAME := integration-route-lambda-controller
 CONTAINER_NAME := integration-route-webhook
 PYTHON := python3
@@ -13,11 +14,15 @@ start-dev-server:
 test:
 	cd test && pytest
 
+.PHONY: deploy
+deploy: build
+	docker push $(IMG_REPO)/$(IMG_NAME):$(VERSION)
+
 .PHONY: build
 build:
 	docker build \
-	--tag $(IMG_NAME):$(VERSION) \
-	.
+  --tag $(IMG_REPO)/$(IMG_NAME):$(VERSION) \
+  .
 
 .PHONY: run-container
 run-container: build
@@ -28,4 +33,4 @@ run-container: build
 
 .PHONY: kill
 kill:
-	-docker rm -f $(CONTAINER_NAME) > /dev/null 2>&1
+	-docker rm -f $(CONTAINER_NAME)

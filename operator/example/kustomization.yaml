@@ -5,7 +5,7 @@ generatorOptions:
   disableNameSuffixHash: true
 
 configMapGenerator:
-  - name: test-route-xml
+  - name: testroute-xml
     files:
       - integrationRoute.xml
       # If the file is not named 'integrationRoute.xml', you will have to add a key with that name:

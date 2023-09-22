@@ -1,3 +1,13 @@
 resources:
   - integrationroute-controller.yaml
-  - spring-cloud-k8s-privileges.yaml
+  - integrationroute-privileges.yaml
+
+patches:
+  # Add tempreg.local imagePullSecret to integration-pod service-account
+  - target:
+      kind: ServiceAccount
+      name: integrationroute-service
+    patch: |-
+      - op: add
+        path: spec/imagePullSecrets
+        value: [{name: local-registry-creds}]
