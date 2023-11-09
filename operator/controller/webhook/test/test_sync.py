@@ -112,12 +112,12 @@ def test_deployment_empty_labels(full_route):
 
 @pytest.fixture()
 def full_route(full_route_load: dict):
-    return copy.deepcopy(full_route_load)
+    return copy.deepcopy(full_route_load['parent'])
 
 
 @pytest.fixture(scope='module')
 def full_route_load() -> Mapping:
-    return load_json('json/integrationroute-full.json')
+    return load_json('json/full-iroute-request.json')
 
 
 def load_json(filepath: str) -> Mapping:

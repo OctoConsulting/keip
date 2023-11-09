@@ -1,0 +1,45 @@
+{
+  "parent": {
+    "apiVersion": "keip.connexta.com/v1alpha1",
+    "kind": "IntegrationRoute",
+    "metadata": {
+      "annotations": {
+        "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"keip.connexta.com/v1alpha1\",\"kind\":\"IntegrationRoute\",\"metadata\":{\"annotations\":{},\"name\":\"testroute\",\"namespace\":\"demo\"},\"spec\":{\"annotations\":{\"aKey1\":\"aValue1\"},\"labels\":{\"firstKey\":\"firstValue\"},\"persistentVolumeClaims\":[{\"claimName\":\"testroute-pvc\",\"mountPath\":\"/tmp/testdir\"}],\"propSources\":[{\"name\":\"testroute-props\"},{\"labels\":{\"group\":\"ir-common\"}}],\"replicas\":2,\"routeConfigMap\":\"testroute-xml\",\"secretSources\":[\"testroute-secret\"]}}\n"
+      },
+      "creationTimestamp": "2023-09-06T01:16:27Z",
+      "generation": 1,
+      "name": "testroute",
+      "namespace": "testspace",
+      "uid": "b10e0347-1ab2-4146-864f-1f4225b06d4d"
+    },
+    "spec": {
+      "annotations": {
+        "aKey1": "aValue1"
+      },
+      "labels": {
+        "firstKey": "firstValue"
+      },
+      "persistentVolumeClaims": [
+        {
+          "claimName": "testroute-pvc",
+          "mountPath": "/tmp/testdir"
+        }
+      ],
+      "propSources": [
+        {
+          "name": "testroute-props"
+        },
+        {
+          "labels": {
+            "group": "ir-common"
+          }
+        }
+      ],
+      "replicas": 2,
+      "routeConfigMap": "testroute-xml",
+      "secretSources": [
+        "testroute-secret"
+      ]
+    }
+  }
+}

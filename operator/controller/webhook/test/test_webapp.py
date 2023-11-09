@@ -13,9 +13,8 @@ def test_status_endpoint(test_client):
 
 
 def test_sync_endpoint_success(test_client):
-    parent = load_json('json/integrationroute-full.json')
-    request = {'controller': {}, 'parent': parent, 'children': [], 'related': [],
-               'finalizing': False}
+    request = load_json('json/full-iroute-request.json')
+    request = request | {'controller': {}, 'children': [], 'related': [], 'finalizing': False}
 
     response = test_client.post('/sync', json=request)
     expected = load_json('json/full-response.json')
