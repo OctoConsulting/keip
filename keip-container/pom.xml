@@ -16,7 +16,8 @@
     <version>0.0.1-SNAPSHOT</version>
 
     <properties>
-        <docker.registry>tempreg.local</docker.registry>
+        <docker.registry>ghcr.io/octoconsulting</docker.registry>
+        <container.source.label>https://github.com/octoconsulting/keip</container.source.label>
 
         <!-- skip deploying jar -->
         <maven.deploy.skip>true</maven.deploy.skip>
@@ -101,6 +102,11 @@
                                 /var/spring/config
                             </volume>
                         </volumes>
+                        <labels>
+                            <org.opencontainers.image.source>
+                                ${container.source.label}
+                            </org.opencontainers.image.source>
+                        </labels>
                     </container>
                     <to>
                         <image>${docker.registry}/${project.artifactId}</image>

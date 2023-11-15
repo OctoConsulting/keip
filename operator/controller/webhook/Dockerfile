@@ -1,5 +1,7 @@
 FROM python:3.11.5-slim
 
+LABEL org.opencontainers.image.source=https://github.com/octoconsulting/keip
+
 WORKDIR /code/webhook
 
 COPY requirements.txt ./
