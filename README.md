@@ -34,10 +34,10 @@ The project consists of several pieces:
 
 ### Installing the Keip Operator
 
-The Keip operator uses
-the [Metacontroller](https://metacontroller.github.io/metacontroller/intro.html) framework, which
-must be deployed first for the Keip lambda controller to function. Makefiles are provided
-to install both the Metacontroller and Keip controller.
+The Keip operator relies on
+the [Metacontroller](https://metacontroller.github.io/metacontroller/intro.html) framework. The
+following steps will install the required version of the Metacontroller, followed by the Keip
+operator.
 
 ```shell
 # Switch to namespace where IntegrationRoutes will be deployed
