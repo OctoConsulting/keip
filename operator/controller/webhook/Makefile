@@ -1,7 +1,7 @@
 VERSION ?= 0.1.1
 HOST_PORT ?= 7080
 
-IMG_REPO := tempreg.local
+IMG_REGISTRY := ghcr.io/octoconsulting
 IMG_NAME := integration-route-lambda-controller
 CONTAINER_NAME := integration-route-webhook
 PYTHON := python3
@@ -16,12 +16,12 @@ test:
 
 .PHONY: deploy
 deploy: build
-	docker push $(IMG_REPO)/$(IMG_NAME):$(VERSION)
+	docker push $(IMG_REGISTRY)/$(IMG_NAME):$(VERSION)
 
 .PHONY: build
 build:
 	docker build \
-  --tag $(IMG_REPO)/$(IMG_NAME):$(VERSION) \
+  --tag $(IMG_REGISTRY)/$(IMG_NAME):$(VERSION) \
   .
 
 .PHONY: run-container

@@ -48,12 +48,9 @@ spec:
       labels:
         app: integrationroute-webhook
     spec:
-      imagePullSecrets:
-        # TODO: Remove if access to tempreg.local is no longer required
-        - name: local-registry-creds
       containers:
         - name: webhook
-          image: tempreg.local/integration-route-lambda-controller:0.1.1
+          image: ghcr.io/octoconsulting/integration-route-lambda-controller:0.1.1
           ports:
             - containerPort: 7080
               name: webhook-http
