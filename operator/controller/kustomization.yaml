@@ -1,9 +1,3 @@
 resources:
-  # Metacontroller
-  - https://github.com/metacontroller/metacontroller/releases/download/v4.11.5/metacontroller-crds-v1.yaml
-  - https://github.com/metacontroller/metacontroller/releases/download/v4.11.5/metacontroller-namespace.yaml
-  - https://github.com/metacontroller/metacontroller/releases/download/v4.11.5/metacontroller-rbac.yaml
-  - https://github.com/metacontroller/metacontroller/releases/download/v4.11.5/metacontroller.yaml
-
   - integrationroute-controller.yaml
   - integrationroute-privileges.yaml

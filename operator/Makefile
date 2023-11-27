@@ -5,12 +5,20 @@ KEIP_INTEGRATION_IMAGE ?= ghcr.io/octoconsulting/keip-integration:0.0.1-SNAPSHOT
 KUBECTL := kubectl
 KUBECTL_DELETE := $(KUBECTL) delete --ignore-not-found
 CONTROLLER_NAMESPACE := keip
+METACONTROLLER_URL := https://github.com/metacontroller/metacontroller/manifests/production?ref=$(METACONTROLLER_VERSION)
 
 .PHONY: all
-all: controller/deploy
+all: metacontroller/deploy controller/deploy
+
 
 .PHONY: clean
-clean: controller/undeploy
+clean: controller/undeploy metacontroller/undeploy
+
+metacontroller/deploy:
+	$(KUBECTL) apply -k $(METACONTROLLER_URL)
+
+metacontroller/undeploy:
+	-$(KUBECTL_DELETE) -k $(METACONTROLLER_URL)
 
 controller/deploy: crd/deploy
 	$(KUBECTL) apply -k controller
