@@ -7,10 +7,17 @@ KUBECTL_DELETE := $(KUBECTL) delete --ignore-not-found
 CONTROLLER_NAMESPACE := keip
 
 .PHONY: all
-all: controller/deploy
+all: metacontroller/deploy controller/deploy
+
 
 .PHONY: clean
-clean: controller/undeploy
+clean: controller/undeploy metacontroller/undeploy
+
+metacontroller/deploy:
+	$(KUBECTL) apply -k metacontroller
+
+metacontroller/undeploy:
+	-$(KUBECTL_DELETE) -k metacontroller
 
 controller/deploy: crd/deploy
 	$(KUBECTL) apply -k controller
