@@ -1,10 +1,10 @@
 {
   "parent": {
-    "apiVersion": "keip.connexta.com/v1alpha1",
+    "apiVersion": "keip.octoconsulting.com/v1alpha1",
     "kind": "IntegrationRoute",
     "metadata": {
       "annotations": {
-        "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"keip.connexta.com/v1alpha1\",\"kind\":\"IntegrationRoute\",\"metadata\":{\"annotations\":{},\"name\":\"testroute\",\"namespace\":\"demo\"},\"spec\":{\"annotations\":{\"aKey1\":\"aValue1\"},\"labels\":{\"firstKey\":\"firstValue\"},\"persistentVolumeClaims\":[{\"claimName\":\"testroute-pvc\",\"mountPath\":\"/tmp/testdir\"}],\"propSources\":[{\"name\":\"testroute-props\"},{\"labels\":{\"group\":\"ir-common\"}}],\"replicas\":2,\"routeConfigMap\":\"testroute-xml\",\"secretSources\":[\"testroute-secret\"]}}\n"
+        "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"keip.octoconsulting.com/v1alpha1\",\"kind\":\"IntegrationRoute\",\"metadata\":{\"annotations\":{},\"name\":\"testroute\",\"namespace\":\"demo\"},\"spec\":{\"annotations\":{\"aKey1\":\"aValue1\"},\"labels\":{\"firstKey\":\"firstValue\"},\"persistentVolumeClaims\":[{\"claimName\":\"testroute-pvc\",\"mountPath\":\"/tmp/testdir\"}],\"propSources\":[{\"name\":\"testroute-props\"},{\"labels\":{\"group\":\"ir-common\"}}],\"replicas\":2,\"routeConfigMap\":\"testroute-xml\",\"secretSources\":[\"testroute-secret\"]}}\n"
       },
       "creationTimestamp": "2023-09-06T01:16:27Z",
       "generation": 1,

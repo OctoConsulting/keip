@@ -11,7 +11,7 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
-    <groupId>com.connexta.keip</groupId>
+    <groupId>com.octoconsulting.keip</groupId>
     <artifactId>keip-integration</artifactId>
     <version>0.0.1-SNAPSHOT</version>
 

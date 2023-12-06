@@ -6,7 +6,7 @@ metadata:
 spec:
   generateSelector: true
   parentResource:
-    apiVersion: keip.connexta.com/v1alpha1
+    apiVersion: keip.octoconsulting.com/v1alpha1
     resource: integrationroutes
     revisionHistory:
       # TODO: Does this actually work if only the CM's content changes?
