@@ -1,6 +1,6 @@
 # VERSION = 0.1.0
 
-KEIP_INTEGRATION_IMAGE ?= ghcr.io/octo/keip-integration:0.0.1-SNAPSHOT
+KEIP_INTEGRATION_IMAGE ?= ghcr.io/octoconsulting/keip-integration:0.0.1-SNAPSHOT
 
 KUBECTL := kubectl
 KUBECTL_DELETE := $(KUBECTL) delete --ignore-not-found
