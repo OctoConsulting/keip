@@ -1,4 +1,4 @@
-apiVersion: keip.connexta.com/v1alpha1
+apiVersion: keip.octo.com/v1alpha1
 kind: IntegrationRoute
 metadata:
   name: testroute
