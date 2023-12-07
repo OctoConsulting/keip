@@ -11,13 +11,13 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
-    <groupId>com.octoconsulting.keip</groupId>
+    <groupId>com.octo.keip</groupId>
     <artifactId>keip-integration</artifactId>
     <version>0.0.1-SNAPSHOT</version>
 
     <properties>
-        <docker.registry>ghcr.io/octoconsulting</docker.registry>
-        <container.source.label>https://github.com/octoconsulting/keip</container.source.label>
+        <docker.registry>ghcr.io/octo</docker.registry>
+        <container.source.label>https://github.com/octo/keip</container.source.label>
 
         <!-- skip deploying jar -->
         <maven.deploy.skip>true</maven.deploy.skip>

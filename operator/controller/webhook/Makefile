@@ -1,7 +1,7 @@
 VERSION ?= 0.1.1
 HOST_PORT ?= 7080
 
-IMG_REGISTRY := ghcr.io/octoconsulting
+IMG_REGISTRY := ghcr.io/octo
 IMG_NAME := integration-route-lambda-controller
 CONTAINER_NAME := integration-route-webhook
 PYTHON := python3

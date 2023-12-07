@@ -15,7 +15,7 @@ The process for creating a custom keip container is outlined here:
 ```shell 
 mvn archetype:generate -DinteractiveMode=false \
                        -DarchetypeCatalog=local \
-                       -DarchetypeGroupId=com.octoconsulting.keip \
+                       -DarchetypeGroupId=com.octo.keip \
                        -DarchetypeArtifactId=keip-container-archetype \
                        -DarchetypeVersion=0.0.1-SNAPSHOT \
                        -DgroupId=com.acme \

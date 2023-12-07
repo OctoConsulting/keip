@@ -1,6 +1,6 @@
 FROM python:3.11.5-slim
 
-LABEL org.opencontainers.image.source=https://github.com/octoconsulting/keip
+LABEL org.opencontainers.image.source=https://github.com/octo/keip
 
 WORKDIR /code/webhook
 
