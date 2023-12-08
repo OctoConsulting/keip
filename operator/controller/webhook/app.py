@@ -15,11 +15,11 @@ from webhook.logconf import LOG_CONF
 _LOGGER = logging.getLogger(__name__)
 
 
-async def webhook(request: Request):
+async def sync_webhook(request: Request):
     # Request API at https://metacontroller.github.io/metacontroller/api/compositecontroller.html#sync-hook-request
     try:
         body = await request.json()
-        response = sync(body['parent'])
+        response = sync(body)
     except JSONDecodeError as e:
         raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail='Failed to parse request body')
     except KeyError as e:
@@ -28,18 +28,47 @@ async def webhook(request: Request):
     return JSONResponse(response)
 
 
+async def customize_webhook(request: Request):
+    try:
+        body = await request.json()
+        _LOGGER.debug(f"Customize Request Body: {body}")
+        response = {
+            "relatedResources": [
+                {
+                    "apiVersion": "v1",
+                    "resource": "configmaps",
+                    "namespace": body["parent"]["metadata"]["namespace"],
+                }
+            ]
+        }
+        _LOGGER.debug(f"Customize Response: {response}")
+    except JSONDecodeError as e:
+        raise HTTPException(
+            status_code=HTTP_400_BAD_REQUEST, detail="Failed to parse request body"
+        )
+    except KeyError as e:
+        raise HTTPException(
+            status_code=HTTP_400_BAD_REQUEST,
+            detail=f"Missing field from request: {repr(e)}",
+        )
+
+    _LOGGER.info(f"Customize Response: {response}")
+    return JSONResponse(response)
+
+
 async def status(request):
-    return JSONResponse({'status': 'UP'})
+    return JSONResponse({"status": "UP"})
 
 
 routes = [
-    Route('/sync', endpoint=webhook, methods=['POST']),
-    Route('/status', endpoint=status, methods=['GET']),
+    Route("/sync", endpoint=sync_webhook, methods=["POST"]),
+    Route("/customize", endpoint=customize_webhook, methods=["POST"]),
+    Route("/status", endpoint=status, methods=["GET"]),
 ]
 
 logging.config.dictConfig(LOG_CONF)
 
 if cfg.DEBUG:
-    _LOGGER.warning('Running server with debug mode. NOT SUITABLE FOR PRODUCTION!')
+    _LOGGER.warning("Running server with debug mode. NOT SUITABLE FOR PRODUCTION!")
 
 app = Starlette(debug=cfg.DEBUG, routes=routes)

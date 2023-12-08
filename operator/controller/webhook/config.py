@@ -6,4 +6,4 @@ cfg = Config('.env')
 DEBUG = cfg('DEBUG', cast=bool, default=False)
 
 # Application
-INTEGRATION_CONTAINER_IMAGE = cfg('INTEGRATION_IMAGE', cast=str, default='keip-integration')
+INTEGRATION_CONTAINER_IMAGE = cfg('INTEGRATION_IMAGE', cast=str, default='ghcr.io/octoconsulting/keip-integration')
