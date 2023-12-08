@@ -118,7 +118,21 @@ def _create_pod_template(parent, labels, integration_image):
                     "name": "integration-app",
                     "image": integration_image,
                     "volumeMounts": vol_config.get_mounts(),
-                }
+                    "livenessProbe": {
+                        "httpGet": {
+                            "path": "/actuator/health/liveness",
+                            "port": 8080,
+                        },
+                        "initialDelaySeconds": 10
+                    },
+                    "readinessProbe": {
+                        "httpGet": {
+                            "path": "/actuator/health/readiness",
+                            "port": 8080,
+                        },
+                        "initialDelaySeconds": 10
+                    },
+                },
             ],
             "volumes": vol_config.get_volumes(),
         },
