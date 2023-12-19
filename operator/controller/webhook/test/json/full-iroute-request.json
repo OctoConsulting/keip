@@ -39,7 +39,11 @@
       "routeConfigMap": "testroute-xml",
       "secretSources": [
         "testroute-secret"
-      ]
+      ],
+      "tls": {
+        "configMapName": "test-tls-cm",
+        "key": "test-tls-key"
+      }
     }
   }
 }

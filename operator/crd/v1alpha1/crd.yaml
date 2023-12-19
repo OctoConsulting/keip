@@ -78,9 +78,20 @@ spec:
                     required:
                       - claimName
                       - mountPath
+                tls:
+                  description: "Configure TLS connections using a JKS truststore. The truststore should have the password set to 'changeit'"
+                  type: object
+                  properties:
+                    configMapName:
+                      type: string
+                    key:
+                      type: string
+                      default: truststore.jks
+                  required:
+                    - configMapName
               required:
                 - routeConfigMap
           required:
             - spec
       subresources: # Can be used to add status information to CustomResource objects
-        status: {}
+        status: { }
