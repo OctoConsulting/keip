@@ -10,7 +10,11 @@ from webhook.introute.sync import (
     _spring_cloud_k8s_config,
     SECRETS_ROOT,
     _new_deployment,
+    _spring_app_config_env_var,
+    _get_java_jdk_options,
 )
+
+JDK_OPTIONS_ENV_NAME = "JDK_JAVA_OPTIONS"
 
 
 def test_empty_parent_raises_exception(full_route):
@@ -43,30 +47,60 @@ def test_vol_config_missing_secrets_and_pvcs_no_fail(full_route):
 def test_spring_app_config_json_missing_props_sources(full_route):
     del full_route["spec"]["propSources"]
 
-    spring_conf_env_var = _spring_cloud_k8s_config(full_route)
-    spring_conf = json.loads(spring_conf_env_var["value"])
+    spring_conf = _spring_cloud_k8s_config(full_route)
 
-    assert spring_conf["spring"]["cloud"]["kubernetes"]["secrets"] == {
-        "paths": SECRETS_ROOT
-    }
+    assert spring_conf["kubernetes"]["secrets"] == {"paths": SECRETS_ROOT}
 
 
 def test_spring_app_config_json_missing_secret_sources(full_route):
     del full_route["spec"]["secretSources"]
 
-    spring_conf_env_var = _spring_cloud_k8s_config(full_route)
-    spring_conf = json.loads(spring_conf_env_var["value"])
+    spring_conf = _spring_cloud_k8s_config(full_route)
 
-    assert spring_conf["spring"]["cloud"]["kubernetes"]["config"]["sources"] is not None
+    assert spring_conf["kubernetes"]["config"]["sources"] is not None
 
 
 def test_spring_app_config_json_missing_props_and_secret_sources(full_route):
     del full_route["spec"]["propSources"]
     del full_route["spec"]["secretSources"]
 
-    spring_conf = _spring_cloud_k8s_config(full_route)
+    spring_conf = _spring_app_config_env_var(full_route)
+    json_props = json.loads(spring_conf["value"])
 
-    assert spring_conf is None
+    assert spring_conf["name"] == "SPRING_APPLICATION_JSON"
+
+    expected_json = {"spring": {"application": {"name": "testroute"}}}
+    assert json_props == expected_json
+
+
+def test_jdk_options_pkcs12_type(full_route):
+    options = _get_java_jdk_options(full_route)
+
+    assert options["name"] == JDK_OPTIONS_ENV_NAME
+
+    expected_options = "-Djavax.net.ssl.trustStore=/etc/cabundle/test-truststore.p12 -Djavax.net.ssl.trustStorePassword= -Djavax.net.ssl.trustStoreType=PKCS12"
+    assert options["value"] == expected_options
+
+
+def test_jdk_options_jks_type(full_route):
+    tls_config = full_route["spec"]["tls"]
+    tls_config["type"] = "jks"
+    tls_config["key"] = "test-truststore.jks"
+
+    options = _get_java_jdk_options(full_route)
+
+    assert options["name"] == JDK_OPTIONS_ENV_NAME
+
+    expected_options = "-Djavax.net.ssl.trustStore=/etc/cabundle/test-truststore.jks -Djavax.net.ssl.trustStorePassword=changeit -Djavax.net.ssl.trustStoreType=JKS"
+    assert options["value"] == expected_options
+
+
+def test_jdk_options_unknown_type(full_route):
+    tls_config = full_route["spec"]["tls"]
+    tls_config["type"] = "pem"
+
+    with pytest.raises(AssertionError):
+        _get_java_jdk_options(full_route)
 
 
 def test_pod_template_no_annotations(full_route):
@@ -87,21 +121,12 @@ def test_pod_template_empty_annotations(full_route):
     assert pod_template["metadata"].get("annotations") is None
 
 
-def test_pod_template_no_props_and_secrets_spring_config_not_present(full_route):
-    del full_route["spec"]["propSources"]
-    del full_route["spec"]["secretSources"]
-
-    deployment = _new_deployment(full_route)
-
-    check_env_var_absent(deployment, "SPRING_APPLICATION_JSON")
-
-
 def test_pod_template_no_tls(full_route):
     del full_route["spec"]["tls"]
 
     deployment = _new_deployment(full_route)
 
-    check_env_var_absent(deployment, "JDK_JAVA_OPTIONS")
+    check_env_var_absent(deployment, JDK_OPTIONS_ENV_NAME)
     check_volume_absent(deployment, "truststore")
     check_volume_mounts_absent(deployment, "truststore")
 

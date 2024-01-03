@@ -42,7 +42,8 @@
       ],
       "tls": {
         "configMapName": "test-tls-cm",
-        "key": "test-tls-key"
+        "key": "test-truststore.p12",
+        "type": "pkcs12"
       }
     }
   }

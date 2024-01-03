@@ -57,7 +57,10 @@ class VolumeConfig:
                     "configMap": {
                         "name": self._tls_config["configMapName"],
                         "items": [
-                            {"key": self._tls_config["key"], "path": "truststore.jks"}
+                            {
+                                "key": self._tls_config["key"],
+                                "path": self._tls_config["key"],
+                            }
                         ],
                     },
                 }
@@ -102,8 +105,7 @@ class VolumeConfig:
         return volume_mounts
 
 
-def _spring_cloud_k8s_config(parent) -> Optional[Mapping[str, str]]:
-    """Generates the spring-cloud-kubernetes config that's passed as an env var to the Spring app"""
+def _spring_cloud_k8s_config(parent) -> Optional[Mapping]:
     metadata = parent["metadata"]
 
     props_srcs = parent["spec"].get("propSources")
@@ -112,45 +114,59 @@ def _spring_cloud_k8s_config(parent) -> Optional[Mapping[str, str]]:
     if not props_srcs and not secret_srcs:
         return None
 
-    config = {
-        "spring": {
-            "config.import": "kubernetes:",
-            "application": {"name": metadata["name"]},
-            "cloud": {
-                "kubernetes": {
-                    "config": {
-                        "fail-fast": True,
-                        "namespace": metadata["namespace"],
-                        "sources": props_srcs,
-                    },
-                    "secrets": {"paths": SECRETS_ROOT},
-                }
+    return {
+        "kubernetes": {
+            "config": {
+                "fail-fast": True,
+                "namespace": metadata["namespace"],
+                "sources": props_srcs,
             },
+            "secrets": {"paths": SECRETS_ROOT},
         }
     }
 
+
+def _spring_app_config_env_var(parent) -> Mapping[str, str]:
+    metadata = parent["metadata"]
+    app_config = {
+        "spring": {
+            "application": {"name": metadata["name"]},
+        }
+    }
+
+    if cloud_config := _spring_cloud_k8s_config(parent):
+        app_config["spring"]["config.import"] = "kubernetes:"
+        app_config["spring"]["cloud"] = cloud_config
+
     return {
         "name": "SPRING_APPLICATION_JSON",
-        "value": json.dumps(config),
+        "value": json.dumps(app_config),
     }
 
 
 def _get_java_jdk_options(parent) -> Optional[Mapping[str, str]]:
     tls_config = parent["spec"].get("tls")
 
-    if tls_config:
-        return {
-            "name": "JDK_JAVA_OPTIONS",
-            "value": f"-Djavax.net.ssl.trustStore={str(Path(TRUSTSTORE_PATH, 'truststore.jks'))} -Djavax.net.ssl.trustStorePassword=changeit",
-        }
-    else:
+    if not tls_config:
         return None
+
+    tls_type = tls_config['type']
+    assert tls_type in ["jks", "pkcs12"], \
+        f"({tls_type}) is not a supported TLS type. Supported types: ('jks', 'pkcs12')"
+
+    truststore_password = "changeit" if tls_type == "jks" else ""
+    jdk_options = f"-Djavax.net.ssl.trustStore={str(Path(TRUSTSTORE_PATH, tls_config['key']))} -Djavax.net.ssl.trustStorePassword={truststore_password} -Djavax.net.ssl.trustStoreType={tls_type.upper()}"
+
+    return {
+        "name": "JDK_JAVA_OPTIONS",
+        "value": jdk_options,
+    }
 
 
 def _generate_container_env_vars(parent) -> List[Mapping[str, str]]:
     env_vars = []
 
-    if spring_app_config := _spring_cloud_k8s_config(parent):
+    if spring_app_config := _spring_app_config_env_var(parent):
         env_vars.append(spring_app_config)
 
     if jdk_options := _get_java_jdk_options(parent):

@@ -79,16 +79,22 @@ spec:
                       - claimName
                       - mountPath
                 tls:
-                  description: "Configure TLS connections using a JKS truststore. The truststore should have the password set to 'changeit'"
+                  description: "Configure client TLS connections using a JKS or PKCS12 truststore. A JKS truststore should have its password set to 'changeit', while a PKCS12 truststore should have an empty password."
                   type: object
                   properties:
                     configMapName:
                       type: string
                     key:
                       type: string
-                      default: truststore.jks
+                    type:
+                      type: string
+                      enum:
+                        - jks
+                        - pkcs12
                   required:
                     - configMapName
+                    - key
+                    - type
               required:
                 - routeConfigMap
           required:
