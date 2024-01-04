@@ -1,0 +1,9 @@
+{
+    "relatedResources": [
+        {
+            "apiVersion": "v1",
+            "resource": "configmaps",
+            "namespace": "testspace"
+        }
+    ]
+}

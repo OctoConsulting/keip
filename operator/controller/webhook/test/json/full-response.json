@@ -39,7 +39,7 @@
             "containers": [
               {
                 "name": "integration-app",
-                "image": "keip-integration",
+                "image": "ghcr.io/octoconsulting/keip-integration",
                 "volumeMounts": [
                   {
                     "name": "integration-route-config",
@@ -72,7 +72,7 @@
                 "env": [
                   {
                     "name": "SPRING_APPLICATION_JSON",
-                    "value": "{\"spring\": {\"config.import\": \"kubernetes:\", \"application\": {\"name\": \"testroute\"}, \"cloud\": {\"kubernetes\": {\"config\": {\"fail-fast\": true, \"namespace\": \"testspace\", \"sources\": [{\"name\": \"testroute-props\"}, {\"labels\": {\"group\": \"ir-common\"}}]}, \"secrets\": {\"paths\": \"/etc/secrets\"}}}}}"
+                    "value": "{\"spring\": {\"config.import\": \"kubernetes:\", \"application\": {\"name\": \"testroute\"}, \"cloud\": {\"kubernetes\": {\"config\": {\"fail-fast\": true, \"namespace\": \"testspace\", \"sources\": [{\"name\": \"testroute-props-1k32ll28l3\"}]}, \"secrets\": {\"paths\": \"/etc/secrets\"}}}}}"
                   }
                 ]
               }

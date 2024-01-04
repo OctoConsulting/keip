@@ -1,0 +1,123 @@
+{
+    "controller": {
+        "kind": "CompositeController",
+        "apiVersion": "metacontroller.k8s.io/v1alpha1",
+        "metadata": {
+            "name": "integrationroute-controller",
+            "uid": "6cc0ac09-2d6f-48ea-a160-f0c66e53a4c7",
+            "resourceVersion": "1493531",
+            "generation": 1,
+            "creationTimestamp": "2023-12-06T18:16:02Z",
+            "annotations": {}
+        },
+        "spec": {
+            "parentResource": {
+                "apiVersion": "keip.octoconsulting.com/v1alpha1",
+                "resource": "integrationroutes",
+                "revisionHistory": {
+                    "fieldPaths": [
+                        "spec.routeConfigMap"
+                    ]
+                }
+            },
+            "childResources": [
+                {
+                    "apiVersion": "apps/v1",
+                    "resource": "deployments",
+                    "updateStrategy": {
+                        "method": "RollingRecreate",
+                        "statusChecks": {
+                            "conditions": [
+                                {
+                                    "type": "Ready",
+                                    "status": "True"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "apiVersion": "v1",
+                    "resource": "configmaps",
+                    "updateStrategy": {
+                        "method": "RollingRecreate",
+                        "statusChecks": {
+                            "conditions": [
+                                {
+                                    "type": "Ready",
+                                    "status": "True"
+                                }
+                            ]
+                        }
+                    }
+                }
+            ],
+            "hooks": {
+                "customize": {
+                    "version": "v1",
+                    "webhook": {
+                        "url": "http:\/\/integrationroute-webhook.keip/customize",
+                        "timeout": "10s"
+                    }
+                },
+                "sync": {
+                    "version": "v1",
+                    "webhook": {
+                        "url": "http:\/\/integrationroute-webhook.keip/sync",
+                        "timeout": "10s"
+                    },
+                    "customize": {
+                        "version": "v1",
+                        "webhook": {
+                            "url": "http:\/\/integrationroute-webhook.keip/customize",
+                            "timeout": "10s"
+                        }
+                    }
+                },
+                "generateSelector": true
+            },
+            "status": {}
+        }
+    },
+    "parent": {
+        "apiVersion": "keip.octo.com/v1alpha1",
+        "kind": "IntegrationRoute",
+        "metadata": {
+            "annotations": {},
+            "creationTimestamp": "2023-09-06T01:16:27Z",
+            "generation": 1,
+            "name": "testroute",
+            "namespace": "testspace",
+            "uid": "b10e0347-1ab2-4146-864f-1f4225b06d4d"
+        },
+        "spec": {
+            "annotations": {
+                "aKey1": "aValue1"
+            },
+            "labels": {
+                "firstKey": "firstValue"
+            },
+            "persistentVolumeClaims": [
+                {
+                    "claimName": "testroute-pvc",
+                    "mountPath": "/tmp/testdir"
+                }
+            ],
+            "propSources": [
+                {
+                    "name": "testroute-props"
+                },
+                {
+                    "labels": {
+                        "group": "ir-common"
+                    }
+                }
+            ],
+            "replicas": 2,
+            "routeConfigMap": "testroute-xml",
+            "secretSources": [
+                "testroute-secret"
+            ]
+        }
+    }
+}

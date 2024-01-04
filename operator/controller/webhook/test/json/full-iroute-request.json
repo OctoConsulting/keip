@@ -41,5 +41,58 @@
         "testroute-secret"
       ]
     }
+  },
+  "related": {
+      "ConfigMap.v1": {
+          "testroute-props-1k32ll28l2": {
+              "apiVersion": "v1",
+              "data": {
+                  "application.yaml": "greeting: Hello"
+              },
+              "kind": "ConfigMap",
+              "metadata": {
+                  "creationTimestamp": "2023-12-07T00:43:42Z",
+                  "labels": {
+                    "group": "ir-common"
+                  },
+                  "name": "testroute-props-1k32ll28l2",
+                  "namespace": "testspace",
+                  "resourceVersion": "1513996",
+                  "uid": "11be2ecb-db3e-4f1f-aeba-b32a18ff64f4"
+              }
+          },
+          "testroute-props-1k32ll28l3": {
+              "apiVersion": "v1",
+              "data": {
+                  "application.yaml": "greeting: Hello"
+              },
+              "kind": "ConfigMap",
+              "metadata": {
+                  "creationTimestamp": "2023-12-07T00:43:43Z",
+                  "labels": {
+                    "group": "ir-common"
+                  },
+                  "name": "testroute-props-1k32ll28l3",
+                  "namespace": "testspace",
+                  "resourceVersion": "1513996",
+                  "uid": "11be2ecb-db3e-4f1f-aeba-b32a18ff64f4"
+              }
+          },
+          "testroute-props-1k32ll28l1": {
+              "apiVersion": "v1",
+              "data": {
+                  "application.yaml": "greeting: Hello"
+              },
+              "kind": "ConfigMap",
+              "metadata": {
+                  "creationTimestamp": "2023-12-07T00:43:41Z",
+                  "labels": {},
+                  "name": "testroute-props-1k32ll28l2",
+                  "namespace": "testspace",
+                  "resourceVersion": "1513996",
+                  "uid": "11be2ecb-db3e-4f1f-aeba-b32a18ff64f4"
+              }
+          }
+      }
   }
 }
