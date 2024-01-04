@@ -39,7 +39,12 @@
       "routeConfigMap": "testroute-xml",
       "secretSources": [
         "testroute-secret"
-      ]
+      ],
+      "tls": {
+        "configMapName": "test-tls-cm",
+        "key": "test-truststore.p12",
+        "type": "pkcs12"
+      }
     }
   }
 }

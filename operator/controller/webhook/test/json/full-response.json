@@ -53,6 +53,11 @@
                   {
                     "name": "testroute-pvc",
                     "mountPath": "/tmp/testdir"
+                  },
+                  {
+                    "name": "truststore",
+                    "readOnly": true,
+                    "mountPath": "/etc/cabundle"
                   }
                 ],
                 "livenessProbe": {
@@ -72,7 +77,11 @@
                 "env": [
                   {
                     "name": "SPRING_APPLICATION_JSON",
-                    "value": "{\"spring\": {\"config.import\": \"kubernetes:\", \"application\": {\"name\": \"testroute\"}, \"cloud\": {\"kubernetes\": {\"config\": {\"fail-fast\": true, \"namespace\": \"testspace\", \"sources\": [{\"name\": \"testroute-props\"}, {\"labels\": {\"group\": \"ir-common\"}}]}, \"secrets\": {\"paths\": \"/etc/secrets\"}}}}}"
+                    "value": "{\"spring\": {\"application\": {\"name\": \"testroute\"}, \"config.import\": \"kubernetes:\", \"cloud\": {\"kubernetes\": {\"config\": {\"fail-fast\": true, \"namespace\": \"testspace\", \"sources\": [{\"name\": \"testroute-props\"}, {\"labels\": {\"group\": \"ir-common\"}}]}, \"secrets\": {\"paths\": \"/etc/secrets\"}}}}}"
+                  },
+                  {
+                    "name": "JDK_JAVA_OPTIONS",
+                    "value": "-Djavax.net.ssl.trustStore=/etc/cabundle/test-truststore.p12 -Djavax.net.ssl.trustStorePassword= -Djavax.net.ssl.trustStoreType=PKCS12"
                   }
                 ]
               }
@@ -94,6 +103,18 @@
                 "name": "testroute-pvc",
                 "persistentVolumeClaim": {
                   "claimName": "testroute-pvc"
+                }
+              },
+              {
+                "name": "truststore",
+                "configMap": {
+                  "name": "test-tls-cm",
+                  "items": [
+                    {
+                      "key": "test-truststore.p12",
+                      "path": "test-truststore.p12"
+                    }
+                  ]
                 }
               }
             ]

@@ -23,3 +23,8 @@ pip install -r requirements.txt
 
 You should now be able to use the `Makefile` for running tests or starting a dev server, among other
 tasks.
+
+#### Code Formatting
+
+To keep diffs small, consider using
+the [Black formatter](https://black.readthedocs.io/en/stable/integrations/editors.html).

@@ -9,6 +9,8 @@ _LOGGER = logging.getLogger(__name__)
 
 SECRETS_ROOT = "/etc/secrets"
 
+TRUSTSTORE_PATH = "/etc/cabundle"
+
 
 class VolumeConfig:
     """
@@ -19,11 +21,13 @@ class VolumeConfig:
     """
 
     _route_vol_name = "integration-route-config"
+    _tls_vol_name = "truststore"
 
     def __init__(self, parent_spec) -> None:
         self._route_config = parent_spec["routeConfigMap"]
         self._secret_srcs = parent_spec.get("secretSources", [])
         self._pvcs = parent_spec.get("persistentVolumeClaims", [])
+        self._tls_config = parent_spec.get("tls")
 
     def get_volumes(self) -> List[Mapping]:
         volumes = [
@@ -43,6 +47,22 @@ class VolumeConfig:
                 {
                     "name": pvc_spec["claimName"],
                     "persistentVolumeClaim": {"claimName": pvc_spec["claimName"]},
+                }
+            )
+
+        if self._tls_config:
+            volumes.append(
+                {
+                    "name": self._tls_vol_name,
+                    "configMap": {
+                        "name": self._tls_config["configMapName"],
+                        "items": [
+                            {
+                                "key": self._tls_config["key"],
+                                "path": self._tls_config["key"],
+                            }
+                        ],
+                    },
                 }
             )
 
@@ -73,11 +93,19 @@ class VolumeConfig:
                 }
             )
 
+        if self._tls_config:
+            volume_mounts.append(
+                {
+                    "name": self._tls_vol_name,
+                    "readOnly": True,
+                    "mountPath": TRUSTSTORE_PATH,
+                }
+            )
+
         return volume_mounts
 
 
 def _spring_cloud_k8s_config(parent) -> Optional[Mapping]:
-    """Generates the spring-cloud-kubernetes config that's passed as an env var to the Spring app"""
     metadata = parent["metadata"]
 
     props_srcs = parent["spec"].get("propSources")
@@ -87,21 +115,64 @@ def _spring_cloud_k8s_config(parent) -> Optional[Mapping]:
         return None
 
     return {
-        "spring": {
-            "config.import": "kubernetes:",
-            "application": {"name": metadata["name"]},
-            "cloud": {
-                "kubernetes": {
-                    "config": {
-                        "fail-fast": True,
-                        "namespace": metadata["namespace"],
-                        "sources": props_srcs,
-                    },
-                    "secrets": {"paths": SECRETS_ROOT},
-                }
+        "kubernetes": {
+            "config": {
+                "fail-fast": True,
+                "namespace": metadata["namespace"],
+                "sources": props_srcs,
             },
+            "secrets": {"paths": SECRETS_ROOT},
         }
     }
+
+
+def _spring_app_config_env_var(parent) -> Mapping[str, str]:
+    metadata = parent["metadata"]
+    app_config = {
+        "spring": {
+            "application": {"name": metadata["name"]},
+        }
+    }
+
+    if cloud_config := _spring_cloud_k8s_config(parent):
+        app_config["spring"]["config.import"] = "kubernetes:"
+        app_config["spring"]["cloud"] = cloud_config
+
+    return {
+        "name": "SPRING_APPLICATION_JSON",
+        "value": json.dumps(app_config),
+    }
+
+
+def _get_java_jdk_options(parent) -> Optional[Mapping[str, str]]:
+    tls_config = parent["spec"].get("tls")
+
+    if not tls_config:
+        return None
+
+    tls_type = tls_config['type']
+    assert tls_type in ["jks", "pkcs12"], \
+        f"({tls_type}) is not a supported TLS type. Supported types: ('jks', 'pkcs12')"
+
+    truststore_password = "changeit" if tls_type == "jks" else ""
+    jdk_options = f"-Djavax.net.ssl.trustStore={str(Path(TRUSTSTORE_PATH, tls_config['key']))} -Djavax.net.ssl.trustStorePassword={truststore_password} -Djavax.net.ssl.trustStoreType={tls_type.upper()}"
+
+    return {
+        "name": "JDK_JAVA_OPTIONS",
+        "value": jdk_options,
+    }
+
+
+def _generate_container_env_vars(parent) -> List[Mapping[str, str]]:
+    env_vars = []
+
+    if spring_app_config := _spring_app_config_env_var(parent):
+        env_vars.append(spring_app_config)
+
+    if jdk_options := _get_java_jdk_options(parent):
+        env_vars.append(jdk_options)
+
+    return env_vars
 
 
 def _create_pod_template(parent, labels, integration_image):
@@ -123,14 +194,14 @@ def _create_pod_template(parent, labels, integration_image):
                             "path": "/actuator/health/liveness",
                             "port": 8080,
                         },
-                        "initialDelaySeconds": 10
+                        "initialDelaySeconds": 10,
                     },
                     "readinessProbe": {
                         "httpGet": {
                             "path": "/actuator/health/readiness",
                             "port": 8080,
                         },
-                        "initialDelaySeconds": 10
+                        "initialDelaySeconds": 10,
                     },
                 },
             ],
@@ -142,14 +213,7 @@ def _create_pod_template(parent, labels, integration_image):
     if annotations:
         pod_template["metadata"]["annotations"] = annotations
 
-    spring_app_config = _spring_cloud_k8s_config(parent)
-    if spring_app_config:
-        pod_template["spec"]["containers"][0]["env"] = [
-            {
-                "name": "SPRING_APPLICATION_JSON",
-                "value": json.dumps(spring_app_config),
-            }
-        ]
+    pod_template["spec"]["containers"][0]["env"] = _generate_container_env_vars(parent)
 
     return pod_template
 
@@ -180,7 +244,9 @@ def _new_deployment(parent):
                 }
             },
             "replicas": parent["spec"]["replicas"],
-            "template": _create_pod_template(parent, labels, cfg.INTEGRATION_CONTAINER_IMAGE),
+            "template": _create_pod_template(
+                parent, labels, cfg.INTEGRATION_CONTAINER_IMAGE
+            ),
         },
     }
 
