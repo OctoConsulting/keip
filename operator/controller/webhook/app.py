@@ -21,10 +21,14 @@ async def sync_webhook(request: Request):
         body = await request.json()
         response = sync(body)
     except JSONDecodeError as e:
-        raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail='Failed to parse request body')
+        raise HTTPException(
+            status_code=HTTP_400_BAD_REQUEST, detail="Failed to parse request body"
+        )
     except KeyError as e:
-        raise HTTPException(status_code=HTTP_400_BAD_REQUEST,
-                            detail=f'Missing field from request: {repr(e)}')
+        raise HTTPException(
+            status_code=HTTP_400_BAD_REQUEST,
+            detail=f"Missing field from request: {repr(e)}",
+        )
     return JSONResponse(response)
 
 
