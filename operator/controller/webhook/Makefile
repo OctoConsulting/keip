@@ -5,6 +5,8 @@ IMG_REGISTRY := ghcr.io/octoconsulting
 IMG_NAME := integration-route-lambda-controller
 CONTAINER_NAME := integration-route-webhook
 PYTHON := python3
+TEST_COVERAGE_DIR := .test_coverage
+TEST_COVERAGE_FILE := $(TEST_COVERAGE_DIR)/.coverage
 
 .PHONY: start-dev
 start-dev-server:
@@ -12,7 +14,15 @@ start-dev-server:
 
 .PHONY: test
 test:
-	cd test && pytest
+	cd test && mkdir -p $(TEST_COVERAGE_DIR) && coverage run --data-file=$(TEST_COVERAGE_FILE) -m pytest
+
+.PHONY: report-test-coverage
+report-test-coverage: test
+	cd test && coverage report --data-file $(TEST_COVERAGE_FILE)
+
+.PHONY: report-test-coverage-html
+report-test-coverage-html: test
+	cd test && coverage html --data-file $(TEST_COVERAGE_FILE) --directory $(TEST_COVERAGE_DIR)/html && open $(TEST_COVERAGE_DIR)/html/index.html
 
 .PHONY: deploy
 deploy: build
