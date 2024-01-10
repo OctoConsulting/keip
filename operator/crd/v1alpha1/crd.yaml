@@ -23,12 +23,12 @@ spec:
               type: object
               properties:
                 annotations:
-                  description: "Annotations to add to the IntegrationRoute pod template"
+                  description: "Annotations to add to the IntegrationRoute pod and deployment templates"
                   type: object
                   additionalProperties:
                     type: string
                 labels:
-                  description: "Labels to add to the IntegrationRoute pod template"
+                  description: "Labels to add to the IntegrationRoute pod and deployment templates"
                   type: object
                   additionalProperties:
                     type: string

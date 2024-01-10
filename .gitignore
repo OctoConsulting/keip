@@ -44,3 +44,5 @@ __pycache__/
 *.py[cod]
 *$py.class
 .test_coverage/
+**pytest_cache
+**.venv

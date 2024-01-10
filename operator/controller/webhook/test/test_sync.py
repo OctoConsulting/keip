@@ -149,6 +149,26 @@ def test_deployment_empty_labels(full_route):
     assert len(labels) > 0
 
 
+def test_deployment_missing_annotations(full_route):
+    del full_route["spec"]["annotations"]
+
+    deployment = _new_deployment(full_route)
+
+    assert "annotations" in deployment["metadata"]
+    annotations = deployment["metadata"]["annotations"]
+    assert len(annotations) == 0
+
+
+def test_deployment_empty_annotations(full_route):
+    full_route["spec"]["annotations"] = {}
+
+    deployment = _new_deployment(full_route)
+
+    assert "annotations" in deployment["metadata"]
+    annotations = deployment["metadata"]["annotations"]
+    assert len(annotations) == 0
+
+
 @pytest.fixture()
 def full_route(full_route_load: dict):
     return copy.deepcopy(full_route_load["parent"])

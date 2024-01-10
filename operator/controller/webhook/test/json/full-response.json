@@ -12,6 +12,9 @@
           "app.kubernetes.io/instance": "integrationroute-testroute",
           "app.kubernetes.io/version": "latest",
           "firstKey": "firstValue"
+        },
+        "annotations": {
+          "aKey1": "aValue1"
         }
       },
       "spec": {

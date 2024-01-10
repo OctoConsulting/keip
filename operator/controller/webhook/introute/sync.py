@@ -236,6 +236,7 @@ def _new_deployment(parent):
         "metadata": {
             "name": parent_metadata["name"],
             "labels": labels,
+            "annotations": parent["spec"].get("annotations", {})
         },
         "spec": {
             "selector": {
