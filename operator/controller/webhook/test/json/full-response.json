@@ -80,7 +80,7 @@
                 "env": [
                   {
                     "name": "SPRING_APPLICATION_JSON",
-                    "value": "{\"spring\": {\"application\": {\"name\": \"testroute\"}, \"config.import\": \"kubernetes:\", \"cloud\": {\"kubernetes\": {\"config\": {\"fail-fast\": true, \"namespace\": \"testspace\", \"sources\": [{\"name\": \"testroute-props\"}, {\"labels\": {\"group\": \"ir-common\"}}]}, \"secrets\": {\"paths\": \"/etc/secrets\"}}}}}"
+                    "value": "{\"spring\": {\"application\": {\"name\": \"testroute\"}, \"config.import\": \"kubernetes:\", \"cloud\": {\"kubernetes\": {\"config\": {\"fail-fast\": true, \"namespace\": \"testspace\", \"sources\": [{\"name\": \"testroute-props\"}, {\"labels\": {\"group\": \"ir-common\"}}]}, \"reload\": {\"enabled\": true, \"monitoring-secrets\": false, \"monitoring-config-maps\": true, \"strategy\": \"restart_context\"}, \"secrets\": {\"paths\": \"/etc/secrets\"}}}}, \"management\": {\"endpoint\": {\"restart\": {\"enabled\": true}}, \"endpoints\": {\"web\": {\"exposure\": {\"include\": \"restart,health\"}}}}}"
                   },
                   {
                     "name": "JDK_JAVA_OPTIONS",

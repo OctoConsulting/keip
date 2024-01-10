@@ -69,7 +69,13 @@ def test_spring_app_config_json_missing_props_and_secret_sources(full_route):
 
     assert spring_conf["name"] == "SPRING_APPLICATION_JSON"
 
-    expected_json = {"spring": {"application": {"name": "testroute"}}}
+    expected_json = {
+        "spring": {"application": {"name": "testroute"}},
+        "management": {
+            "endpoint": {"restart": {"enabled": True}},
+            "endpoints": {"web": {"exposure": {"include": "restart,health"}}},
+        },
+    }
     assert json_props == expected_json
 
 

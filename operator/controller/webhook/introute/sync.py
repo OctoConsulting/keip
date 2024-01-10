@@ -121,6 +121,12 @@ def _spring_cloud_k8s_config(parent) -> Optional[Mapping]:
                 "namespace": metadata["namespace"],
                 "sources": props_srcs,
             },
+            "reload": {
+                "enabled": True,
+                "monitoring-secrets": False,
+                "monitoring-config-maps": True,
+                "strategy": "restart_context",
+            },
             "secrets": {"paths": SECRETS_ROOT},
         }
     }
@@ -131,7 +137,11 @@ def _spring_app_config_env_var(parent) -> Mapping[str, str]:
     app_config = {
         "spring": {
             "application": {"name": metadata["name"]},
-        }
+        },
+        "management": {
+            "endpoint": {"restart": {"enabled": True}},
+            "endpoints": {"web": {"exposure": {"include": "restart,health"}}},
+        },
     }
 
     if cloud_config := _spring_cloud_k8s_config(parent):
@@ -150,9 +160,11 @@ def _get_java_jdk_options(parent) -> Optional[Mapping[str, str]]:
     if not tls_config:
         return None
 
-    tls_type = tls_config['type']
-    assert tls_type in ["jks", "pkcs12"], \
-        f"({tls_type}) is not a supported TLS type. Supported types: ('jks', 'pkcs12')"
+    tls_type = tls_config["type"]
+    assert tls_type in [
+        "jks",
+        "pkcs12",
+    ], f"({tls_type}) is not a supported TLS type. Supported types: ('jks', 'pkcs12')"
 
     truststore_password = "changeit" if tls_type == "jks" else ""
     jdk_options = f"-Djavax.net.ssl.trustStore={str(Path(TRUSTSTORE_PATH, tls_config['key']))} -Djavax.net.ssl.trustStorePassword={truststore_password} -Djavax.net.ssl.trustStoreType={tls_type.upper()}"
@@ -236,7 +248,7 @@ def _new_deployment(parent):
         "metadata": {
             "name": parent_metadata["name"],
             "labels": labels,
-            "annotations": parent["spec"].get("annotations", {})
+            "annotations": parent["spec"].get("annotations", {}),
         },
         "spec": {
             "selector": {
