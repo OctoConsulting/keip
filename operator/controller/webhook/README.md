@@ -10,7 +10,7 @@ seen [here](https://metacontroller.github.io/metacontroller/api/compositecontrol
 
 ### Dev Environment Setup
 
-First, configure a Python virtual environment (e.g.
+First, configure a Python virtual environment with version 3.11 or later (e.g.
 using [venv](https://docs.python.org/3/library/venv.html)
 or [conda](https://conda.io/projects/conda/en/latest/user-guide/getting-started.html#managing-python)).
 Once that's set up, activate your virtual environment and run the following to install the necessary
