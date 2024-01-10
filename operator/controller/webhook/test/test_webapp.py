@@ -6,7 +6,7 @@ from webhook.test.test_sync import load_json
 
 
 def test_status_endpoint(test_client):
-    response = test_client.get('/status')
+    response = test_client.get("/status")
 
     assert response.status_code == 200
     assert response.json() == {"status": "UP"}
