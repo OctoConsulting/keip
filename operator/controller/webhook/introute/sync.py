@@ -116,16 +116,17 @@ def _spring_cloud_k8s_config(parent) -> Optional[Mapping]:
 
     return {
         "kubernetes": {
-            "config": {
-                "fail-fast": True,
-                "namespace": metadata["namespace"],
-                "sources": props_srcs,
-            },
             "reload": {
                 "enabled": True,
                 "monitoring-secrets": False,
                 "monitoring-config-maps": True,
                 "strategy": "restart_context",
+                "namespaces": [metadata["namespace"]],
+            },
+            "config": {
+                "fail-fast": True,
+                "namespace": metadata["namespace"],
+                "sources": props_srcs,
             },
             "secrets": {"paths": SECRETS_ROOT},
         }
@@ -146,6 +147,7 @@ def _spring_app_config_env_var(parent) -> Mapping[str, str]:
 
     if cloud_config := _spring_cloud_k8s_config(parent):
         app_config["spring"]["config.import"] = "kubernetes:"
+        app_config["spring"]["main.cloud-platform"] = "kubernetes"
         app_config["spring"]["cloud"] = cloud_config
 
     return {
