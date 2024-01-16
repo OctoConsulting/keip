@@ -185,6 +185,12 @@ def _generate_container_env_vars(parent) -> List[Mapping[str, str]]:
 
     if jdk_options := _get_java_jdk_options(parent):
         env_vars.append(jdk_options)
+    env_vars.append(
+        {
+            "name": "logging_level_org_springframework_cloud_kubernetes",
+            "value": "DEBUG"
+        }
+    )
 
     return env_vars
 
