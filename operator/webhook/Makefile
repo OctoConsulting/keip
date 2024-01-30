@@ -1,4 +1,4 @@
-VERSION ?= 0.4.0
+VERSION := $(shell cat version.txt)
 HOST_PORT ?= 7080
 
 IMG_REGISTRY := ghcr.io/octoconsulting
