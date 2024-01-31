@@ -10,11 +10,11 @@
     </parent>
 
     <groupId>com.octo.keip</groupId>
-    <artifactId>keip-default-image</artifactId>
-    <version>0.0.2</version>
+    <artifactId>minimal-app</artifactId>
+    <version>v0.0.2</version>
 
     <properties>
-        <docker.registry>ghcr.io/octoconsulting</docker.registry>
+        <docker.registry>ghcr.io/octoconsulting/keip</docker.registry>
         <container.source.label>https://github.com/octoconsulting/keip</container.source.label>
 
         <!-- skip deploying jar -->
