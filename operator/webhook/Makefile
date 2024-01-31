@@ -1,8 +1,8 @@
-VERSION ?= 0.4.0
+VERSION ?= v0.4.0
 HOST_PORT ?= 7080
 
-IMG_REGISTRY := ghcr.io/octoconsulting
-IMG_NAME := integration-route-lambda-controller
+IMG_REGISTRY := ghcr.io/octoconsulting/keip
+IMG_NAME := webhook
 CONTAINER_NAME := integration-route-webhook
 PYTHON := python3
 TEST_COVERAGE_DIR := .test_coverage
