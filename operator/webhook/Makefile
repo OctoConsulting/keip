@@ -2,7 +2,8 @@ VERSION ?= 0.4.0
 HOST_PORT ?= 7080
 
 IMG_REGISTRY := ghcr.io/octoconsulting
-IMG_NAME := integration-route-lambda-controller
+IMG_NAME := keip/route-webhook
+FULL_IMAGE_NAME := $(IMG_REGISTRY)/$(IMG_NAME):$(VERSION)
 CONTAINER_NAME := integration-route-webhook
 PYTHON := python3
 TEST_COVERAGE_DIR := .test_coverage
@@ -26,12 +27,12 @@ report-test-coverage-html: test
 
 .PHONY: deploy
 deploy: build
-	docker push $(IMG_REGISTRY)/$(IMG_NAME):$(VERSION)
+	docker push $(FULL_IMAGE_NAME)
 
 .PHONY: build
 build:
 	docker build \
-  --tag $(IMG_REGISTRY)/$(IMG_NAME):$(VERSION) \
+  --tag $(FULL_IMAGE_NAME) \
   .
 
 .PHONY: run-container
@@ -39,7 +40,7 @@ run-container: build
 	docker run \
 	--name $(CONTAINER_NAME) \
 	--publish $(HOST_PORT):7080 \
-	$(IMG_NAME):$(VERSION)
+	$(FULL_IMAGE_NAME)
 
 .PHONY: kill
 kill:

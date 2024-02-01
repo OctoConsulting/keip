@@ -17,7 +17,7 @@ Once that's set up, activate your virtual environment and run the following to i
 packages:
 
 ```shell
-pip install -r dev-requirements.txt
+pip install -r requirements-dev.txt
 pip install -r requirements.txt
 ```
 

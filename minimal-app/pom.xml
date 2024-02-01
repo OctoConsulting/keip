@@ -10,7 +10,7 @@
     </parent>
 
     <groupId>com.octo.keip</groupId>
-    <artifactId>keip-default-image</artifactId>
+    <artifactId>minimal-app</artifactId>
     <version>0.0.2</version>
 
     <properties>
@@ -115,7 +115,7 @@
                         </labels>
                     </container>
                     <to>
-                        <image>${docker.registry}/${project.artifactId}</image>
+                        <image>${docker.registry}/keip/${project.artifactId}</image>
                         <tags>
                             <tag>${project.version}</tag>
                         </tags>

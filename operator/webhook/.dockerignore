@@ -12,4 +12,4 @@ pip-log.txt
 
 # Local directives
 test
-dev-requirements.txt
+requirements-dev.txt
