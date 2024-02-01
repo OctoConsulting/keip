@@ -14,7 +14,7 @@
     <version>0.0.2</version>
 
     <properties>
-        <docker.registry>ghcr.io/octoconsulting/keip</docker.registry>
+        <docker.registry>ghcr.io/octoconsulting</docker.registry>
         <container.source.label>https://github.com/octoconsulting/keip</container.source.label>
 
         <!-- skip deploying jar -->
@@ -115,7 +115,7 @@
                         </labels>
                     </container>
                     <to>
-                        <image>${docker.registry}/${project.artifactId}</image>
+                        <image>${docker.registry}/keip/${project.artifactId}</image>
                         <tags>
                             <tag>${project.version}</tag>
                         </tags>
