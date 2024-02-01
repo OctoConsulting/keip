@@ -11,7 +11,7 @@
 
     <groupId>com.octo.keip</groupId>
     <artifactId>minimal-app</artifactId>
-    <version>v0.0.2</version>
+    <version>0.0.2</version>
 
     <properties>
         <docker.registry>ghcr.io/octoconsulting/keip</docker.registry>
@@ -115,7 +115,7 @@
                         </labels>
                     </container>
                     <to>
-                        <image>${docker.registry}/${project.artifactId}</image>
+                        <image>${docker.registry}/v${project.artifactId}</image>
                         <tags>
                             <tag>${project.version}</tag>
                         </tags>
