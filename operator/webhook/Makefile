@@ -1,9 +1,9 @@
 VERSION ?= 0.4.0
 HOST_PORT ?= 7080
 
-IMG_REGISTRY := ghcr.io/octoconsulting/keip
-IMG_NAME := webhook
-FULL_IMAGE_NAME := $(IMG_REGISTRY)/$(IMG_NAME):v$(VERSION)
+IMG_REGISTRY := ghcr.io/octoconsulting
+IMG_NAME := keip/route-webhook
+FULL_IMAGE_NAME := $(IMG_REGISTRY)/$(IMG_NAME):$(VERSION)
 CONTAINER_NAME := integration-route-webhook
 PYTHON := python3
 TEST_COVERAGE_DIR := .test_coverage

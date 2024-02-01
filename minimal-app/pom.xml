@@ -115,7 +115,7 @@
                         </labels>
                     </container>
                     <to>
-                        <image>${docker.registry}/v${project.artifactId}</image>
+                        <image>${docker.registry}/${project.artifactId}</image>
                         <tags>
                             <tag>${project.version}</tag>
                         </tags>
