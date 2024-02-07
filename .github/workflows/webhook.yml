@@ -1,0 +1,105 @@
+name: webhook-workflow
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - operator/webhook/**
+      - .github/workflows/webhook.yml
+  push:
+    branches:
+      - main
+    paths:
+      - operator/**
+      - "!operator/webhook/**"
+      - .github/workflows/operator.yml
+
+env:
+  WORKING_DIR: ./operator/webhook
+  GIT_TAG_PREFIX: webhook_v
+
+jobs:
+  test:
+    name: unit test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: ${{ env.WORKING_DIR }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python3 -m pip install -r requirements.txt
+      - run: python3 -m pip install -r requirements-dev.txt
+      - run: make test
+
+  build:
+    name: build image
+    needs: test
+    if: github.ref != 'refs/heads/main'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: ${{ env.WORKING_DIR }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/build-push-action@f2a1d5e99d037542a71f64918e516c093c6f3fc4
+        with:
+          context: ${{ env.WORKING_DIR }}
+          push: false
+
+  release:
+    needs: test
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: ${{ env.WORKING_DIR }}
+    permissions:
+      contents: write # create git tags
+      packages: write # push docker images
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          VERSION=$(make get-version)
+          REGISTRY=$(make get-registry)
+          IMAGE_NAME=$(make get-image-name)
+          echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "REGISTRY=$REGISTRY" >> "$GITHUB_OUTPUT"
+          echo "TAG_NAME=${{ env.GIT_TAG_PREFIX }}$VERSION" >> "$GITHUB_OUTPUT"
+          echo "FULL_IMAGE_NAME=$REGISTRY/$IMAGE_NAME:$VERSION" >> "$GITHUB_OUTPUT"
+          cat $GITHUB_OUTPUT
+        id: naming-selector
+        name: generate names for artifacts
+
+      - run: |
+          ! docker manifest inspect ${{ steps.naming-selector.outputs.FULL_IMAGE_NAME }}
+        name: confirm image is not already pushed
+
+      - run: |
+          git fetch --tags
+          ! git rev-parse -q --verify "refs/tags/${{ steps.naming-selector.outputs.TAG_NAME }}"
+        name: confirm git tag does not exist
+
+      - uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
+        with:
+          registry: ${{ steps.naming-selector.outputs.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: docker/build-push-action@f2a1d5e99d037542a71f64918e516c093c6f3fc4
+        with:
+          context: ${{ env.WORKING_DIR }}
+          push: true
+          tags: ${{ steps.naming-selector.outputs.FULL_IMAGE_NAME }}
+
+      - uses: mathieudutour/github-tag-action@v6.1
+        id: tag_version
+        with:
+          custom_tag: ${{ steps.naming-selector.outputs.TAG_NAME }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          # avoid v prefix before tag
+          tag_prefix: ""

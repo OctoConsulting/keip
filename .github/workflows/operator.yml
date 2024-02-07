@@ -1,0 +1,74 @@
+name: operator-workflow
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - operator/**
+      - "!operator/webhook/**"
+      - .github/workflows/operator.yml
+  push:
+    branches:
+      - main
+    paths:
+      - operator/**
+      - "!operator/webhook/**"
+      - .github/workflows/operator.yml
+
+env:
+  WORKING_DIR: ./operator
+  GIT_TAG_PREFIX: operator_v
+
+jobs:
+  build:
+    if: github.ref != 'refs/heads/main'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: ${{ env.WORKING_DIR }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: make prep-release
+        name: generate release files
+
+  release:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: ${{ env.WORKING_DIR }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - run: |
+          VERSION=$(cat version.txt)
+          echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "TAG_NAME=${{ env.GIT_TAG_PREFIX }}$VERSION" >> "$GITHUB_OUTPUT"
+          cat $GITHUB_OUTPUT
+        id: naming-selector
+        name: generate names for artifacts
+
+      - run: |
+          git fetch --tags
+          ! git rev-parse -q --verify "refs/tags/${{ steps.naming-selector.outputs.TAG_NAME }}"
+        name: confirm git tag does not exist
+
+      - run: make prep-release
+        name: generate release files
+
+      - uses: mathieudutour/github-tag-action@v6.1
+        id: tag_version
+        with:
+          custom_tag: ${{ steps.naming-selector.outputs.TAG_NAME }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          # avoid v prefix before tag
+          tag_prefix: ""
+
+      - uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ steps.tag_version.outputs.new_tag }}
+          name: Release ${{ steps.tag_version.outputs.new_tag }}
+          body: ${{ steps.tag_version.outputs.changelog }}
+          artifactErrorsFailBuild: true
+          artifacts: ${{ env.WORKING_DIR }}/output/*

@@ -9,6 +9,18 @@ PYTHON := python3
 TEST_COVERAGE_DIR := .test_coverage
 TEST_COVERAGE_FILE := $(TEST_COVERAGE_DIR)/.coverage
 
+.PHONY: get-version
+get-version:
+	@echo $(VERSION)
+
+.PHONY: get-registry
+get-registry:
+	@echo $(IMG_REGISTRY)
+
+.PHONY: get-image-name
+get-image-name:
+	@echo $(IMG_NAME)
+
 .PHONY: start-dev
 start-dev-server:
 	$(PYTHON) -m uvicorn --port 7080 --reload --app-dir .. webhook.app:app

@@ -1,4 +1,4 @@
-mypy
-pytest
-httpx
-coverage
+mypy==1.8.0
+pytest==8.0.0
+httpx==0.26.0
+coverage==7.4.1

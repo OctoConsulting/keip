@@ -1,0 +1,94 @@
+name: minimal-app-workflow
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - minimal-app/**
+      - .github/workflows/minimal-app.yml
+  push:
+    branches:
+      - main
+    paths:
+      - operator/**
+      - "!operator/webhook/**"
+      - .github/workflows/operator.yml
+
+env:
+  WORKING_DIR: ./minimal-app
+  JAVA_VERSION: 17
+  GIT_TAG_PREFIX: minimal-app_v
+
+jobs:
+  build:
+    name: build image
+    if: github.ref != 'refs/heads/main'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: ${{ env.WORKING_DIR }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v3
+        with:
+          java-version: "${{ env.JAVA_VERSION }}"
+          distribution: "temurin"
+      - run: mvn --batch-mode --update-snapshots verify
+        name: build image
+
+  release:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: ${{ env.WORKING_DIR }}
+    permissions:
+      contents: write # create git tags
+      packages: write # push docker images
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          REGISTRY=$(mvn help:evaluate -Dexpression=docker.registry -q -DforceStdout)
+          IMAGE_NAME=$(mvn help:evaluate -Dexpression=image-name -q -DforceStdout)
+          echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "REGISTRY=$REGISTRY" >> "$GITHUB_OUTPUT"
+          echo "TAG_NAME=${{ env.GIT_TAG_PREFIX }}$VERSION" >> "$GITHUB_OUTPUT"
+          echo "IMAGE_NAME=$REGISTRY/$IMAGE_NAME:$VERSION" >> "$GITHUB_OUTPUT"
+          cat $GITHUB_OUTPUT
+        id: naming-selector
+        name: generate names for artifacts
+
+      - run: |
+          ! docker manifest inspect ${{ steps.naming-selector.outputs.IMAGE_NAME }}
+        name: confirm image is not already pushed
+
+      - run: |
+          git fetch --tags
+          ! git rev-parse -q --verify "refs/tags/${{ steps.naming-selector.outputs.TAG_NAME }}"
+        name: confirm git tag does not exist
+
+      - uses: actions/setup-java@v3
+        with:
+          java-version: "${{ env.JAVA_VERSION }}"
+          distribution: "temurin"
+      - run: mvn --batch-mode --update-snapshots verify
+        name: build image
+
+      - uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
+        with:
+          registry: ${{ steps.naming-selector.outputs.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - run: docker push ${{ steps.naming-selector.outputs.IMAGE_NAME }}
+
+      - uses: mathieudutour/github-tag-action@v6.1
+        id: tag_version
+        with:
+          custom_tag: ${{ steps.naming-selector.outputs.TAG_NAME }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          # avoid v prefix before tag
+          tag_prefix: ""
