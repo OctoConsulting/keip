@@ -16,7 +16,7 @@ To perform a new release, simply update the version for a given subproject.
 The version can be found either in a version.txt file or pom.xml file at the root of each subproject.
 New releases of the same version will never overwrite old releases.
 If the intent is to overwrite an old github release or docker image package, then the old artifact and its associated git tags should be deleted first.
-If a previous attempt at release failed, it can be re-ran by going to the github actions tab, choose the job that failed, click re-run on the top right.
+If a previous attempt at release failed, it can be re-ran by going to the github actions tab, choose the job that failed, click re-run on the top right, and either run all jobs or failed jobs.
 
 ## Caching
 There is currently no caching for builds, but it could be added at a later date.
