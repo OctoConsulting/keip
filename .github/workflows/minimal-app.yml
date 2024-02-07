@@ -12,7 +12,6 @@ on:
     paths:
       - operator/**
       - "!operator/webhook/**"
-      - .github/workflows/operator.yml
 
 env:
   WORKING_DIR: ./minimal-app
