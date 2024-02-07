@@ -42,7 +42,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - run: |
-          VERSION=$(cat version.txt)
+          VERSION=$(make get-version)
           echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
           echo "TAG_NAME=${{ env.GIT_TAG_PREFIX }}$VERSION" >> "$GITHUB_OUTPUT"
           cat $GITHUB_OUTPUT

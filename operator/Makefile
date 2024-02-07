@@ -1,3 +1,4 @@
+VERSION ?= 0.1.1
 KEIP_INTEGRATION_IMAGE ?= ghcr.io/octoconsulting/keip/minimal-app:0.0.2
 
 KUBECTL := kubectl
@@ -10,6 +11,10 @@ all: metacontroller/deploy controller/deploy
 
 .PHONY: clean
 clean: controller/undeploy metacontroller/undeploy
+
+.PHONY: get-version
+get-version:
+	@echo $(VERSION)
 
 prep-release:
 	rm -rf output
