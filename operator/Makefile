@@ -1,4 +1,4 @@
-KEIP_INTEGRATION_IMAGE ?= ghcr.io/octoconsulting/keip-default-image:0.0.2
+KEIP_INTEGRATION_IMAGE ?= ghcr.io/octoconsulting/keip/minimal-app:0.0.2
 
 KUBECTL := kubectl
 KUBECTL_DELETE := $(KUBECTL) delete --ignore-not-found
