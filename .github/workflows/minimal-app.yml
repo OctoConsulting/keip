@@ -16,8 +16,6 @@ on:
 
 env:
   WORKING_DIR: ./minimal-app
-  REGISTRY: ghcr.io/octoconsulting
-  IMAGE_NAME: keip/minimal-app
   JAVA_VERSION: 17
   GIT_TAG_PREFIX: minimal-app_v
 
@@ -53,9 +51,12 @@ jobs:
       - uses: actions/checkout@v4
       - run: |
           VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          REGISTRY=$(mvn help:evaluate -Dexpression=docker.registry -q -DforceStdout)
+          IMAGE_NAME=$(mvn help:evaluate -Dexpression=image-name -q -DforceStdout)
           echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "REGISTRY=$REGISTRY" >> "$GITHUB_OUTPUT"
           echo "TAG_NAME=${{ env.GIT_TAG_PREFIX }}$VERSION" >> "$GITHUB_OUTPUT"
-          echo "IMAGE_NAME=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:$VERSION" >> "$GITHUB_OUTPUT"
+          echo "IMAGE_NAME=$REGISTRY/$IMAGE_NAME:$VERSION" >> "$GITHUB_OUTPUT"
           cat $GITHUB_OUTPUT
         id: naming-selector
         name: generate names for artifacts
@@ -78,7 +79,7 @@ jobs:
 
       - uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
         with:
-          registry: ${{ env.REGISTRY }}
+          registry: ${{ steps.naming-selector.outputs.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 

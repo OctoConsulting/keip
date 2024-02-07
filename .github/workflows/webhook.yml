@@ -1,4 +1,4 @@
-name: webhook-workflow
+name: webhook-workflo
 on:
   workflow_dispatch:
   pull_request:
@@ -15,8 +15,6 @@ on:
 
 env:
   WORKING_DIR: ./operator/webhook
-  REGISTRY: ghcr.io/octoconsulting
-  IMAGE_NAME: keip/route-webhook
   GIT_TAG_PREFIX: webhook_v
 
 jobs:
@@ -66,16 +64,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: |
-          VERSION=$(cat version.txt)
+          VERSION=$(make get-version)
+          REGISTRY=$(make get-registry)
+          IMAGE_NAME=$(make get-image-name)
           echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "REGISTRY=$REGISTRY" >> "$GITHUB_OUTPUT"
           echo "TAG_NAME=${{ env.GIT_TAG_PREFIX }}$VERSION" >> "$GITHUB_OUTPUT"
-          echo "IMAGE_NAME=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:$VERSION" >> "$GITHUB_OUTPUT"
+          echo "FULL_IMAGE_NAME=$REGISTRY/$IMAGE_NAME:$VERSION" >> "$GITHUB_OUTPUT"
           cat $GITHUB_OUTPUT
         id: naming-selector
         name: generate names for artifacts
 
       - run: |
-          ! docker manifest inspect ${{ steps.naming-selector.outputs.IMAGE_NAME }}
+          ! docker manifest inspect ${{ steps.naming-selector.outputs.FULL_IMAGE_NAME }}
         name: confirm image is not already pushed
 
       - run: |
@@ -85,7 +86,7 @@ jobs:
 
       - uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
         with:
-          registry: ${{ env.REGISTRY }}
+          registry: ${{ steps.naming-selector.outputs.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
@@ -93,7 +94,7 @@ jobs:
         with:
           context: ${{ env.WORKING_DIR }}
           push: true
-          tags: ${{ steps.naming-selector.outputs.IMAGE_NAME }}
+          tags: ${{ steps.naming-selector.outputs.FULL_IMAGE_NAME }}
 
       - uses: mathieudutour/github-tag-action@v6.1
         id: tag_version

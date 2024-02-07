@@ -1,8 +1,8 @@
 # Kubernetes Enterprise Integration Patterns (Keip)
 
-[![operator-workflow](https://github.com/OctoConsulting/keip/actions/workflows/operator.yml/badge.svg?branch=main)](https://github.com/OctoConsulting/keip/actions/workflows/operator.yml)
-[![webhook-workflow](https://github.com/OctoConsulting/keip/actions/workflows/webhook.yml/badge.svg?branch=main)](https://github.com/OctoConsulting/keip/actions/workflows/webhook.yml)
-[![minimal-app-workflow](https://github.com/OctoConsulting/keip/actions/workflows/minimal-app.yml/badge.svg?branch=main)](https://github.com/OctoConsulting/keip/actions/workflows/minimal-app.yml)
+[![operator](https://github.com/OctoConsulting/keip/actions/workflows/operator.yml/badge.svg?branch=main)](https://github.com/OctoConsulting/keip/actions/workflows/operator.yml)
+[![webhook](https://github.com/OctoConsulting/keip/actions/workflows/webhook.yml/badge.svg?branch=main)](https://github.com/OctoConsulting/keip/actions/workflows/webhook.yml)
+[![minimal-app](https://github.com/OctoConsulting/keip/actions/workflows/minimal-app.yml/badge.svg?branch=main)](https://github.com/OctoConsulting/keip/actions/workflows/minimal-app.yml)
 
 The goal of Keip is to provide a simple method for deploying Spring Integration routes using
 Kuberenetes semantics.
