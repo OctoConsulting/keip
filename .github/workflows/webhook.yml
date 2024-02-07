@@ -1,4 +1,4 @@
-name: webhook-workflo
+name: webhook-workflow
 on:
   workflow_dispatch:
   pull_request:
