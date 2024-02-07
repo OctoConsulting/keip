@@ -1,4 +1,4 @@
-name: minimal-app-workflow
+name: minimal-app
 
 on:
   workflow_dispatch:

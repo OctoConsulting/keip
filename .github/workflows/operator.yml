@@ -1,4 +1,4 @@
-name: operator-workflow
+name: operator
 on:
   workflow_dispatch:
   pull_request:
