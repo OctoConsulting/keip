@@ -1,4 +1,4 @@
-VERSION ?= 0.1.1
+VERSION ?= 0.1.2
 KEIP_INTEGRATION_IMAGE ?= ghcr.io/octoconsulting/keip/minimal-app:0.0.2
 
 KUBECTL := kubectl
@@ -7,7 +7,6 @@ CONTROLLER_NAMESPACE := keip
 
 .PHONY: all
 all: metacontroller/deploy controller/deploy
-
 
 .PHONY: clean
 clean: controller/undeploy metacontroller/undeploy
@@ -21,7 +20,6 @@ prep-release:
 	mkdir output
 	kustomize build ./controller > ./output/controller.yaml
 	kustomize build ./crd > ./output/crd.yaml
-	cp ./metacontroller/kustomization.yaml ./output/metacontroller.yaml
 	ls -al ./output
 
 metacontroller/deploy:
