@@ -1,4 +1,4 @@
-name: operator-workflow
+name: operator
 on:
   workflow_dispatch:
   pull_request:
@@ -12,7 +12,6 @@ on:
     paths:
       - operator/**
       - "!operator/webhook/**"
-      - .github/workflows/operator.yml
 
 env:
   WORKING_DIR: ./operator
@@ -42,7 +41,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - run: |
-          VERSION=$(cat version.txt)
+          VERSION=$(make get-version)
           echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
           echo "TAG_NAME=${{ env.GIT_TAG_PREFIX }}$VERSION" >> "$GITHUB_OUTPUT"
           cat $GITHUB_OUTPUT

@@ -1,4 +1,4 @@
-name: minimal-app-workflow
+name: minimal-app
 
 on:
   workflow_dispatch:
@@ -12,7 +12,6 @@ on:
     paths:
       - operator/**
       - "!operator/webhook/**"
-      - .github/workflows/operator.yml
 
 env:
   WORKING_DIR: ./minimal-app
