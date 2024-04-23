@@ -35,9 +35,10 @@ def test_vol_config_missing_route_map_raise_exception(full_route):
         VolumeConfig(full_route["spec"])
 
 
-def test_vol_config_missing_secrets_and_pvcs_no_fail(full_route):
+def test_vol_config_missing_optional_vols_no_fail(full_route):
     del full_route["spec"]["secretSources"]
     del full_route["spec"]["persistentVolumeClaims"]
+    del full_route["spec"]["configMaps"]
     vol_conf = VolumeConfig(full_route["spec"])
 
     assert len(vol_conf.get_volumes()) > 0

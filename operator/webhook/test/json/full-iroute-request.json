@@ -44,7 +44,17 @@
         "configMapName": "test-tls-cm",
         "key": "test-truststore.p12",
         "type": "pkcs12"
-      }
+      },
+      "configMaps": [
+        {
+          "name": "test-cm-1",
+          "mountPath": "/path/to/cm1"
+        },
+        {
+          "name": "test-cm-2",
+          "mountPath": "/path/to/cm2"
+        }
+      ]
     }
   }
 }

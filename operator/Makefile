@@ -37,7 +37,7 @@ controller/undeploy: crd/undeploy
 	-$(KUBECTL_DELETE) -k controller
 
 crd/deploy:
-	$(KUBECTL) apply -k crd/v1alpha1
+	$(KUBECTL) apply -k crd
 
 crd/undeploy:
-	-$(KUBECTL_DELETE) -k crd/v1alpha1
+	-$(KUBECTL_DELETE) -k crd

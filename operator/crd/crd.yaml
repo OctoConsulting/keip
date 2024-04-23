@@ -59,6 +59,16 @@ spec:
                   type: array
                   items:
                     type: string
+                configMaps:
+                  description: "List of configMaps that will be mounted into the integration route container"
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                      mountPath:
+                        type: string
                 replicas: # not yet implemented
                   description: "Number of containers running the integration route"
                   type: integer
