@@ -1,4 +1,4 @@
-VERSION ?= 0.1.2
+VERSION ?= 0.2.0
 KEIP_INTEGRATION_IMAGE ?= ghcr.io/octoconsulting/keip/minimal-app:0.0.2
 
 KUBECTL := kubectl
