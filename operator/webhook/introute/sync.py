@@ -27,6 +27,7 @@ class VolumeConfig:
         self._route_config = parent_spec["routeConfigMap"]
         self._secret_srcs = parent_spec.get("secretSources", [])
         self._pvcs = parent_spec.get("persistentVolumeClaims", [])
+        self._config_maps = parent_spec.get("configMaps", [])
         self._tls_config = parent_spec.get("tls")
 
     def get_volumes(self) -> List[Mapping]:
@@ -47,6 +48,16 @@ class VolumeConfig:
                 {
                     "name": pvc_spec["claimName"],
                     "persistentVolumeClaim": {"claimName": pvc_spec["claimName"]},
+                }
+            )
+
+        for cm_spec in self._config_maps:
+            volumes.append(
+                {
+                    "name": cm_spec["name"],
+                    "configMap": {
+                        "name": cm_spec["name"]
+                    }
                 }
             )
 
@@ -90,6 +101,14 @@ class VolumeConfig:
                 {
                     "name": pvc_spec["claimName"],
                     "mountPath": pvc_spec["mountPath"],
+                }
+            )
+
+        for cm_spec in self._config_maps:
+            volume_mounts.append(
+                {
+                    "name": cm_spec["name"],
+                    "mountPath": cm_spec["mountPath"],
                 }
             )
 

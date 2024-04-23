@@ -58,6 +58,14 @@
                     "mountPath": "/tmp/testdir"
                   },
                   {
+                    "name": "test-cm-1",
+                    "mountPath": "/path/to/cm1"
+                  },
+                  {
+                    "name": "test-cm-2",
+                    "mountPath": "/path/to/cm2"
+                  },
+                  {
                     "name": "truststore",
                     "readOnly": true,
                     "mountPath": "/etc/cabundle"
@@ -106,6 +114,18 @@
                 "name": "testroute-pvc",
                 "persistentVolumeClaim": {
                   "claimName": "testroute-pvc"
+                }
+              },
+              {
+                "name": "test-cm-1",
+                "configMap": {
+                  "name": "test-cm-1"
+                }
+              },
+              {
+                "name": "test-cm-2",
+                "configMap": {
+                  "name": "test-cm-2"
                 }
               },
               {
