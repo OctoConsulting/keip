@@ -1,4 +1,4 @@
-# Contributing to KeIP
+# Contributing to keip
 First off, thanks for taking the time to contribute! 🎉
 
 The following is a set of guidelines for contributing to KeIP, hosted in the OctoConsulting Organization on GitHub. 

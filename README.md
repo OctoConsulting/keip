@@ -1,10 +1,10 @@
-# KeIP (Kubernetes Enterprise Integration Patterns)
+# keip (Kubernetes Enterprise Integration Patterns)
 
 [![operator](https://github.com/OctoConsulting/keip/actions/workflows/operator.yml/badge.svg?branch=main)](https://github.com/OctoConsulting/keip/actions/workflows/operator.yml)
 [![webhook](https://github.com/OctoConsulting/keip/actions/workflows/webhook.yml/badge.svg?branch=main)](https://github.com/OctoConsulting/keip/actions/workflows/webhook.yml)
 [![minimal-app](https://github.com/OctoConsulting/keip/actions/workflows/minimal-app.yml/badge.svg?branch=main)](https://github.com/OctoConsulting/keip/actions/workflows/minimal-app.yml)
 
-KeIP is a Kubernetes operator that simplifies the deployment of Spring Integration routes on Kubernetes clusters. This 
+keip is a Kubernetes operator that simplifies the deployment of Spring Integration routes on Kubernetes clusters. This 
 operator makes it easy to manage integration flows, enhancing scalability and resilience through Kubernetes.
 
 ## Key Features
@@ -26,7 +26,7 @@ operator makes it easy to manage integration flows, enhancing scalability and re
    git clone https://github.com/OctoConsulting/keip.git && cd keip
    ```
 
-2. **Deploy the KeIP operator:**
+2. **Deploy the keip operator:**
    ```shell
    cd operator && make all
    ```
