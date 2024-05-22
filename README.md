@@ -11,6 +11,8 @@ operator makes it easy to manage integration flows, enhancing scalability and re
 - **Kubernetes Native**: Fully integrates with Kubernetes, using custom resources to manage Spring Integration routes.
 - **Ease of Use**: Allows the definition and deployment of complex integration patterns with simple Kubernetes manifests.
 - **Flexibility**: Supports a range of configurations to cater to different integration requirements.
+- **Dynamic Route Definition**: Define and deploy Spring Integration routes at runtime without the need to compile code,
+enabling greater flexibility and faster iterations.
 
 ## Getting Started
 
@@ -59,20 +61,18 @@ The default keip container provides only the basic components for Spring Integra
 your integration routes, you will need to include additional Spring Integration components or your own Java code. See 
 [README.md](keip-container-archetype%2FREADME.md) for instructions on how to create a custom container.
 
-Once your new container is available, you'll need to set that name in the keip-controller-props ConfigMap. The name of 
-this ConfigMap includes a hash, so we'll need to retrieve the full ConfigMap name first. We'll need to change the value
-for the integration-image key.
-
-Note that the single-line command below requires that you have the `jq` utility installed.
+Once your new container is available, you'll need to set that name in the `keip-controller-props` ConfigMap. We'll need 
+to change the value for the `integration-image` key to set it to whatever the name of your custom keip container is.
 
 ```shell
-kubectl edit cm `kubectl get configmap --all-namespaces -o json | jq -r '.items[] | select(.metadata.name | startswith("keip-controller-props")) | .metadata.name'`
+kubectl edit configmap -n keip keip-controller-props
 ```
 
-A similar approach that relies on `grep` instead of `jq`:
+Once the ConfigMap is updated, you'll need to delete the `integrationroute-webhook` container. Note that the single-line
+command below requires that you have the `jq` utility installed.
 
 ```shell
-CMNAME=`kubectl get configmap -o custom-columns=NAME:.metadata.name --no-headers | grep keip-controller-props` && kubectl edit configmap $CMNAME
+kubectl delete pod `kubectl get pods -n keip -o json | jq -r '.items[] | select(.metadata.name | startswith("integrationroute-webhook-")) | .metadata.name'`
 ```
 
 ### Deploying a Spring Integration Route
