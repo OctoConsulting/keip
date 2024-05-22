@@ -23,7 +23,7 @@ mvn archetype:generate -DinteractiveMode=false \
                        -Dversion=0.1.0-SNAPSHOT
 ```
 
-4. change the new directory: `cd rocket-skis`
+4. change to the new directory: `cd rocket-skis`
 5. edit the `pom.xml` file to include any dependencies required for your project or remove those that aren't required.
 6. build the container: `mvn clean install`
 
