@@ -12,10 +12,11 @@ from webhook.introute.sync import (
     _new_deployment,
     _spring_app_config_env_var,
     _get_java_jdk_options,
+    _generate_container_env_vars
+    
 )
 
 JDK_OPTIONS_ENV_NAME = "JDK_JAVA_OPTIONS"
-
 
 def test_empty_parent_raises_exception(full_route):
     with pytest.raises(KeyError):
@@ -70,38 +71,9 @@ def test_spring_app_config_json_missing_props_and_secret_sources(full_route):
 
     assert spring_conf["name"] == "SPRING_APPLICATION_JSON"
 
-    expected_json = {"spring": {"application": {"name": "testroute"}}}
+    expected_json = {"spring": {"application": {"name": "testroute"}}, "server": {"ssl": {"key-alias": "certificate", "key-store": "/etc/keystore/test-keystore.jks", "key-store-type": "JKS"}, "port": 8443}}
+
     assert json_props == expected_json
-
-
-def test_jdk_options_pkcs12_type(full_route):
-    options = _get_java_jdk_options(full_route)
-
-    assert options["name"] == JDK_OPTIONS_ENV_NAME
-
-    expected_options = "-Djavax.net.ssl.trustStore=/etc/cabundle/test-truststore.p12 -Djavax.net.ssl.trustStorePassword= -Djavax.net.ssl.trustStoreType=PKCS12"
-    assert options["value"] == expected_options
-
-
-def test_jdk_options_jks_type(full_route):
-    tls_config = full_route["spec"]["tls"]
-    tls_config["type"] = "jks"
-    tls_config["key"] = "test-truststore.jks"
-
-    options = _get_java_jdk_options(full_route)
-
-    assert options["name"] == JDK_OPTIONS_ENV_NAME
-
-    expected_options = "-Djavax.net.ssl.trustStore=/etc/cabundle/test-truststore.jks -Djavax.net.ssl.trustStorePassword=changeit -Djavax.net.ssl.trustStoreType=JKS"
-    assert options["value"] == expected_options
-
-
-def test_jdk_options_unknown_type(full_route):
-    tls_config = full_route["spec"]["tls"]
-    tls_config["type"] = "pem"
-
-    with pytest.raises(AssertionError):
-        _get_java_jdk_options(full_route)
 
 
 def test_pod_template_no_annotations(full_route):
@@ -127,9 +99,61 @@ def test_pod_template_no_tls(full_route):
 
     deployment = _new_deployment(full_route)
 
-    check_env_var_absent(deployment, JDK_OPTIONS_ENV_NAME)
+    check_pod_probe_protocol(deployment, "HTTP", 8080)
     check_volume_absent(deployment, "truststore")
     check_volume_mounts_absent(deployment, "truststore")
+    check_volume_absent(deployment, "keystore")
+    check_volume_mounts_absent(deployment, "keystore")
+
+
+def test_pod_template_no_truststore(full_route):
+    del full_route["spec"]["tls"]["truststore"]
+
+    deployment = _new_deployment(full_route)
+
+    check_pod_probe_protocol(deployment, "HTTPS", 8443)
+    check_volume_absent(deployment, "truststore")
+    check_volume_mounts_absent(deployment, "truststore")
+
+
+def test_pod_template_no_keystore(full_route):
+    del full_route["spec"]["tls"]["keystore"]
+
+    deployment = _new_deployment(full_route)
+
+    check_pod_probe_protocol(deployment, "HTTP", 8080)
+    check_volume_absent(deployment, "keystore")
+    check_volume_mounts_absent(deployment, "keystore")
+
+
+def test_jdk_options_pkcs12_type(full_route):
+    tls_config = full_route["spec"]["tls"]
+    options = _get_java_jdk_options(tls_config)
+
+    assert options["name"] == JDK_OPTIONS_ENV_NAME
+
+    expected_options = "-Djavax.net.ssl.trustStore=/etc/cabundle/test-truststore.p12 -Djavax.net.ssl.trustStorePassword= -Djavax.net.ssl.trustStoreType=PKCS12"
+    assert options["value"] == expected_options
+
+
+def test_jdk_options_jks_type(full_route):
+    tls_config = full_route["spec"]["tls"]
+    tls_config["truststore"]["type"] = "jks"
+    tls_config["truststore"]["key"] = "test-truststore.jks"
+
+    options = _get_java_jdk_options(tls_config)
+    assert options["name"] == JDK_OPTIONS_ENV_NAME
+
+    expected_options = "-Djavax.net.ssl.trustStore=/etc/cabundle/test-truststore.jks -Djavax.net.ssl.trustStorePassword=changeit -Djavax.net.ssl.trustStoreType=JKS"
+    assert options["value"] == expected_options
+
+
+def test_env_vars_no_keystore(full_route):
+    del full_route["spec"]["tls"]["keystore"]
+
+    options = _generate_container_env_vars(full_route)
+
+    assert not any(x for x in options if x.get('name') == 'SERVER_SSL_KEYSTOREPASSWORD')
 
 
 def test_deployment_missing_labels(full_route):
@@ -195,6 +219,16 @@ def check_volume_absent(deployment: Mapping, name: str):
     vols = deployment["spec"]["template"]["spec"]["volumes"]
     vol_names = [v["name"] for v in vols]
     assert name not in vol_names
+
+def check_pod_probe_protocol(deployment: Mapping, scheme: str, port: int):
+    liveness_probe = get_container(deployment)["livenessProbe"]
+    readiness_probe = get_container(deployment)["readinessProbe"]
+
+    assert liveness_probe["httpGet"]["port"] == port
+    assert liveness_probe["httpGet"]["scheme"] == scheme
+
+    assert readiness_probe["httpGet"]["port"] == port
+    assert readiness_probe["httpGet"]["scheme"] == scheme
 
 
 def check_volume_mounts_absent(deployment: Mapping, name: str):
