@@ -11,6 +11,7 @@ SECRETS_ROOT = "/etc/secrets"
 
 TRUSTSTORE_PATH = "/etc/cabundle"
 
+KEYSTORE_PATH = "/etc/keystore"
 
 class VolumeConfig:
     """
@@ -21,7 +22,8 @@ class VolumeConfig:
     """
 
     _route_vol_name = "integration-route-config"
-    _tls_vol_name = "truststore"
+    _tls_truststore_name = "truststore"
+    _tls_keystore_name = "keystore"
 
     def __init__(self, parent_spec) -> None:
         self._route_config = parent_spec["routeConfigMap"]
@@ -62,20 +64,39 @@ class VolumeConfig:
             )
 
         if self._tls_config:
-            volumes.append(
-                {
-                    "name": self._tls_vol_name,
-                    "configMap": {
-                        "name": self._tls_config["configMapName"],
-                        "items": [
-                            {
-                                "key": self._tls_config["key"],
-                                "path": self._tls_config["key"],
-                            }
-                        ],
-                    },
-                }
-            )
+            truststore = self._tls_config.get('truststore')
+            if truststore:
+                volumes.append(
+                    {
+                        "name": self._tls_truststore_name,
+                        "configMap": {
+                            "name": truststore["configMapName"],
+                            "items": [
+                                {
+                                    "key": truststore["key"],
+                                    "path": truststore["key"],
+                                }
+                            ],
+                        },
+                    }
+                )
+
+            keystore = self._tls_config.get('keystore')
+            if keystore:
+                volumes.append(
+                    {
+                        "name": self._tls_keystore_name,
+                        "secret": {
+                            "secretName": keystore["secretName"],
+                            "items": [
+                                {
+                                    "key": keystore["key"],
+                                    "path": keystore["key"],
+                                }
+                            ],
+                        },
+                    }
+                )
 
         return volumes
 
@@ -111,15 +132,23 @@ class VolumeConfig:
                     "mountPath": cm_spec["mountPath"],
                 }
             )
-
         if self._tls_config:
-            volume_mounts.append(
-                {
-                    "name": self._tls_vol_name,
-                    "readOnly": True,
-                    "mountPath": TRUSTSTORE_PATH,
-                }
-            )
+            if self._tls_config.get('truststore'):
+                volume_mounts.append(
+                    {
+                        "name": self._tls_truststore_name,
+                        "readOnly": True,
+                        "mountPath": TRUSTSTORE_PATH,
+                    }
+                )
+            if self._tls_config.get('keystore'):
+                volume_mounts.append(
+                    {
+                        "name": self._tls_keystore_name,
+                        "readOnly": True,
+                        "mountPath": KEYSTORE_PATH,
+                    }
+                )
 
         return volume_mounts
 
@@ -145,13 +174,36 @@ def _spring_cloud_k8s_config(parent) -> Optional[Mapping]:
     }
 
 
-def _spring_app_config_env_var(parent) -> Mapping[str, str]:
+def _get_server_ssl_config(parent) -> Optional[Mapping]:
+    tls_config = parent["spec"].get("tls")
+    if not tls_config:
+        return None
+
+    keystore = tls_config.get("keystore")
+
+    if not keystore:
+        return None
+ 
+    return {
+        "ssl": {
+            "key-alias": "certificate",
+            "key-store": str(Path(KEYSTORE_PATH, keystore["key"])),
+            "key-store-type": keystore["type"].upper()
+        },
+        "port": 8443
+    }
+
+
+def _spring_app_config_env_var(parent) -> Optional[Mapping]:
     metadata = parent["metadata"]
     app_config = {
         "spring": {
             "application": {"name": metadata["name"]},
         }
     }
+
+    if tls_config := _get_server_ssl_config(parent):
+        app_config["server"] = tls_config
 
     if cloud_config := _spring_cloud_k8s_config(parent):
         app_config["spring"]["config.import"] = "kubernetes:"
@@ -163,22 +215,37 @@ def _spring_app_config_env_var(parent) -> Mapping[str, str]:
     }
 
 
-def _get_java_jdk_options(parent) -> Optional[Mapping[str, str]]:
-    tls_config = parent["spec"].get("tls")
+def _get_keystore_password_env(tls) -> Mapping[str, str]:
 
-    if not tls_config:
+    keystore = tls.get("keystore")
+    
+    if not keystore:
         return None
 
-    tls_type = tls_config['type']
-    assert tls_type in ["jks", "pkcs12"], \
-        f"({tls_type}) is not a supported TLS type. Supported types: ('jks', 'pkcs12')"
+    return {
+        "name": "SERVER_SSL_KEYSTOREPASSWORD",
+        "valueFrom": {
+            "secretKeyRef": {
+                "name": keystore["passwordSecretRef"],
+                "key": "password"
+            }
+        }
+    }
 
+
+def _get_java_jdk_options(tls) -> Optional[Mapping[str, str]]:
+
+    truststore = tls.get("truststore")
+    
+    if not truststore:
+        return None
+
+    tls_type = truststore["type"]
     truststore_password = "changeit" if tls_type == "jks" else ""
-    jdk_options = f"-Djavax.net.ssl.trustStore={str(Path(TRUSTSTORE_PATH, tls_config['key']))} -Djavax.net.ssl.trustStorePassword={truststore_password} -Djavax.net.ssl.trustStoreType={tls_type.upper()}"
 
     return {
         "name": "JDK_JAVA_OPTIONS",
-        "value": jdk_options,
+        "value": f"-Djavax.net.ssl.trustStore={str(Path(TRUSTSTORE_PATH, truststore['key']))} -Djavax.net.ssl.trustStorePassword={truststore_password} -Djavax.net.ssl.trustStoreType={tls_type.upper()}"
     }
 
 
@@ -188,8 +255,13 @@ def _generate_container_env_vars(parent) -> List[Mapping[str, str]]:
     if spring_app_config := _spring_app_config_env_var(parent):
         env_vars.append(spring_app_config)
 
-    if jdk_options := _get_java_jdk_options(parent):
-        env_vars.append(jdk_options)
+    if tls := parent["spec"].get("tls"):
+        if jdk_options := _get_java_jdk_options(tls):
+            env_vars.append(jdk_options)
+
+        if keystore_password_env := _get_keystore_password_env(tls):
+            env_vars.append(keystore_password_env)
+
 
     return env_vars
 
@@ -198,6 +270,11 @@ def _create_pod_template(parent, labels, integration_image):
     """TODO: Should add some resource constraints for containers. Add constraint values to CRD."""
 
     vol_config = VolumeConfig(parent["spec"])
+
+    has_tls = "tls" in parent["spec"] and "keystore" in parent["spec"]["tls"]
+
+    scheme = "HTTPS" if has_tls else "HTTP"
+    management_port = 8443 if has_tls else 8080
 
     pod_template = {
         "metadata": {"labels": labels},
@@ -211,14 +288,16 @@ def _create_pod_template(parent, labels, integration_image):
                     "livenessProbe": {
                         "httpGet": {
                             "path": "/actuator/health/liveness",
-                            "port": 8080,
+                            "port": management_port,
+                            "scheme": scheme
                         },
                         "initialDelaySeconds": 10,
                     },
                     "readinessProbe": {
                         "httpGet": {
                             "path": "/actuator/health/readiness",
-                            "port": 8080,
+                            "port": management_port,
+                            "scheme": scheme
                         },
                         "initialDelaySeconds": 10,
                     },

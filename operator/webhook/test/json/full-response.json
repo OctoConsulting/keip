@@ -69,30 +69,46 @@
                     "name": "truststore",
                     "readOnly": true,
                     "mountPath": "/etc/cabundle"
+                  },
+                  {
+                    "name": "keystore",
+                    "readOnly": true,
+                    "mountPath": "/etc/keystore"
                   }
                 ],
                 "livenessProbe": {
                   "httpGet": {
                     "path": "/actuator/health/liveness",
-                    "port": 8080
+                    "port": 8443,
+                    "scheme": "HTTPS"
                   },
                   "initialDelaySeconds": 10
                 },
                 "readinessProbe": {
                   "httpGet": {
                     "path": "/actuator/health/readiness",
-                    "port": 8080
+                    "port": 8443,
+                    "scheme": "HTTPS"
                   },
                   "initialDelaySeconds": 10
                 },
                 "env": [
                   {
                     "name": "SPRING_APPLICATION_JSON",
-                    "value": "{\"spring\": {\"application\": {\"name\": \"testroute\"}, \"config.import\": \"kubernetes:\", \"cloud\": {\"kubernetes\": {\"config\": {\"fail-fast\": true, \"namespace\": \"testspace\", \"sources\": [{\"name\": \"testroute-props\"}, {\"labels\": {\"group\": \"ir-common\"}}]}, \"secrets\": {\"paths\": \"/etc/secrets\"}}}}}"
+                    "value": "{\"spring\": {\"application\": {\"name\": \"testroute\"}, \"config.import\": \"kubernetes:\", \"cloud\": {\"kubernetes\": {\"config\": {\"fail-fast\": true, \"namespace\": \"testspace\", \"sources\": [{\"name\": \"testroute-props\"}, {\"labels\": {\"group\": \"ir-common\"}}]}, \"secrets\": {\"paths\": \"/etc/secrets\"}}}}, \"server\": {\"ssl\": {\"key-alias\": \"certificate\", \"key-store\": \"/etc/keystore/test-keystore.jks\", \"key-store-type\": \"JKS\"}, \"port\": 8443}}"
                   },
                   {
                     "name": "JDK_JAVA_OPTIONS",
                     "value": "-Djavax.net.ssl.trustStore=/etc/cabundle/test-truststore.p12 -Djavax.net.ssl.trustStorePassword= -Djavax.net.ssl.trustStoreType=PKCS12"
+                  },
+                  {
+                    "name": "SERVER_SSL_KEYSTOREPASSWORD",
+                    "valueFrom": {
+                      "secretKeyRef": {
+                        "name": "keystore-password-ref",
+                        "key": "password"
+                      }
+                    }
                   }
                 ]
               }
@@ -136,6 +152,18 @@
                     {
                       "key": "test-truststore.p12",
                       "path": "test-truststore.p12"
+                    }
+                  ]
+                }
+              },
+              {
+                "name": "keystore",
+                "secret": {
+                  "secretName": "test-tls-secret",
+                  "items": [
+                    {
+                      "key": "test-keystore.jks",
+                      "path": "test-keystore.jks"
                     }
                   ]
                 }

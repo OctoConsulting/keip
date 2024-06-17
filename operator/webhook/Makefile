@@ -1,4 +1,4 @@
-VERSION ?= 0.5.0
+VERSION ?= 0.6.0
 HOST_PORT ?= 7080
 
 IMG_REGISTRY := ghcr.io/octoconsulting
@@ -27,7 +27,7 @@ start-dev-server:
 
 .PHONY: test
 test:
-	cd test && mkdir -p $(TEST_COVERAGE_DIR) && coverage run --data-file=$(TEST_COVERAGE_FILE) -m pytest
+	cd test && mkdir -p $(TEST_COVERAGE_DIR) && coverage run --data-file=$(TEST_COVERAGE_FILE) -m pytest -vv
 
 .PHONY: report-test-coverage
 report-test-coverage: test

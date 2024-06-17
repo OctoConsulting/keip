@@ -11,3 +11,9 @@ spec:
     #     group: abc
   secretSources:
     - testroute-secret
+  tls:
+    keystore:
+      secretName: test-keystore
+      type: jks
+      key: keystore.jks
+      passwordSecretRef: jks-password

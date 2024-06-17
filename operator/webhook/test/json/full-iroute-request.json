@@ -41,9 +41,17 @@
         "testroute-secret"
       ],
       "tls": {
-        "configMapName": "test-tls-cm",
-        "key": "test-truststore.p12",
-        "type": "pkcs12"
+        "keystore": {
+          "secretName": "test-tls-secret",
+          "key": "test-keystore.jks",
+          "type": "jks",
+          "passwordSecretRef": "keystore-password-ref"
+        },
+        "truststore": {
+          "configMapName": "test-tls-cm",
+          "key": "test-truststore.p12",
+          "type": "pkcs12"
+        }
       },
       "configMaps": [
         {
