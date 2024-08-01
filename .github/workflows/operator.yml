@@ -23,10 +23,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: 'echo "Target branch: $GITHUB_BASE_REF"'
-        name: print target branch
+
+      - run: |
+          VERSION=$(make get-version)
+          echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "TAG_NAME=$(make --no-print-directory -C operator get-tag)" >> "$GITHUB_OUTPUT"
+          cat $GITHUB_OUTPUT
+        id: naming-selector
+        name: generate names for artifacts
       - run: sh .github/workflows/scripts/verify_operator_version.sh
-        name: verify using latest version of webhook
+        name: Verify using latest version of webhook
 #  build:
 #    if: github.ref != 'refs/heads/main'
 #    runs-on: ubuntu-latest
