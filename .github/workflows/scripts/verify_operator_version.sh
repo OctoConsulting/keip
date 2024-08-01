@@ -15,6 +15,10 @@ verify_current_webhook_img() {
 }
 
 verify_operator_version_bump() {
+
+  # fetch because job does not fetch other branches by default
+  git fetch origin $GITHUB_BASE_REF
+
   changes_in_pr=$(git diff origin/$GITHUB_BASE_REF -- $OPERATOR_DIR)
   if [ -z "$changes_in_pr" ]; then
     echo "found operator changes"
