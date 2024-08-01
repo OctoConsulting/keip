@@ -18,6 +18,13 @@ env:
   GIT_TAG_PREFIX: operator_v
 
 jobs:
+  verify-versions:
+    if: github.ref != 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: sh .github/workflows/scripts/verify_operator_version.sh
+        name: verify using latest version of webhook
   build:
     if: github.ref != 'refs/heads/main'
     runs-on: ubuntu-latest

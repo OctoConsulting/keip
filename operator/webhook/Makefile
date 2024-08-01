@@ -19,7 +19,7 @@ get-registry:
 
 .PHONY: get-image-name
 get-image-name:
-	@echo $(IMG_NAME)
+	@echo $(FULL_IMAGE_NAME)
 
 .PHONY: start-dev
 start-dev-server:
