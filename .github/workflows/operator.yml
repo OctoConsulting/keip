@@ -15,7 +15,6 @@ on:
 
 env:
   WORKING_DIR: ./operator
-  GIT_TAG_PREFIX: operator_v
 
 jobs:
   verify-versions:
@@ -59,8 +58,9 @@ jobs:
       # set variables used by multiple steps in the job
       - run: |
           VERSION=$(make get-version)
+          TAG_NAME=$(make get-tag)
           echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
-          echo "TAG_NAME=${{ env.GIT_TAG_PREFIX }}$VERSION" >> "$GITHUB_OUTPUT"
+          echo "TAG_NAME=$TAG_NAME" >> "$GITHUB_OUTPUT"
           cat $GITHUB_OUTPUT
         id: naming-selector
         name: generate names for artifacts
