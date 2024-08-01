@@ -27,3 +27,4 @@ verify_operator_version_bump() {
 }
 
 verify_current_webhook_img
+verify_operator_version_bump
