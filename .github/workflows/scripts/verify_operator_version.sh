@@ -15,12 +15,12 @@ verify_current_webhook_img() {
 }
 
 verify_operator_version_bump() {
-  changes_in_pr=$(git diff origin/$GITHUB_BASE_REF $OPERATOR_DIR)
+  changes_in_pr=$(git diff origin/$GITHUB_BASE_REF -- $OPERATOR_DIR)
   if [ -z "$changes_in_pr" ]; then
     echo "found operator changes"
   fi
 
-  changes_in_pr=$(git diff origin/$GITHUB_BASE_REF keip-container-archetype)
+  changes_in_pr=$(git diff origin/$GITHUB_BASE_REF -- keip-container-archetype)
     if [ -z "$changes_in_pr" ]; then
       echo "found archetype changes"
     fi
