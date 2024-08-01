@@ -20,13 +20,17 @@ verify_operator_version_bump() {
   git fetch origin $GITHUB_BASE_REF
 
   changes_in_pr=$(git diff origin/$GITHUB_BASE_REF -- $OPERATOR_DIR)
-  if [ -z "$changes_in_pr" ]; then
+  if [ -n "$changes_in_pr" ]; then
     echo "found operator changes"
+  else
+    echo "no operator changes"
   fi
 
   changes_in_pr=$(git diff origin/$GITHUB_BASE_REF -- keip-container-archetype)
-    if [ -z "$changes_in_pr" ]; then
+    if [ -n "$changes_in_pr" ]; then
       echo "found archetype changes"
+    else
+      echo "no archetype changes"
     fi
 }
 
