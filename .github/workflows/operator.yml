@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: 'echo "Target branch: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME"'
+      - run: 'echo "Target branch: $GITHUB_BASE_REF"'
         name: print target branch
       - run: sh .github/workflows/scripts/verify_operator_version.sh
         name: verify using latest version of webhook
