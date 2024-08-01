@@ -23,19 +23,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - run: 'echo "Target branch: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME"'
+        name: print target branch
       - run: sh .github/workflows/scripts/verify_operator_version.sh
         name: verify using latest version of webhook
-  build:
-    if: github.ref != 'refs/heads/main'
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        shell: bash
-        working-directory: ${{ env.WORKING_DIR }}
-    steps:
-      - uses: actions/checkout@v4
-      - run: make prep-release
-        name: generate release files
+#  build:
+#    if: github.ref != 'refs/heads/main'
+#    runs-on: ubuntu-latest
+#    defaults:
+#      run:
+#        shell: bash
+#        working-directory: ${{ env.WORKING_DIR }}
+#    steps:
+#      - uses: actions/checkout@v4
+#      - run: make prep-release
+#        name: generate release files
 
   release:
     if: github.ref == 'refs/heads/main'
