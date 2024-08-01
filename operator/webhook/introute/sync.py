@@ -291,7 +291,8 @@ def _create_pod_template(parent, labels, integration_image):
                             "port": management_port,
                             "scheme": scheme
                         },
-                        "initialDelaySeconds": 10,
+                        "failureThreshold": 3,
+                        "timeoutSeconds": 3
                     },
                     "readinessProbe": {
                         "httpGet": {
@@ -299,7 +300,17 @@ def _create_pod_template(parent, labels, integration_image):
                             "port": management_port,
                             "scheme": scheme
                         },
-                        "initialDelaySeconds": 10,
+                        "failureThreshold": 2,
+                        "timeoutSeconds": 3
+                    },
+                    "startupProbe": {
+                        "httpGet": {
+                            "path": "/actuator/health/liveness",
+                            "port": management_port,
+                            "scheme": scheme
+                        },
+                        "failureThreshold": 12,
+                        "timeoutSeconds": 3
                     },
                 },
             ],
