@@ -11,5 +11,6 @@ pip-log.txt
 .pytest_cache
 
 # Local directives
+.venv
 test
 requirements-dev.txt

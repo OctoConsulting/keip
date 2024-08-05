@@ -8,21 +8,12 @@ Prerequisites:
 - Metacontroller
 - Keip CRDs and controller
 - Access to a `keip-integration` image
-- Cert-Manager
 
-Running the example:
-1. Install Cert-Manager:
-```shell
-kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.15.0/cert-manager.yaml
-```
-2. Create JKS password secret:
-```shell
-kubectl create secret generic --from-literal=password=password jks-password
-```
-3. Run example:
+Run the example:
 ```shell
 kubectl apply -k example
 ```
+*_Note_*: The example uses a keystore.jks file and a certificate created by [Cert Manager](https://cert-manager.io/).
 
 This should result in the creation of the following resources:
 
@@ -44,6 +35,7 @@ kubectl get pod
 NAME                         READY   STATUS    RESTARTS   AGE
 testroute-74d574bf85-tbv9m   1/1     Running   0          99s
 ```
+*_Note_*: Cert Manager takes a few seconds to create the certificate and keystore secret. The testroute pod will not start until the keystore.jks secret is available to mount.
 
 Check the pod's logs for the configured greeting and secret:
 ```shell
