@@ -14,7 +14,6 @@ on:
 
 env:
   WORKING_DIR: ./operator/webhook
-  GIT_TAG_PREFIX: webhook_v
 
 jobs:
 #  test:
@@ -66,9 +65,10 @@ jobs:
           VERSION=$(make get-version)
           REGISTRY=$(make get-registry)
           IMAGE_NAME=$(make get-image-name)
+          GIT_TAG=$(make get-tag)
           echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
           echo "REGISTRY=$REGISTRY" >> "$GITHUB_OUTPUT"
-          echo "TAG_NAME=${{ env.GIT_TAG_PREFIX }}$VERSION" >> "$GITHUB_OUTPUT"
+          echo "TAG_NAME=$GIT_TAG" >> "$GITHUB_OUTPUT"
           echo "FULL_IMAGE_NAME=$REGISTRY/$IMAGE_NAME:$VERSION" >> "$GITHUB_OUTPUT"
           cat $GITHUB_OUTPUT
         id: naming-selector

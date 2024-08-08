@@ -19,6 +19,13 @@ env:
   GIT_TAG_PREFIX: minimal-app_v
 
 jobs:
+  verify-versions:
+    if: github.ref != 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: sh .github/workflows/scripts/verify_minimal_app_releasable.sh
+        name: Verify minimal app is in a state to be released on merge
 #  build:
 #    name: build image
 #    if: github.ref != 'refs/heads/main'

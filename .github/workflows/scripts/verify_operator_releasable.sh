@@ -13,10 +13,10 @@ verify_current_webhook_img() {
   test "$webhook_image_used" = "$current_webhook_img"
 }
 
-verify_operator_version_bump() {
+verify_version_bump() {
   potential_tag=$(make --no-print-directory -C $OPERATOR_DIR get-tag)
   sh .github/workflows/scripts/verify_changes_update_version.sh $potential_tag $OPERATOR_DIR
 }
 
 verify_current_webhook_img
-verify_operator_version_bump
+verify_version_bump

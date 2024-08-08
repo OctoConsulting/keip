@@ -1,5 +1,6 @@
 VERSION ?= 0.6.1
 HOST_PORT ?= 7080
+GIT_TAG := webhook_v$(VERSION)
 
 IMG_REGISTRY := ghcr.io/octoconsulting
 IMG_NAME := keip/route-webhook
@@ -12,6 +13,10 @@ TEST_COVERAGE_FILE := $(TEST_COVERAGE_DIR)/.coverage
 .PHONY: get-version
 get-version:
 	@echo $(VERSION)
+
+.PHONY: get-tag
+get-tag:
+	@echo $(GIT_TAG)
 
 .PHONY: get-registry
 get-registry:
