@@ -20,6 +20,7 @@ env:
 
 jobs:
   verify-versions:
+    if: github.ref != 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -44,7 +45,6 @@ jobs:
 
   release:
     if: github.ref == 'refs/heads/main'
-    needs: verify-versions
     runs-on: ubuntu-latest
     defaults:
       run:
