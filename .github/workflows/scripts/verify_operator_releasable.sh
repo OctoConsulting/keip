@@ -10,7 +10,7 @@ verify_current_webhook_img() {
   test -n "$current_webhook_img"
   test -n "$webhook_image_used"
 
-  test "$webhook_image_used" = "$current_webhook_img"
+  test "$webhook_image_used" = "$current_webhook_img" || (echo "Operator is not using current version of webhook image" && exit 1)
 }
 
 verify_version_bump() {
