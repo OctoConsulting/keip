@@ -68,11 +68,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: |
-          VERSION=$(make get-version)
           REGISTRY=$(make get-registry)
           IMAGE_NAME=$(make get-image-name)
           GIT_TAG=$(make get-tag)
-          echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
           echo "REGISTRY=$REGISTRY" >> "$GITHUB_OUTPUT"
           echo "TAG_NAME=$GIT_TAG" >> "$GITHUB_OUTPUT"
           echo "FULL_IMAGE_NAME=$IMAGE_NAME" >> "$GITHUB_OUTPUT"
