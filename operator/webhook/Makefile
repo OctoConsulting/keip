@@ -1,5 +1,6 @@
-VERSION ?= 0.6.1
+VERSION ?= 0.6.2
 HOST_PORT ?= 7080
+GIT_TAG := webhook_v$(VERSION)
 
 IMG_REGISTRY := ghcr.io/octoconsulting
 IMG_NAME := keip/route-webhook
@@ -9,9 +10,9 @@ PYTHON := python3
 TEST_COVERAGE_DIR := .test_coverage
 TEST_COVERAGE_FILE := $(TEST_COVERAGE_DIR)/.coverage
 
-.PHONY: get-version
-get-version:
-	@echo $(VERSION)
+.PHONY: get-tag
+get-tag:
+	@echo $(GIT_TAG)
 
 .PHONY: get-registry
 get-registry:
@@ -19,7 +20,7 @@ get-registry:
 
 .PHONY: get-image-name
 get-image-name:
-	@echo $(IMG_NAME)
+	@echo $(FULL_IMAGE_NAME)
 
 .PHONY: start-dev
 start-dev-server:

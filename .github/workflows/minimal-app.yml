@@ -19,6 +19,12 @@ env:
   GIT_TAG_PREFIX: minimal-app_v
 
 jobs:
+  verify-versions:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: sh .github/workflows/scripts/verify_minimal_app_releasable.sh
+        name: Verify minimal app is in a state to be released on merge
   build:
     name: build image
     if: github.ref != 'refs/heads/main'
@@ -38,6 +44,7 @@ jobs:
 
   release:
     if: github.ref == 'refs/heads/main'
+    needs: verify-versions
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -52,7 +59,6 @@ jobs:
           VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
           REGISTRY=$(mvn help:evaluate -Dexpression=docker.registry -q -DforceStdout)
           IMAGE_NAME=$(mvn help:evaluate -Dexpression=image-name -q -DforceStdout)
-          echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
           echo "REGISTRY=$REGISTRY" >> "$GITHUB_OUTPUT"
           echo "TAG_NAME=${{ env.GIT_TAG_PREFIX }}$VERSION" >> "$GITHUB_OUTPUT"
           echo "IMAGE_NAME=$REGISTRY/$IMAGE_NAME:$VERSION" >> "$GITHUB_OUTPUT"

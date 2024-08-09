@@ -15,9 +15,15 @@ on:
 
 env:
   WORKING_DIR: ./operator
-  GIT_TAG_PREFIX: operator_v
 
 jobs:
+  verify-versions:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: sh .github/workflows/scripts/verify_operator_releasable.sh
+        name: Verify operator is in a state to be released on merge
+
   build:
     if: github.ref != 'refs/heads/main'
     runs-on: ubuntu-latest
@@ -32,6 +38,7 @@ jobs:
 
   release:
     if: github.ref == 'refs/heads/main'
+    needs: verify-versions
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -40,10 +47,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # set variables used by multiple steps in the job
       - run: |
-          VERSION=$(make get-version)
-          echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
-          echo "TAG_NAME=${{ env.GIT_TAG_PREFIX }}$VERSION" >> "$GITHUB_OUTPUT"
+          TAG_NAME=$(make get-tag)
+          echo "TAG_NAME=$TAG_NAME" >> "$GITHUB_OUTPUT"
           cat $GITHUB_OUTPUT
         id: naming-selector
         name: generate names for artifacts

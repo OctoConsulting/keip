@@ -1,5 +1,6 @@
-VERSION ?= 0.3.1
-KEIP_INTEGRATION_IMAGE ?= ghcr.io/octoconsulting/keip/minimal-app:0.0.2
+VERSION ?= 0.3.2
+GIT_TAG := operator_v$(VERSION)
+KEIP_INTEGRATION_IMAGE ?= ghcr.io/octoconsulting/keip/minimal-app:latest
 
 KUBECTL := kubectl
 KUBECTL_DELETE := $(KUBECTL) delete --ignore-not-found
@@ -11,9 +12,9 @@ all: metacontroller/deploy controller/deploy
 .PHONY: clean
 clean: controller/undeploy metacontroller/undeploy
 
-.PHONY: get-version
-get-version:
-	@echo $(VERSION)
+.PHONY: get-tag
+get-tag:
+	@echo $(GIT_TAG)
 
 prep-release:
 	rm -rf output
