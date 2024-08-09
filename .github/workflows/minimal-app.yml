@@ -25,22 +25,22 @@ jobs:
       - uses: actions/checkout@v4
       - run: sh .github/workflows/scripts/verify_minimal_app_releasable.sh
         name: Verify minimal app is in a state to be released on merge
-#  build:
-#    name: build image
-#    if: github.ref != 'refs/heads/main'
-#    runs-on: ubuntu-latest
-#    defaults:
-#      run:
-#        shell: bash
-#        working-directory: ${{ env.WORKING_DIR }}
-#    steps:
-#      - uses: actions/checkout@v4
-#      - uses: actions/setup-java@v3
-#        with:
-#          java-version: "${{ env.JAVA_VERSION }}"
-#          distribution: "temurin"
-#      - run: mvn --batch-mode --update-snapshots verify
-#        name: build image
+  build:
+    name: build image
+    if: github.ref != 'refs/heads/main'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: ${{ env.WORKING_DIR }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v3
+        with:
+          java-version: "${{ env.JAVA_VERSION }}"
+          distribution: "temurin"
+      - run: mvn --batch-mode --update-snapshots verify
+        name: build image
 
   release:
     if: github.ref == 'refs/heads/main'

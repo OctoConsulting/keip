@@ -21,28 +21,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-#      - run: |
-#          VERSION=$(make --no-print-directory -C operator get-version)
-#          TAG_NAME=$(make --no-print-directory -C operator get-tag)
-#          echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
-#          echo "TAG_NAME=$TAG_NAME" >> "$GITHUB_OUTPUT"
-#          cat $GITHUB_OUTPUT
-#        id: naming-selector
-#        name: generate names for artifacts
       - run: sh .github/workflows/scripts/verify_operator_releasable.sh
         name: Verify operator is in a state to be released on merge
-#  build:
-#    if: github.ref != 'refs/heads/main'
-#    runs-on: ubuntu-latest
-#    defaults:
-#      run:
-#        shell: bash
-#        working-directory: ${{ env.WORKING_DIR }}
-#    steps:
-#      - uses: actions/checkout@v4
-#      - run: make prep-release
-#        name: generate release files
+
+  build:
+    if: github.ref != 'refs/heads/main'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: ${{ env.WORKING_DIR }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: make prep-release
+        name: generate release files
 
   release:
     if: github.ref == 'refs/heads/main'
