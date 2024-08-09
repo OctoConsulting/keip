@@ -1,4 +1,4 @@
-VERSION ?= 0.6.1
+VERSION ?= 0.6.2
 HOST_PORT ?= 7080
 GIT_TAG := webhook_v$(VERSION)
 
