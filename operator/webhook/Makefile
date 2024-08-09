@@ -10,10 +10,6 @@ PYTHON := python3
 TEST_COVERAGE_DIR := .test_coverage
 TEST_COVERAGE_FILE := $(TEST_COVERAGE_DIR)/.coverage
 
-.PHONY: get-version
-get-version:
-	@echo $(VERSION)
-
 .PHONY: get-tag
 get-tag:
 	@echo $(GIT_TAG)

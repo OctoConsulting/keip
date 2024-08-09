@@ -49,9 +49,7 @@ jobs:
 
       # set variables used by multiple steps in the job
       - run: |
-          VERSION=$(make get-version)
           TAG_NAME=$(make get-tag)
-          echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
           echo "TAG_NAME=$TAG_NAME" >> "$GITHUB_OUTPUT"
           cat $GITHUB_OUTPUT
         id: naming-selector

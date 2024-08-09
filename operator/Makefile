@@ -12,10 +12,6 @@ all: metacontroller/deploy controller/deploy
 .PHONY: clean
 clean: controller/undeploy metacontroller/undeploy
 
-.PHONY: get-version
-get-version:
-	@echo $(VERSION)
-
 .PHONY: get-tag
 get-tag:
 	@echo $(GIT_TAG)
