@@ -23,6 +23,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - run: printenv | grep -i prefix
+        name: remove me
       - run: sh .github/workflows/scripts/verify_minimal_app_releasable.sh
         name: Verify minimal app is in a state to be released on merge
 #  build:
