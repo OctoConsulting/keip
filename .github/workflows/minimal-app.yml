@@ -43,7 +43,7 @@ jobs:
         name: build image
 
   release:
-    if: github.ref == 'refs/heads/main'
+#    if: github.ref == 'refs/heads/main'
     needs: verify-versions
     runs-on: ubuntu-latest
     defaults:
