@@ -16,21 +16,27 @@ env:
   WORKING_DIR: ./operator/webhook
 
 jobs:
-#  test:
-#    name: unit test
-#    runs-on: ubuntu-latest
-#    defaults:
-#      run:
-#        shell: bash
-#        working-directory: ${{ env.WORKING_DIR }}
-#    steps:
-#      - uses: actions/checkout@v4
-#      - uses: actions/setup-python@v5
-#        with:
-#          python-version: '3.11'
-#      - run: python3 -m pip install -r requirements.txt
-#      - run: python3 -m pip install -r requirements-dev.txt
-#      - run: make test
+  verify-versions:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: sh .github/workflows/scripts/verify_minimal_app_releasable.sh
+        name: Verify minimal app is in a state to be released on merge
+  test:
+    name: unit test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: ${{ env.WORKING_DIR }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python3 -m pip install -r requirements.txt
+      - run: python3 -m pip install -r requirements-dev.txt
+      - run: make test
 #
 #  build:
 #    name: build image
@@ -49,7 +55,7 @@ jobs:
 #          push: false
 
   release:
-    needs: test
+    needs: [test, verify-versions]
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     defaults:
