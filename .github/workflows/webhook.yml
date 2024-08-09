@@ -20,8 +20,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: sh .github/workflows/scripts/verify_minimal_app_releasable.sh
-        name: Verify minimal app is in a state to be released on merge
+      - run: sh .github/workflows/scripts/verify_webhook_releasable.sh
+        name: Verify webhook is in a state to be released on merge
   test:
     name: unit test
     runs-on: ubuntu-latest
