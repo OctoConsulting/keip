@@ -1,6 +1,6 @@
 import json
 import logging
-from pathlib import Path
+from pathlib import PurePosixPath
 from typing import List, Mapping, Optional
 
 from webhook import config as cfg
@@ -113,7 +113,7 @@ class VolumeConfig:
                 {
                     "name": secret,
                     "readOnly": True,
-                    "mountPath": str(Path(SECRETS_ROOT, secret)),
+                    "mountPath": str(PurePosixPath(SECRETS_ROOT, secret)),
                 }
             )
 
@@ -183,16 +183,21 @@ def _get_server_ssl_config(parent) -> Optional[Mapping]:
 
     if not keystore:
         return None
- 
+
     return {
         "ssl": {
             "key-alias": "certificate",
-            "key-store": str(Path(KEYSTORE_PATH, keystore["key"])),
+            "key-store": str(PurePosixPath(KEYSTORE_PATH, keystore["key"])),
             "key-store-type": keystore["type"].upper()
         },
         "port": 8443
     }
 
+def _service_name_env_var(parent) -> Mapping[str, str]:
+    return {
+        "name": "SERVICE_NAME",
+        "value": parent["metadata"]["name"]
+    }
 
 def _spring_app_config_env_var(parent) -> Optional[Mapping]:
     metadata = parent["metadata"]
@@ -245,7 +250,7 @@ def _get_java_jdk_options(tls) -> Optional[Mapping[str, str]]:
 
     return {
         "name": "JDK_JAVA_OPTIONS",
-        "value": f"-Djavax.net.ssl.trustStore={str(Path(TRUSTSTORE_PATH, truststore['key']))} -Djavax.net.ssl.trustStorePassword={truststore_password} -Djavax.net.ssl.trustStoreType={tls_type.upper()}"
+        "value": f"-Djavax.net.ssl.trustStore={str(PurePosixPath(TRUSTSTORE_PATH, truststore['key']))} -Djavax.net.ssl.trustStorePassword={truststore_password} -Djavax.net.ssl.trustStoreType={tls_type.upper()}"
     }
 
 
@@ -262,6 +267,11 @@ def _generate_container_env_vars(parent) -> List[Mapping[str, str]]:
         if keystore_password_env := _get_keystore_password_env(tls):
             env_vars.append(keystore_password_env)
 
+    env_vars.append(_service_name_env_var(parent))
+
+    if additional_env_vars := parent["spec"].get("env"):
+        for additional_env_var in additional_env_vars:
+            env_vars.append( { "name": additional_env_var["name"], "value": additional_env_var["value"] } )
 
     return env_vars
 
@@ -323,6 +333,10 @@ def _create_pod_template(parent, labels, integration_image):
         pod_template["metadata"]["annotations"] = annotations
 
     pod_template["spec"]["containers"][0]["env"] = _generate_container_env_vars(parent)
+
+    envFrom = parent["spec"].get("envFrom")
+    if envFrom:
+        pod_template["spec"]["containers"][0]["envFrom"] = envFrom
 
     return pod_template
 

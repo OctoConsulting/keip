@@ -35,6 +35,28 @@
           }
         }
       ],
+      "env": [
+        {
+          "name": "ADDITIONAL_ENV_VAR_1",
+          "value": "myvalue1"
+        },
+        {
+          "name": "ADDITIONAL_ENV_VAR_2",
+          "value": "myvalue2"
+        }
+      ],
+      "envFrom": [
+        {
+          "configMapRef": {
+            "name": "my-config"
+          }
+        },
+        {
+          "secretRef": {
+            "name": "my-secret"
+          }
+        }
+      ],
       "replicas": 2,
       "routeConfigMap": "testroute-xml",
       "secretSources": [
