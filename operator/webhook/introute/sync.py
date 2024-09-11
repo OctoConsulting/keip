@@ -269,9 +269,7 @@ def _generate_container_env_vars(parent) -> List[Mapping[str, str]]:
 
     env_vars.append(_service_name_env_var(parent))
 
-    if additional_env_vars := parent["spec"].get("env"):
-        for additional_env_var in additional_env_vars:
-            env_vars.append( { "name": additional_env_var["name"], "value": additional_env_var["value"] } )
+    env_vars.extend(parent["spec"].get("env", []))
 
     return env_vars
 
