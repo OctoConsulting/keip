@@ -69,6 +69,42 @@ spec:
                         type: string
                       mountPath:
                         type: string
+                env:
+                  description: "List of environment variables to set in the container (cannot be updated)"
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                      value:
+                        type: string
+                    required:
+                      - name
+                      - value
+                envFrom:
+                  description: "List of sources to populate environment variables in the container (cannot be updated)"
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      configMapRef:
+                        type: object
+                        properties:
+                          name:
+                            type: string
+                      secretRef:
+                        type: object
+                        properties:
+                          name:
+                            type: string
+                    oneOf:
+                      - properties:
+                        required:
+                          - configMapRef
+                      - properties:
+                        required:
+                          - secretRef
                 replicas: # not yet implemented
                   description: "Number of containers running the integration route"
                   type: integer

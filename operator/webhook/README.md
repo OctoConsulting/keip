@@ -24,6 +24,8 @@ pip install -r requirements.txt
 You should now be able to use the `Makefile` for running tests or starting a dev server, among other
 tasks.
 
+> **_NOTE:_**  There are some `make` tasks prefixed with `win-` in `Makefile` that are specific to Windows. 
+
 #### Code Formatting
 
 To keep diffs small, consider using

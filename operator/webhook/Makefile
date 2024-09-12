@@ -1,4 +1,4 @@
-VERSION ?= 0.6.2
+VERSION ?= 0.7.0
 HOST_PORT ?= 7080
 GIT_TAG := webhook_v$(VERSION)
 
@@ -30,13 +30,25 @@ start-dev-server:
 test:
 	cd test && mkdir -p $(TEST_COVERAGE_DIR) && coverage run --data-file=$(TEST_COVERAGE_FILE) -m pytest -vv
 
+.PHONY: win-test
+win-test:
+	cd test && (if not exist $(TEST_COVERAGE_DIR) mkdir $(TEST_COVERAGE_DIR)) && coverage run --data-file=$(TEST_COVERAGE_FILE) -m pytest -vv
+
 .PHONY: report-test-coverage
 report-test-coverage: test
+	cd test && coverage report --data-file $(TEST_COVERAGE_FILE)
+
+.PHONY: win-report-test-coverage
+win-report-test-coverage: win-test
 	cd test && coverage report --data-file $(TEST_COVERAGE_FILE)
 
 .PHONY: report-test-coverage-html
 report-test-coverage-html: test
 	cd test && coverage html --data-file $(TEST_COVERAGE_FILE) --directory $(TEST_COVERAGE_DIR)/html && open $(TEST_COVERAGE_DIR)/html/index.html
+
+.PHONY: win-report-test-coverage-html
+win-report-test-coverage-html: win-test
+	cd test && coverage html --data-file $(TEST_COVERAGE_FILE) --directory $(TEST_COVERAGE_DIR)/html && start "" $(TEST_COVERAGE_DIR)/html/index.html
 
 .PHONY: deploy
 deploy: build

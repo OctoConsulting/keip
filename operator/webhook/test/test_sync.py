@@ -1,5 +1,6 @@
 import copy
 import json
+from pathlib import PurePosixPath
 from typing import Mapping
 
 import pytest
@@ -71,7 +72,7 @@ def test_spring_app_config_json_missing_props_and_secret_sources(full_route):
 
     assert spring_conf["name"] == "SPRING_APPLICATION_JSON"
 
-    expected_json = {"spring": {"application": {"name": "testroute"}}, "server": {"ssl": {"key-alias": "certificate", "key-store": "/etc/keystore/test-keystore.jks", "key-store-type": "JKS"}, "port": 8443}}
+    expected_json = {"spring": {"application": {"name": "testroute"}}, "server": {"ssl": {"key-alias": "certificate", "key-store": str(PurePosixPath("/", "etc", "keystore", "test-keystore.jks")), "key-store-type": "JKS"}, "port": 8443}}
 
     assert json_props == expected_json
 
@@ -132,7 +133,7 @@ def test_jdk_options_pkcs12_type(full_route):
 
     assert options["name"] == JDK_OPTIONS_ENV_NAME
 
-    expected_options = "-Djavax.net.ssl.trustStore=/etc/cabundle/test-truststore.p12 -Djavax.net.ssl.trustStorePassword= -Djavax.net.ssl.trustStoreType=PKCS12"
+    expected_options = "-Djavax.net.ssl.trustStore=" + str(PurePosixPath("/", "etc", "cabundle", "test-truststore.p12")) + " -Djavax.net.ssl.trustStorePassword= -Djavax.net.ssl.trustStoreType=PKCS12"
     assert options["value"] == expected_options
 
 
@@ -144,7 +145,7 @@ def test_jdk_options_jks_type(full_route):
     options = _get_java_jdk_options(tls_config)
     assert options["name"] == JDK_OPTIONS_ENV_NAME
 
-    expected_options = "-Djavax.net.ssl.trustStore=/etc/cabundle/test-truststore.jks -Djavax.net.ssl.trustStorePassword=changeit -Djavax.net.ssl.trustStoreType=JKS"
+    expected_options = "-Djavax.net.ssl.trustStore=" + str(PurePosixPath("/", "etc", "cabundle", "test-truststore.jks")) + " -Djavax.net.ssl.trustStorePassword=changeit -Djavax.net.ssl.trustStoreType=JKS"
     assert options["value"] == expected_options
 
 
@@ -154,6 +155,37 @@ def test_env_vars_no_keystore(full_route):
     options = _generate_container_env_vars(full_route)
 
     assert not any(x for x in options if x.get('name') == 'SERVER_SSL_KEYSTOREPASSWORD')
+
+def test_env_var_service_name(full_route):
+    actual_env_vars = _generate_container_env_vars(full_route)
+    actual_service_name_env_var = next((actual_env_var for actual_env_var in actual_env_vars if actual_env_var['name'] == 'SERVICE_NAME'), None)
+    expected_service_name_env_var = {"name": "SERVICE_NAME", "value": "testroute"}
+    assert expected_service_name_env_var == actual_service_name_env_var
+
+
+def test_no_additional_env_vars(full_route):
+    additional_env_vars_to_remove_from_expected_response = ["ADDITIONAL_ENV_VAR_1", "ADDITIONAL_ENV_VAR_2"]
+
+    expected_response = load_json("json/full-response.json")
+    env_vars_in_response = list(expected_response["children"][0]["spec"]["template"]["spec"]["containers"][0]["env"])
+    for env_var in env_vars_in_response:
+        if env_var["name"] == additional_env_vars_to_remove_from_expected_response[0] or env_var["name"] == additional_env_vars_to_remove_from_expected_response[1]:
+            expected_response["children"][0]["spec"]["template"]["spec"]["containers"][0]["env"].remove(env_var)
+
+    del full_route["spec"]["env"]
+    actual_response = sync(full_route)
+
+    assert expected_response == actual_response
+
+
+def test_no_env_from(full_route):
+    expected_response = load_json("json/full-response.json")
+    del expected_response["children"][0]["spec"]["template"]["spec"]["containers"][0]["envFrom"]
+
+    del full_route["spec"]["envFrom"]
+    actual_response = sync(full_route)
+
+    assert expected_response == actual_response
 
 
 def test_deployment_missing_labels(full_route):
