@@ -8,10 +8,9 @@ on:
       - .github/workflows/minimal-app.yml
   push:
     branches:
-      - main
+      - successfully_release_nothing
     paths:
-      - operator/**
-      - "!operator/webhook/**"
+      - minimal-app/**
 
 env:
   WORKING_DIR: ./minimal-app

@@ -9,8 +9,7 @@ on:
     branches:
       - main
     paths:
-      - operator/**
-      - "!operator/webhook/**"
+      - operator/webhook/**
 
 env:
   WORKING_DIR: ./operator/webhook
