@@ -8,7 +8,7 @@ on:
       - .github/workflows/minimal-app.yml
   push:
     branches:
-      - successfully_release_nothing
+      - main
     paths:
       - minimal-app/**
 
