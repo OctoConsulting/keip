@@ -10,8 +10,7 @@ on:
     branches:
       - main
     paths:
-      - operator/**
-      - "!operator/webhook/**"
+      - minimal-app/**
 
 env:
   WORKING_DIR: ./minimal-app
