@@ -56,7 +56,8 @@ deploy: build
 
 .PHONY: build
 build:
-	docker build \
+	docker buildx build \
+	--platform=linux/amd64,linux/arm64 \
   --tag $(FULL_IMAGE_NAME) \
   .
 
