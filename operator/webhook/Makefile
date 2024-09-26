@@ -58,8 +58,8 @@ deploy: build
 build:
 	docker buildx build \
 	--platform=linux/amd64,linux/arm64 \
-  --tag $(FULL_IMAGE_NAME) \
-  .
+  	--tag $(FULL_IMAGE_NAME) \
+  	.
 
 .PHONY: run-container
 run-container: build
