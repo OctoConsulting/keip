@@ -6,6 +6,7 @@ on:
     paths:
       - minimal-app/**
       - .github/workflows/minimal-app.yml
+      - .github/workflows/scripts
   push:
     branches:
       - main
@@ -60,36 +61,41 @@ jobs:
           IMAGE_NAME=$(mvn help:evaluate -Dexpression=image-name -q -DforceStdout)
           echo "REGISTRY=$REGISTRY" >> "$GITHUB_OUTPUT"
           echo "TAG_NAME=${{ env.GIT_TAG_PREFIX }}$VERSION" >> "$GITHUB_OUTPUT"
-          echo "IMAGE_NAME=$REGISTRY/$IMAGE_NAME:$VERSION" >> "$GITHUB_OUTPUT"
+          echo "FULL_IMAGE_NAME=$REGISTRY/$IMAGE_NAME:$VERSION" >> "$GITHUB_OUTPUT"
           cat $GITHUB_OUTPUT
         id: naming-selector
         name: generate names for artifacts
 
       - run: |
-          ! docker manifest inspect ${{ steps.naming-selector.outputs.IMAGE_NAME }}
-        name: confirm image is not already pushed
-
-      - run: |
           git fetch --tags
-          ! git rev-parse -q --verify "refs/tags/${{ steps.naming-selector.outputs.TAG_NAME }}"
-        name: confirm git tag does not exist
+          if git rev-parse -q --verify "refs/tags/${{ steps.naming-selector.outputs.TAG_NAME }}"; then
+            # confirm image exists
+            docker manifest inspect ${{ steps.naming-selector.outputs.FULL_IMAGE_NAME }}
+          else
+            echo "needs_release=true" >> $GITHUB_ENV
+          fi
+        name: check if release is needed
 
       - uses: actions/setup-java@v3
         with:
           java-version: "${{ env.JAVA_VERSION }}"
           distribution: "temurin"
       - run: mvn --batch-mode --update-snapshots verify
+        if: env.needs_release == 'true'
         name: build image
 
       - uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
+        if: env.needs_release == 'true'
         with:
           registry: ${{ steps.naming-selector.outputs.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - run: docker push ${{ steps.naming-selector.outputs.IMAGE_NAME }}
+      - run: docker push ${{ steps.naming-selector.outputs.FULL_IMAGE_NAME }}
+        if: env.needs_release == 'true'
 
       - uses: mathieudutour/github-tag-action@v6.1
+        if: env.needs_release == 'true'
         id: tag_version
         with:
           custom_tag: ${{ steps.naming-selector.outputs.TAG_NAME }}

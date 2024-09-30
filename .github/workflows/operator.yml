@@ -6,6 +6,7 @@ on:
       - operator/**
       - "!operator/webhook/**"
       - .github/workflows/operator.yml
+      - .github/workflows/scripts
   push:
     branches:
       - main
@@ -57,13 +58,17 @@ jobs:
 
       - run: |
           git fetch --tags
-          ! git rev-parse -q --verify "refs/tags/${{ steps.naming-selector.outputs.TAG_NAME }}"
-        name: confirm git tag does not exist
+          if ! git rev-parse -q --verify "refs/tags/${{ steps.naming-selector.outputs.TAG_NAME }}"; then
+            echo "needs_release=true" >> $GITHUB_ENV
+          fi
+        name: check if release is needed
 
       - run: make prep-release
+        if: env.needs_release == 'true'
         name: generate release files
 
       - uses: mathieudutour/github-tag-action@v6.1
+        if: env.needs_release == 'true'
         id: tag_version
         with:
           custom_tag: ${{ steps.naming-selector.outputs.TAG_NAME }}
@@ -72,6 +77,7 @@ jobs:
           tag_prefix: ""
 
       - uses: ncipollo/release-action@v1
+        if: env.needs_release == 'true'
         with:
           tag: ${{ steps.tag_version.outputs.new_tag }}
           name: Release ${{ steps.tag_version.outputs.new_tag }}
