@@ -5,6 +5,7 @@ on:
     paths:
       - operator/webhook/**
       - .github/workflows/webhook.yml
+      - .github/workflows/scripts
   push:
     branches:
       - main
@@ -82,24 +83,28 @@ jobs:
         name: generate names for artifacts
 
       - run: |
-          ! docker manifest inspect ${{ steps.naming-selector.outputs.FULL_IMAGE_NAME }}
-        name: confirm image is not already pushed
-
-      - run: |
           git fetch --tags
-          ! git rev-parse -q --verify "refs/tags/${{ steps.naming-selector.outputs.TAG_NAME }}"
-        name: confirm git tag does not exist
+          if git rev-parse -q --verify "refs/tags/${{ steps.naming-selector.outputs.TAG_NAME }}"; then
+            # confirm image exists
+            docker manifest inspect ${{ steps.naming-selector.outputs.FULL_IMAGE_NAME }}
+          else
+            echo "needs_release=true" >> $GITHUB_ENV
+          fi
+        name: check if release is needed
 
       - uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
+        if: env.needs_release == 'true'
         with:
           registry: ${{ steps.naming-selector.outputs.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Docker Buildx
+        if: env.needs_release == 'true'
         uses: docker/setup-buildx-action@v3
 
       - uses: docker/build-push-action@f2a1d5e99d037542a71f64918e516c093c6f3fc4
+        if: env.needs_release == 'true'
         with:
           context: ${{ env.WORKING_DIR }}
           platforms: linux/amd64,linux/arm64
@@ -107,6 +112,7 @@ jobs:
           tags: ${{ steps.naming-selector.outputs.FULL_IMAGE_NAME }}
 
       - uses: mathieudutour/github-tag-action@v6.1
+        if: env.needs_release == 'true'
         id: tag_version
         with:
           custom_tag: ${{ steps.naming-selector.outputs.TAG_NAME }}
