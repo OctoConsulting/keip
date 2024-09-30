@@ -8,7 +8,8 @@ verify_current_webhook_img() {
   test -n "$current_webhook_img"
   test -n "$webhook_image_used"
 
-  test "$webhook_image_used" = "$current_webhook_img" || (echo "Operator is not using current version of webhook image" && exit 1)
+  error_message="Operator is using webhook image version $webhook_image_used but should be using the most recent $current_webhook_img."
+  test "$webhook_image_used" = "$current_webhook_img" || (echo $error_message && exit 1)
 }
 
 verify_current_webhook_img
