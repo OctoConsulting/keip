@@ -49,9 +49,12 @@ jobs:
         working-directory: ${{ env.WORKING_DIR }}
     steps:
       - uses: actions/checkout@v4
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
       - uses: docker/build-push-action@f2a1d5e99d037542a71f64918e516c093c6f3fc4
         with:
           context: ${{ env.WORKING_DIR }}
+          platforms: linux/amd64,linux/arm64
           push: false
 
   release:
@@ -93,9 +96,13 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
       - uses: docker/build-push-action@f2a1d5e99d037542a71f64918e516c093c6f3fc4
         with:
           context: ${{ env.WORKING_DIR }}
+          platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ steps.naming-selector.outputs.FULL_IMAGE_NAME }}
 

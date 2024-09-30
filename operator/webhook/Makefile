@@ -1,4 +1,4 @@
-VERSION ?= 0.7.0
+VERSION ?= 0.8.0
 HOST_PORT ?= 7080
 GIT_TAG := webhook_v$(VERSION)
 
@@ -56,9 +56,10 @@ deploy: build
 
 .PHONY: build
 build:
-	docker build \
-  --tag $(FULL_IMAGE_NAME) \
-  .
+	docker buildx build \
+	--platform=linux/amd64,linux/arm64 \
+  	--tag $(FULL_IMAGE_NAME) \
+  	.
 
 .PHONY: run-container
 run-container: build
