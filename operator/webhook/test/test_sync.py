@@ -11,13 +11,14 @@ from webhook.introute.sync import (
     _spring_cloud_k8s_config,
     SECRETS_ROOT,
     _new_deployment,
+    _create_pod_template,
     _spring_app_config_env_var,
     _get_java_jdk_options,
-    _generate_container_env_vars
-    
+    _generate_container_env_vars,
 )
 
 JDK_OPTIONS_ENV_NAME = "JDK_JAVA_OPTIONS"
+
 
 def test_empty_parent_raises_exception(full_route):
     with pytest.raises(KeyError):
@@ -72,7 +73,19 @@ def test_spring_app_config_json_missing_props_and_secret_sources(full_route):
 
     assert spring_conf["name"] == "SPRING_APPLICATION_JSON"
 
-    expected_json = {"spring": {"application": {"name": "testroute"}}, "server": {"ssl": {"key-alias": "certificate", "key-store": str(PurePosixPath("/", "etc", "keystore", "test-keystore.jks")), "key-store-type": "JKS"}, "port": 8443}}
+    expected_json = {
+        "spring": {"application": {"name": "testroute"}},
+        "server": {
+            "ssl": {
+                "key-alias": "certificate",
+                "key-store": str(
+                    PurePosixPath("/", "etc", "keystore", "test-keystore.jks")
+                ),
+                "key-store-type": "JKS",
+            },
+            "port": 8443,
+        },
+    }
 
     assert json_props == expected_json
 
@@ -133,7 +146,11 @@ def test_jdk_options_pkcs12_type(full_route):
 
     assert options["name"] == JDK_OPTIONS_ENV_NAME
 
-    expected_options = "-Djavax.net.ssl.trustStore=" + str(PurePosixPath("/", "etc", "cabundle", "test-truststore.p12")) + " -Djavax.net.ssl.trustStorePassword= -Djavax.net.ssl.trustStoreType=PKCS12"
+    expected_options = (
+        "-Djavax.net.ssl.trustStore="
+        + str(PurePosixPath("/", "etc", "cabundle", "test-truststore.p12"))
+        + " -Djavax.net.ssl.trustStorePassword= -Djavax.net.ssl.trustStoreType=PKCS12"
+    )
     assert options["value"] == expected_options
 
 
@@ -145,7 +162,11 @@ def test_jdk_options_jks_type(full_route):
     options = _get_java_jdk_options(tls_config)
     assert options["name"] == JDK_OPTIONS_ENV_NAME
 
-    expected_options = "-Djavax.net.ssl.trustStore=" + str(PurePosixPath("/", "etc", "cabundle", "test-truststore.jks")) + " -Djavax.net.ssl.trustStorePassword=changeit -Djavax.net.ssl.trustStoreType=JKS"
+    expected_options = (
+        "-Djavax.net.ssl.trustStore="
+        + str(PurePosixPath("/", "etc", "cabundle", "test-truststore.jks"))
+        + " -Djavax.net.ssl.trustStorePassword=changeit -Djavax.net.ssl.trustStoreType=JKS"
+    )
     assert options["value"] == expected_options
 
 
@@ -154,23 +175,44 @@ def test_env_vars_no_keystore(full_route):
 
     options = _generate_container_env_vars(full_route)
 
-    assert not any(x for x in options if x.get('name') == 'SERVER_SSL_KEYSTOREPASSWORD')
+    assert not any(x for x in options if x.get("name") == "SERVER_SSL_KEYSTOREPASSWORD")
+
 
 def test_env_var_service_name(full_route):
     actual_env_vars = _generate_container_env_vars(full_route)
-    actual_service_name_env_var = next((actual_env_var for actual_env_var in actual_env_vars if actual_env_var['name'] == 'SERVICE_NAME'), None)
+    actual_service_name_env_var = next(
+        (
+            actual_env_var
+            for actual_env_var in actual_env_vars
+            if actual_env_var["name"] == "SERVICE_NAME"
+        ),
+        None,
+    )
     expected_service_name_env_var = {"name": "SERVICE_NAME", "value": "testroute"}
     assert expected_service_name_env_var == actual_service_name_env_var
 
 
 def test_no_additional_env_vars(full_route):
-    additional_env_vars_to_remove_from_expected_response = ["ADDITIONAL_ENV_VAR_1", "ADDITIONAL_ENV_VAR_2"]
+    additional_env_vars_to_remove_from_expected_response = [
+        "ADDITIONAL_ENV_VAR_1",
+        "ADDITIONAL_ENV_VAR_2",
+    ]
 
     expected_response = load_json("json/full-response.json")
-    env_vars_in_response = list(expected_response["children"][0]["spec"]["template"]["spec"]["containers"][0]["env"])
+    env_vars_in_response = list(
+        expected_response["children"][0]["spec"]["template"]["spec"]["containers"][0][
+            "env"
+        ]
+    )
     for env_var in env_vars_in_response:
-        if env_var["name"] == additional_env_vars_to_remove_from_expected_response[0] or env_var["name"] == additional_env_vars_to_remove_from_expected_response[1]:
-            expected_response["children"][0]["spec"]["template"]["spec"]["containers"][0]["env"].remove(env_var)
+        if (
+            env_var["name"] == additional_env_vars_to_remove_from_expected_response[0]
+            or env_var["name"]
+            == additional_env_vars_to_remove_from_expected_response[1]
+        ):
+            expected_response["children"][0]["spec"]["template"]["spec"]["containers"][
+                0
+            ]["env"].remove(env_var)
 
     del full_route["spec"]["env"]
     actual_response = sync(full_route)
@@ -180,7 +222,9 @@ def test_no_additional_env_vars(full_route):
 
 def test_no_env_from(full_route):
     expected_response = load_json("json/full-response.json")
-    del expected_response["children"][0]["spec"]["template"]["spec"]["containers"][0]["envFrom"]
+    del expected_response["children"][0]["spec"]["template"]["spec"]["containers"][0][
+        "envFrom"
+    ]
 
     del full_route["spec"]["envFrom"]
     actual_response = sync(full_route)
@@ -226,6 +270,39 @@ def test_deployment_empty_annotations(full_route):
     assert len(annotations) == 0
 
 
+def test_pod_missing_resources(full_route):
+    del full_route["spec"]["resources"]
+
+    pod = _create_pod_template(full_route, labels=None, integration_image=None)
+
+    resources = pod["spec"]["containers"][0].get("resources")
+    assert resources["requests"]["cpu"] == "500m"
+    assert resources["requests"]["memory"] == "1Gi"
+    assert resources["limits"]["memory"] == "2Gi"
+    assert "cpu" not in resources["limits"]
+
+
+def test_pod_resources_limits_only(full_route):
+    del full_route["spec"]["resources"]["requests"]
+
+    pod = _create_pod_template(full_route, labels=None, integration_image=None)
+
+    pod_resources = pod["spec"]["containers"][0]["resources"]
+    assert "requests" not in pod_resources
+    assert "memory" in pod_resources["limits"]
+
+
+def test_pod_resources_requests_only(full_route):
+    del full_route["spec"]["resources"]["limits"]
+
+    pod = _create_pod_template(full_route, labels=None, integration_image=None)
+
+    pod_resources = pod["spec"]["containers"][0]["resources"]
+    assert "limits" not in pod_resources
+    assert "cpu" in pod_resources["requests"]
+    assert "memory" in pod_resources["requests"]
+
+
 @pytest.fixture()
 def full_route(full_route_load: dict):
     return copy.deepcopy(full_route_load["parent"])
@@ -251,6 +328,7 @@ def check_volume_absent(deployment: Mapping, name: str):
     vols = deployment["spec"]["template"]["spec"]["volumes"]
     vol_names = [v["name"] for v in vols]
     assert name not in vol_names
+
 
 def check_pod_probe_protocol(deployment: Mapping, scheme: str, port: int):
     liveness_probe = get_container(deployment)["livenessProbe"]

@@ -84,7 +84,16 @@
           "name": "test-cm-2",
           "mountPath": "/path/to/cm2"
         }
-      ]
+      ],
+      "resources": {
+        "limits": {
+          "memory": "2Gi"
+        },
+        "requests": {
+          "cpu": "500m",
+          "memory": "1Gi"
+        }
+      }
     }
   }
 }

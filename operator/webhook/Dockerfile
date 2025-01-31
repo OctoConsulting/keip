@@ -9,4 +9,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-CMD python -m uvicorn --host 0.0.0.0 --port 7080 --app-dir /code app:app
+ENTRYPOINT ["python", "-m", "uvicorn", "app:app", "--host", "0.0.0.0", "--port", "7080", "--app-dir", "/code"]
