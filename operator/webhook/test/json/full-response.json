@@ -148,11 +148,11 @@
                 ],
                 "resources": {
                   "requests": {
-                    "cpu": "500m",
-                    "memory": "1Gi"
+                    "cpu": "1",
+                    "memory": "2Gi"
                   },
                   "limits": {
-                    "memory": "2Gi"
+                    "memory": "5Gi"
                   }
                 }
               }

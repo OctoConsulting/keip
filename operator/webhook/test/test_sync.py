@@ -289,7 +289,7 @@ def test_pod_resources_limits_only(full_route):
 
     pod_resources = pod["spec"]["containers"][0]["resources"]
     assert "requests" not in pod_resources
-    assert "memory" in pod_resources["limits"]
+    assert pod_resources["limits"].get("memory") == "5Gi"
 
 
 def test_pod_resources_requests_only(full_route):
@@ -299,8 +299,8 @@ def test_pod_resources_requests_only(full_route):
 
     pod_resources = pod["spec"]["containers"][0]["resources"]
     assert "limits" not in pod_resources
-    assert "cpu" in pod_resources["requests"]
-    assert "memory" in pod_resources["requests"]
+    assert pod_resources["requests"].get("cpu") == "1"
+    assert pod_resources["requests"].get("memory") == "2Gi"
 
 
 @pytest.fixture()
