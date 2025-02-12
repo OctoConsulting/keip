@@ -145,7 +145,16 @@
                       "name": "my-secret"
                     }
                   }
-                ]
+                ],
+                "resources": {
+                  "requests": {
+                    "cpu": "1",
+                    "memory": "2Gi"
+                  },
+                  "limits": {
+                    "memory": "5Gi"
+                  }
+                }
               }
             ],
             "volumes": [

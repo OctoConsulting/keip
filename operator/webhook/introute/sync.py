@@ -1,7 +1,7 @@
 import json
 import logging
 from pathlib import PurePosixPath
-from typing import List, Mapping, Optional
+from typing import List, Mapping, Optional, Any
 
 from webhook import config as cfg
 
@@ -13,12 +13,22 @@ TRUSTSTORE_PATH = "/etc/cabundle"
 
 KEYSTORE_PATH = "/etc/keystore"
 
+
 class VolumeConfig:
     """
     Handles creating a pod's volumes and volumeMounts based on the following IntegrationRoute inputs:
+        - annotations
+        - labels
         - routeConfigMap
+        - propSources
         - secretSources
+        - configMaps
+        - env
+        - envFrom
+        - resources
+        - replicas
         - persistentVolumeClaims
+        - tls
     """
 
     _route_vol_name = "integration-route-config"
@@ -55,16 +65,11 @@ class VolumeConfig:
 
         for cm_spec in self._config_maps:
             volumes.append(
-                {
-                    "name": cm_spec["name"],
-                    "configMap": {
-                        "name": cm_spec["name"]
-                    }
-                }
+                {"name": cm_spec["name"], "configMap": {"name": cm_spec["name"]}}
             )
 
         if self._tls_config:
-            truststore = self._tls_config.get('truststore')
+            truststore = self._tls_config.get("truststore")
             if truststore:
                 volumes.append(
                     {
@@ -81,7 +86,7 @@ class VolumeConfig:
                     }
                 )
 
-            keystore = self._tls_config.get('keystore')
+            keystore = self._tls_config.get("keystore")
             if keystore:
                 volumes.append(
                     {
@@ -100,7 +105,7 @@ class VolumeConfig:
 
         return volumes
 
-    def get_mounts(self) -> List[Mapping]:
+    def get_mounts(self) -> List[dict]:
         volume_mounts = [
             {
                 "name": self._route_vol_name,
@@ -133,7 +138,7 @@ class VolumeConfig:
                 }
             )
         if self._tls_config:
-            if self._tls_config.get('truststore'):
+            if self._tls_config.get("truststore"):
                 volume_mounts.append(
                     {
                         "name": self._tls_truststore_name,
@@ -141,7 +146,7 @@ class VolumeConfig:
                         "mountPath": TRUSTSTORE_PATH,
                     }
                 )
-            if self._tls_config.get('keystore'):
+            if self._tls_config.get("keystore"):
                 volume_mounts.append(
                     {
                         "name": self._tls_keystore_name,
@@ -188,16 +193,15 @@ def _get_server_ssl_config(parent) -> Optional[Mapping]:
         "ssl": {
             "key-alias": "certificate",
             "key-store": str(PurePosixPath(KEYSTORE_PATH, keystore["key"])),
-            "key-store-type": keystore["type"].upper()
+            "key-store-type": keystore["type"].upper(),
         },
-        "port": 8443
+        "port": 8443,
     }
 
+
 def _service_name_env_var(parent) -> Mapping[str, str]:
-    return {
-        "name": "SERVICE_NAME",
-        "value": parent["metadata"]["name"]
-    }
+    return {"name": "SERVICE_NAME", "value": parent["metadata"]["name"]}
+
 
 def _spring_app_config_env_var(parent) -> Optional[Mapping]:
     metadata = parent["metadata"]
@@ -220,28 +224,25 @@ def _spring_app_config_env_var(parent) -> Optional[Mapping]:
     }
 
 
-def _get_keystore_password_env(tls) -> Mapping[str, str]:
+def _get_keystore_password_env(tls) -> Mapping[str, Any]:
 
     keystore = tls.get("keystore")
-    
+
     if not keystore:
-        return None
+        return {}
 
     return {
         "name": "SERVER_SSL_KEYSTOREPASSWORD",
         "valueFrom": {
-            "secretKeyRef": {
-                "name": keystore["passwordSecretRef"],
-                "key": "password"
-            }
-        }
+            "secretKeyRef": {"name": keystore["passwordSecretRef"], "key": "password"}
+        },
     }
 
 
 def _get_java_jdk_options(tls) -> Optional[Mapping[str, str]]:
 
     truststore = tls.get("truststore")
-    
+
     if not truststore:
         return None
 
@@ -250,7 +251,7 @@ def _get_java_jdk_options(tls) -> Optional[Mapping[str, str]]:
 
     return {
         "name": "JDK_JAVA_OPTIONS",
-        "value": f"-Djavax.net.ssl.trustStore={str(PurePosixPath(TRUSTSTORE_PATH, truststore['key']))} -Djavax.net.ssl.trustStorePassword={truststore_password} -Djavax.net.ssl.trustStoreType={tls_type.upper()}"
+        "value": f"-Djavax.net.ssl.trustStore={str(PurePosixPath(TRUSTSTORE_PATH, truststore['key']))} -Djavax.net.ssl.trustStorePassword={truststore_password} -Djavax.net.ssl.trustStoreType={tls_type.upper()}",
     }
 
 
@@ -274,8 +275,7 @@ def _generate_container_env_vars(parent) -> List[Mapping[str, str]]:
     return env_vars
 
 
-def _create_pod_template(parent, labels, integration_image):
-    """TODO: Should add some resource constraints for containers. Add constraint values to CRD."""
+def _create_pod_template(parent, labels, integration_image) -> Mapping[str,  Any]:
 
     vol_config = VolumeConfig(parent["spec"])
 
@@ -297,28 +297,28 @@ def _create_pod_template(parent, labels, integration_image):
                         "httpGet": {
                             "path": "/actuator/health/liveness",
                             "port": management_port,
-                            "scheme": scheme
+                            "scheme": scheme,
                         },
                         "failureThreshold": 3,
-                        "timeoutSeconds": 3
+                        "timeoutSeconds": 3,
                     },
                     "readinessProbe": {
                         "httpGet": {
                             "path": "/actuator/health/readiness",
                             "port": management_port,
-                            "scheme": scheme
+                            "scheme": scheme,
                         },
                         "failureThreshold": 2,
-                        "timeoutSeconds": 3
+                        "timeoutSeconds": 3,
                     },
                     "startupProbe": {
                         "httpGet": {
                             "path": "/actuator/health/liveness",
                             "port": management_port,
-                            "scheme": scheme
+                            "scheme": scheme,
                         },
                         "failureThreshold": 12,
-                        "timeoutSeconds": 3
+                        "timeoutSeconds": 3,
                     },
                 },
             ],
@@ -331,6 +331,20 @@ def _create_pod_template(parent, labels, integration_image):
         pod_template["metadata"]["annotations"] = annotations
 
     pod_template["spec"]["containers"][0]["env"] = _generate_container_env_vars(parent)
+
+    resources = parent["spec"].get("resources")
+    if resources:
+        pod_template["spec"]["containers"][0]["resources"] = resources
+    else:
+        pod_template["spec"]["containers"][0]["resources"] = {
+            "requests": {
+                "cpu": "500m",
+                "memory": "1Gi"
+            },
+            "limits": {
+                "memory": "2Gi"
+            }
+        }
 
     envFrom = parent["spec"].get("envFrom")
     if envFrom:
@@ -357,7 +371,7 @@ def _new_deployment(parent):
         "metadata": {
             "name": parent_metadata["name"],
             "labels": labels,
-            "annotations": parent["spec"].get("annotations", {})
+            "annotations": parent["spec"].get("annotations", {}),
         },
         "spec": {
             "selector": {

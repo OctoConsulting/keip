@@ -105,6 +105,28 @@ spec:
                       - properties:
                         required:
                           - secretRef
+                resources:
+                  description: "Compute resources given to the route containers. Follows https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#resource-requests-and-limits-of-pod-and-container"
+                  type: object
+                  properties:
+                    limits:
+                      description: "Limits describe the maximum amount of compute and memory resources allowed."
+                      type: object
+                      properties:
+                        cpu:
+                          type: string
+                        memory:
+                          type: string
+                    requests:
+                      description: "Requests describe the minimum amount of compute and memory resources required."
+                      type: object
+                      properties:
+                        cpu:
+                          type: string
+                        memory:
+                          type: string
+                      
+
                 replicas: # not yet implemented
                   description: "Number of containers running the integration route"
                   type: integer
