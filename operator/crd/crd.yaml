@@ -110,7 +110,7 @@ spec:
                   type: object
                   properties:
                     limits:
-                      description: "Limits describes the maximum amount of compute resources allowed."
+                      description: "Limits describe the maximum amount of compute and memory resources allowed."
                       type: object
                       properties:
                         cpu:
@@ -118,7 +118,7 @@ spec:
                         memory:
                           type: string
                     requests:
-                      description: "Requests describes the minimum amount of CPU resources required."
+                      description: "Requests describe the minimum amount of compute and memory resources required."
                       type: object
                       properties:
                         cpu:
