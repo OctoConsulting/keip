@@ -22,6 +22,14 @@ spec:
           conditions:
             - type: Ready
               status: "True"
+    - apiVersion: v1
+      resource: services
+      updateStrategy:
+        method: RollingRecreate
+        statusChecks:
+          conditions:
+            - type: Ready
+              status: "True"
   hooks:
     sync:
       webhook:

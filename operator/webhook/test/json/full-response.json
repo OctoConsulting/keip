@@ -225,7 +225,7 @@
           "integration-route": "testroute",
           "prometheus-metrics-enabled": "true"
         },
-        "name": "testroute"
+        "name": "testroute-actuator"
       },
       "spec": {
         "ports": [

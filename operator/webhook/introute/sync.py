@@ -32,6 +32,7 @@ class VolumeConfig:
         - replicas
         - persistentVolumeClaims
         - tls
+        - services
     """
 
     _route_vol_name = "integration-route-config"
@@ -390,7 +391,7 @@ def _new_deployment(parent):
 
     return deployment
 
-def _new_service(parent):
+def _new_actuator_service(parent):
     parent_metadata = parent["metadata"]
 
     has_tls = _has_tls(parent)
@@ -405,7 +406,7 @@ def _new_service(parent):
                 "integration-route": parent_metadata["name"],
                 "prometheus-metrics-enabled": "true"
             },
-            "name": parent_metadata["name"]
+            "name": f'{parent_metadata["name"]}-actuator'
         },
         "spec": {
             "ports": [
@@ -434,7 +435,7 @@ def _get_management_port(has_tls) -> int:
     return HTTPS_PORT if has_tls else HTTP_PORT
 
 def _gen_children(parent) -> List[Mapping]:
-    return [_new_deployment(parent), _new_service(parent)]
+    return [_new_deployment(parent), _new_actuator_service(parent)]
 
 
 def sync(parent) -> Mapping:
