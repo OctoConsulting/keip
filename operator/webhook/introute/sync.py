@@ -17,6 +17,26 @@ HTTPS_PORT = 8443
 
 HTTP_PORT = 8080
 
+ACTUATOR_CONFIG_BLOCK = {
+  "management": {
+    "endpoint": {
+      "health": {
+        "enabled": True
+      },
+      "prometheus": {
+        "enabled": True
+      }
+    },
+    "endpoints": {
+      "web": {
+        "exposure": {
+          "include": "health,prometheus"
+        }
+      }
+    }
+  }
+}
+
 class VolumeConfig:
     """
     Handles creating a pod's volumes and volumeMounts based on the following IntegrationRoute inputs:
@@ -220,6 +240,8 @@ def _spring_app_config_env_var(parent) -> Optional[Mapping]:
     if cloud_config := _spring_cloud_k8s_config(parent):
         app_config["spring"]["config.import"] = "kubernetes:"
         app_config["spring"]["cloud"] = cloud_config
+
+    app_config.update(ACTUATOR_CONFIG_BLOCK)
 
     return {
         "name": "SPRING_APPLICATION_JSON",

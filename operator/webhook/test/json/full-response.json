@@ -106,7 +106,7 @@
                 "env": [
                   {
                     "name": "SPRING_APPLICATION_JSON",
-                    "value": "{\"spring\": {\"application\": {\"name\": \"testroute\"}, \"config.import\": \"kubernetes:\", \"cloud\": {\"kubernetes\": {\"config\": {\"fail-fast\": true, \"namespace\": \"testspace\", \"sources\": [{\"name\": \"testroute-props\"}, {\"labels\": {\"group\": \"ir-common\"}}]}, \"secrets\": {\"paths\": \"/etc/secrets\"}}}}, \"server\": {\"ssl\": {\"key-alias\": \"certificate\", \"key-store\": \"/etc/keystore/test-keystore.jks\", \"key-store-type\": \"JKS\"}, \"port\": 8443}}"
+                    "value": "{\"spring\": {\"application\": {\"name\": \"testroute\"}, \"config.import\": \"kubernetes:\", \"cloud\": {\"kubernetes\": {\"config\": {\"fail-fast\": true, \"namespace\": \"testspace\", \"sources\": [{\"name\": \"testroute-props\"}, {\"labels\": {\"group\": \"ir-common\"}}]}, \"secrets\": {\"paths\": \"/etc/secrets\"}}}}, \"server\": {\"ssl\": {\"key-alias\": \"certificate\", \"key-store\": \"/etc/keystore/test-keystore.jks\", \"key-store-type\": \"JKS\"}, \"port\": 8443}, \"management\": {\"endpoint\": {\"health\": {\"enabled\": true}, \"prometheus\": {\"enabled\": true}}, \"endpoints\": {\"web\": {\"exposure\": {\"include\": \"health,prometheus\"}}}}}"
                   },
                   {
                     "name": "JDK_JAVA_OPTIONS",

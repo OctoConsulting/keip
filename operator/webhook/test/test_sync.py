@@ -69,25 +69,44 @@ def test_spring_app_config_json_missing_props_and_secret_sources(full_route):
     del full_route["spec"]["secretSources"]
 
     spring_conf = _spring_app_config_env_var(full_route)
-    json_props = json.loads(spring_conf["value"])
+    actual_json = spring_conf["value"]
 
     assert spring_conf["name"] == "SPRING_APPLICATION_JSON"
 
-    expected_json = {
-        "spring": {"application": {"name": "testroute"}},
+    expected_json = json.dumps({
+        "spring": {
+            "application": {
+                "name": "testroute"
+            }
+        },
         "server": {
             "ssl": {
                 "key-alias": "certificate",
-                "key-store": str(
-                    PurePosixPath("/", "etc", "keystore", "test-keystore.jks")
-                ),
-                "key-store-type": "JKS",
+                "key-store": "/etc/keystore/test-keystore.jks",
+                "key-store-type": "JKS"
             },
-            "port": 8443,
+            "port": 8443
         },
-    }
+        "management": {
+            "endpoint": {
+                "health": {
+                    "enabled": True
+                },
+                "prometheus": {
+                    "enabled": True
+                }
+            },
+            "endpoints": {
+                "web": {
+                    "exposure": {
+                        "include": "health,prometheus"
+                    }
+                }
+            }
+        }
+    })
 
-    assert json_props == expected_json
+    assert actual_json == expected_json
 
 
 def test_pod_template_no_annotations(full_route):
