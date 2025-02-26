@@ -22,6 +22,14 @@ spec:
           conditions:
             - type: Ready
               status: "True"
+    - apiVersion: v1
+      resource: services
+      updateStrategy:
+        method: RollingRecreate
+        statusChecks:
+          conditions:
+            - type: Ready
+              status: "True"
   hooks:
     sync:
       webhook:
@@ -50,7 +58,7 @@ spec:
     spec:
       containers:
         - name: webhook
-          image: ghcr.io/octoconsulting/keip/route-webhook:0.9.0
+          image: ghcr.io/octoconsulting/keip/route-webhook:0.10.0
           ports:
             - containerPort: 7080
               name: webhook-http

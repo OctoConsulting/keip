@@ -13,6 +13,29 @@ TRUSTSTORE_PATH = "/etc/cabundle"
 
 KEYSTORE_PATH = "/etc/keystore"
 
+HTTPS_PORT = 8443
+
+HTTP_PORT = 8080
+
+ACTUATOR_CONFIG_BLOCK = {
+  "management": {
+    "endpoint": {
+      "health": {
+        "enabled": True
+      },
+      "prometheus": {
+        "enabled": True
+      }
+    },
+    "endpoints": {
+      "web": {
+        "exposure": {
+          "include": "health,prometheus"
+        }
+      }
+    }
+  }
+}
 
 class VolumeConfig:
     """
@@ -29,6 +52,7 @@ class VolumeConfig:
         - replicas
         - persistentVolumeClaims
         - tls
+        - services
     """
 
     _route_vol_name = "integration-route-config"
@@ -195,9 +219,8 @@ def _get_server_ssl_config(parent) -> Optional[Mapping]:
             "key-store": str(PurePosixPath(KEYSTORE_PATH, keystore["key"])),
             "key-store-type": keystore["type"].upper(),
         },
-        "port": 8443,
+        "port": HTTPS_PORT,
     }
-
 
 def _service_name_env_var(parent) -> Mapping[str, str]:
     return {"name": "SERVICE_NAME", "value": parent["metadata"]["name"]}
@@ -217,6 +240,8 @@ def _spring_app_config_env_var(parent) -> Optional[Mapping]:
     if cloud_config := _spring_cloud_k8s_config(parent):
         app_config["spring"]["config.import"] = "kubernetes:"
         app_config["spring"]["cloud"] = cloud_config
+
+    app_config.update(ACTUATOR_CONFIG_BLOCK)
 
     return {
         "name": "SPRING_APPLICATION_JSON",
@@ -279,10 +304,10 @@ def _create_pod_template(parent, labels, integration_image) -> Mapping[str,  Any
 
     vol_config = VolumeConfig(parent["spec"])
 
-    has_tls = "tls" in parent["spec"] and "keystore" in parent["spec"]["tls"]
+    has_tls = _has_tls(parent)
 
-    scheme = "HTTPS" if has_tls else "HTTP"
-    management_port = 8443 if has_tls else 8080
+    scheme = _get_scheme(has_tls).upper()
+    management_port = _get_management_port(has_tls)
 
     pod_template = {
         "metadata": {"labels": labels},
@@ -388,9 +413,51 @@ def _new_deployment(parent):
 
     return deployment
 
+def _new_actuator_service(parent):
+    parent_metadata = parent["metadata"]
+
+    has_tls = _has_tls(parent)
+    scheme = _get_scheme(has_tls)
+    management_port = _get_management_port(has_tls)
+
+    service = {
+        "apiVersion": "v1",
+        "kind": "Service",
+        "metadata": {
+            "labels": {
+                "integration-route": parent_metadata["name"],
+                "prometheus-metrics-enabled": "true"
+            },
+            "name": f'{parent_metadata["name"]}-actuator'
+        },
+        "spec": {
+            "ports": [
+                {
+                    "name": scheme,
+                    "port": management_port,
+                    "protocol": "TCP",
+                    "targetPort": management_port
+                }
+            ],
+            "selector": {
+                "app.kubernetes.io/instance": f'integrationroute-{parent_metadata["name"]}'
+            }
+        }
+    }
+
+    return service
+
+def _has_tls(parent) -> bool:
+    return "tls" in parent["spec"] and "keystore" in parent["spec"]["tls"]
+
+def _get_scheme(has_tls) -> str:
+    return "https" if has_tls else "http"
+
+def _get_management_port(has_tls) -> int:
+    return HTTPS_PORT if has_tls else HTTP_PORT
 
 def _gen_children(parent) -> List[Mapping]:
-    return [_new_deployment(parent)]
+    return [_new_deployment(parent), _new_actuator_service(parent)]
 
 
 def sync(parent) -> Mapping:
