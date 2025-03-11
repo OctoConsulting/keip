@@ -37,28 +37,42 @@ def _new_certificate(parent) -> Mapping:
     password_secret_ref_name = _get_password_secret_ref_name(parent)
 
     alt_names = (
-        annotations.get("cert-manager.io/alt-names").split(",")
+        [n.strip() for n in annotations.get("cert-manager.io/alt-names").split(",")]
         if annotations.get("cert-manager.io/alt-names", None) is not None
         else []
     )
     organizational_units = (
-        annotations.get("cert-manager.io/subject-organizationalunits").split(",")
+        [
+            u.strip()
+            for u in annotations.get(
+                "cert-manager.io/subject-organizationalunits"
+            ).split(",")
+        ]
         if annotations.get("cert-manager.io/subject-organizationalunits", None)
         is not None
         else []
     )
     countries = (
-        annotations.get("cert-manager.io/subject-countries").split(",")
+        [
+            c.strip()
+            for c in annotations.get("cert-manager.io/subject-countries").split(",")
+        ]
         if annotations.get("cert-manager.io/subject-countries", None) is not None
         else []
     )
     provinces = (
-        annotations.get("cert-manager.io/subject-provinces").split(",")
+        [
+            p.strip()
+            for p in annotations.get("cert-manager.io/subject-provinces").split(",")
+        ]
         if annotations.get("cert-manager.io/subject-provinces", None) is not None
         else []
     )
     localities = (
-        annotations.get("cert-manager.io/subject-localities").split(",")
+        [
+            l.strip()
+            for l in annotations.get("cert-manager.io/subject-localities").split(",")
+        ]
         if annotations.get("cert-manager.io/subject-localities", None) is not None
         else []
     )
