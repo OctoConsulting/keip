@@ -1,0 +1,55 @@
+{
+  "status": {},
+  "children": [
+    {
+      "apiVersion": "cert-manager.io/v1",
+      "kind": "Certificate",
+      "metadata": {
+        "name": "testroute-certs",
+        "namespace": "testspace"
+      },
+      "spec": {
+        "commonName": "testroute.testspace",
+        "dnsNames": [
+          "testroute.testspace.svc.cluster.local",
+          "testroute.testspace.svc",
+          "testroute",
+          "testroute-actuator.testspace.svc.cluster.local",
+          "cloud-integration-route-actuator.testspace.svc.cluster.local"
+        ],
+        "issuerRef": {
+          "group": "cert-manager.io",
+          "kind": "ClusterIssuer",
+          "name": "test-cluster-issuer"
+        },
+        "keystores": {
+          "jks": {
+            "create": true,
+            "passwordSecretRef": {
+              "key": "password",
+              "name": "keystore-password-ref"
+            }
+          }
+        },
+        "secretName": "testroute-certstore",
+        "subject": {
+          "organizationalUnits": [
+            "Unit One"
+          ],
+          "countries": [
+            "US",
+            "AU"
+          ],
+          "provinces": [
+            "AZ",
+            "SA"
+          ],
+          "localities": [
+            "Phoenix",
+            "Adelaide"
+          ]
+        }
+      }
+    }
+  ]
+}

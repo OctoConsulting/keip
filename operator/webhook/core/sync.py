@@ -18,24 +18,12 @@ HTTPS_PORT = 8443
 HTTP_PORT = 8080
 
 ACTUATOR_CONFIG_BLOCK = {
-  "management": {
-    "endpoint": {
-      "health": {
-        "enabled": True
-      },
-      "prometheus": {
-        "enabled": True
-      }
-    },
-    "endpoints": {
-      "web": {
-        "exposure": {
-          "include": "health,prometheus"
-        }
-      }
+    "management": {
+        "endpoint": {"health": {"enabled": True}, "prometheus": {"enabled": True}},
+        "endpoints": {"web": {"exposure": {"include": "health,prometheus"}}},
     }
-  }
 }
+
 
 class VolumeConfig:
     """
@@ -222,6 +210,7 @@ def _get_server_ssl_config(parent) -> Optional[Mapping]:
         "port": HTTPS_PORT,
     }
 
+
 def _service_name_env_var(parent) -> Mapping[str, str]:
     return {"name": "SERVICE_NAME", "value": parent["metadata"]["name"]}
 
@@ -300,7 +289,7 @@ def _generate_container_env_vars(parent) -> List[Mapping[str, str]]:
     return env_vars
 
 
-def _create_pod_template(parent, labels, integration_image) -> Mapping[str,  Any]:
+def _create_pod_template(parent, labels, integration_image) -> Mapping[str, Any]:
 
     vol_config = VolumeConfig(parent["spec"])
 
@@ -362,13 +351,8 @@ def _create_pod_template(parent, labels, integration_image) -> Mapping[str,  Any
         pod_template["spec"]["containers"][0]["resources"] = resources
     else:
         pod_template["spec"]["containers"][0]["resources"] = {
-            "requests": {
-                "cpu": "500m",
-                "memory": "1Gi"
-            },
-            "limits": {
-                "memory": "2Gi"
-            }
+            "requests": {"cpu": "500m", "memory": "1Gi"},
+            "limits": {"memory": "2Gi"},
         }
 
     envFrom = parent["spec"].get("envFrom")
@@ -413,6 +397,7 @@ def _new_deployment(parent):
 
     return deployment
 
+
 def _new_actuator_service(parent):
     parent_metadata = parent["metadata"]
 
@@ -426,9 +411,9 @@ def _new_actuator_service(parent):
         "metadata": {
             "labels": {
                 "integration-route": parent_metadata["name"],
-                "prometheus-metrics-enabled": "true"
+                "prometheus-metrics-enabled": "true",
             },
-            "name": f'{parent_metadata["name"]}-actuator'
+            "name": f'{parent_metadata["name"]}-actuator',
         },
         "spec": {
             "ports": [
@@ -436,25 +421,29 @@ def _new_actuator_service(parent):
                     "name": scheme,
                     "port": management_port,
                     "protocol": "TCP",
-                    "targetPort": management_port
+                    "targetPort": management_port,
                 }
             ],
             "selector": {
                 "app.kubernetes.io/instance": f'integrationroute-{parent_metadata["name"]}'
-            }
-        }
+            },
+        },
     }
 
     return service
 
+
 def _has_tls(parent) -> bool:
     return "tls" in parent["spec"] and "keystore" in parent["spec"]["tls"]
+
 
 def _get_scheme(has_tls) -> str:
     return "https" if has_tls else "http"
 
+
 def _get_management_port(has_tls) -> int:
     return HTTPS_PORT if has_tls else HTTP_PORT
+
 
 def _gen_children(parent) -> List[Mapping]:
     return [_new_deployment(parent), _new_actuator_service(parent)]

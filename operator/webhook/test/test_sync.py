@@ -1,11 +1,12 @@
 import copy
 import json
+import os
 from pathlib import PurePosixPath
 from typing import Mapping
 
 import pytest
 
-from webhook.introute.sync import (
+from webhook.core.sync import (
     sync,
     VolumeConfig,
     _spring_cloud_k8s_config,
@@ -17,6 +18,10 @@ from webhook.introute.sync import (
     _generate_container_env_vars,
 )
 
+from webhook.addons.certmanager.main import (
+    sync_certificate,
+)
+
 JDK_OPTIONS_ENV_NAME = "JDK_JAVA_OPTIONS"
 
 
@@ -26,7 +31,9 @@ def test_empty_parent_raises_exception(full_route):
 
 
 def test_full_integration_route(full_route):
-    response = load_json("json/full-response.json")
+    response = load_json_as_dict(
+        f"{os.path.dirname(os.path.abspath(__file__))}/json/full-response.json"
+    )
     actual = sync(full_route)
 
     assert response == actual
@@ -73,38 +80,26 @@ def test_spring_app_config_json_missing_props_and_secret_sources(full_route):
 
     assert spring_conf["name"] == "SPRING_APPLICATION_JSON"
 
-    expected_json = json.dumps({
-        "spring": {
-            "application": {
-                "name": "testroute"
-            }
-        },
-        "server": {
-            "ssl": {
-                "key-alias": "certificate",
-                "key-store": "/etc/keystore/test-keystore.jks",
-                "key-store-type": "JKS"
-            },
-            "port": 8443
-        },
-        "management": {
-            "endpoint": {
-                "health": {
-                    "enabled": True
+    expected_json = json.dumps(
+        {
+            "spring": {"application": {"name": "testroute"}},
+            "server": {
+                "ssl": {
+                    "key-alias": "certificate",
+                    "key-store": "/etc/keystore/test-keystore.jks",
+                    "key-store-type": "JKS",
                 },
-                "prometheus": {
-                    "enabled": True
-                }
+                "port": 8443,
             },
-            "endpoints": {
-                "web": {
-                    "exposure": {
-                        "include": "health,prometheus"
-                    }
-                }
-            }
+            "management": {
+                "endpoint": {
+                    "health": {"enabled": True},
+                    "prometheus": {"enabled": True},
+                },
+                "endpoints": {"web": {"exposure": {"include": "health,prometheus"}}},
+            },
         }
-    })
+    )
 
     assert actual_json == expected_json
 
@@ -217,7 +212,9 @@ def test_no_additional_env_vars(full_route):
         "ADDITIONAL_ENV_VAR_2",
     ]
 
-    expected_response = load_json("json/full-response.json")
+    expected_response = load_json_as_dict(
+        f"{os.path.dirname(os.path.abspath(__file__))}/json/full-response.json"
+    )
     env_vars_in_response = list(
         expected_response["children"][0]["spec"]["template"]["spec"]["containers"][0][
             "env"
@@ -240,7 +237,9 @@ def test_no_additional_env_vars(full_route):
 
 
 def test_no_env_from(full_route):
-    expected_response = load_json("json/full-response.json")
+    expected_response = load_json_as_dict(
+        f"{os.path.dirname(os.path.abspath(__file__))}/json/full-response.json"
+    )
     del expected_response["children"][0]["spec"]["template"]["spec"]["containers"][0][
         "envFrom"
     ]
@@ -329,12 +328,17 @@ def full_route(full_route_load: dict):
 
 @pytest.fixture(scope="module")
 def full_route_load() -> Mapping:
-    return load_json("json/full-iroute-request.json")
+    cwd = os.path.dirname(os.path.abspath(__file__))
+    if os.path.exists(f"{cwd}/json/full-iroute-request.json"):
+        return load_json_as_dict(f"{cwd}/json/full-iroute-request.json")
 
 
-def load_json(filepath: str) -> Mapping:
-    with open(filepath, "r") as f:
-        return json.load(f)
+def load_json_as_dict(filepath: str) -> Mapping:
+    try:
+        with open(filepath, "r") as f:
+            return json.load(f)
+    except FileNotFoundError as e:
+        _LOGGER.error(f"File not found: {filepath}\n{e}")
 
 
 def check_env_var_absent(deployment: Mapping, name: str):

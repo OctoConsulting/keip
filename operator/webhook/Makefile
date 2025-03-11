@@ -1,4 +1,4 @@
-VERSION ?= 0.10.0
+VERSION ?= 0.11.0
 HOST_PORT ?= 7080
 GIT_TAG := webhook_v$(VERSION)
 
@@ -6,7 +6,7 @@ IMG_REGISTRY := ghcr.io/octoconsulting
 IMG_NAME := keip/route-webhook
 FULL_IMAGE_NAME := $(IMG_REGISTRY)/$(IMG_NAME):$(VERSION)
 CONTAINER_NAME := integration-route-webhook
-PYTHON := python3
+PYTHON ?= python3
 TEST_COVERAGE_DIR := .test_coverage
 TEST_COVERAGE_FILE := $(TEST_COVERAGE_DIR)/.coverage
 
@@ -28,27 +28,27 @@ start-dev-server:
 
 .PHONY: test
 test:
-	cd test && mkdir -p $(TEST_COVERAGE_DIR) && coverage run --data-file=$(TEST_COVERAGE_FILE) -m pytest -vv
+	rm -rf $(TEST_COVERAGE_DIR) && mkdir -p $(TEST_COVERAGE_DIR) && coverage run --data-file=$(TEST_COVERAGE_FILE) -m pytest -vv
 
 .PHONY: win-test
 win-test:
-	cd test && (if not exist $(TEST_COVERAGE_DIR) mkdir $(TEST_COVERAGE_DIR)) && coverage run --data-file=$(TEST_COVERAGE_FILE) -m pytest -vv
+	 (if exist $(TEST_COVERAGE_DIR) rmdir /s /q $(TEST_COVERAGE_DIR)) && mkdir $(TEST_COVERAGE_DIR) && coverage run --data-file=$(TEST_COVERAGE_FILE) -m pytest -vv
 
 .PHONY: report-test-coverage
 report-test-coverage: test
-	cd test && coverage report --data-file $(TEST_COVERAGE_FILE)
+	coverage report --data-file $(TEST_COVERAGE_FILE)
 
 .PHONY: win-report-test-coverage
 win-report-test-coverage: win-test
-	cd test && coverage report --data-file $(TEST_COVERAGE_FILE)
+	coverage report --data-file $(TEST_COVERAGE_FILE)
 
 .PHONY: report-test-coverage-html
 report-test-coverage-html: test
-	cd test && coverage html --data-file $(TEST_COVERAGE_FILE) --directory $(TEST_COVERAGE_DIR)/html && open $(TEST_COVERAGE_DIR)/html/index.html
+	coverage html --data-file $(TEST_COVERAGE_FILE) --directory $(TEST_COVERAGE_DIR)/html && open $(TEST_COVERAGE_DIR)/html/index.html
 
 .PHONY: win-report-test-coverage-html
 win-report-test-coverage-html: win-test
-	cd test && coverage html --data-file $(TEST_COVERAGE_FILE) --directory $(TEST_COVERAGE_DIR)/html && start "" $(TEST_COVERAGE_DIR)/html/index.html
+	coverage html --data-file $(TEST_COVERAGE_FILE) --directory $(TEST_COVERAGE_DIR)/html && start "" $(TEST_COVERAGE_DIR)/html/index.html
 
 .PHONY: deploy
 deploy: build

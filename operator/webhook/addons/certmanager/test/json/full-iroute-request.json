@@ -1,0 +1,103 @@
+{
+  "parent": {
+    "apiVersion": "keip.octo.com/v1alpha1",
+    "kind": "IntegrationRoute",
+    "metadata": {
+      "annotations": {
+        "cert-manager.io/alt-names": "cloud-integration-route-actuator.testspace.svc.cluster.local",
+        "cert-manager.io/cluster-issuer": "test-cluster-issuer",
+        "cert-manager.io/common-name": "testroute",
+        "cert-manager.io/subject-organizationalunits": "Unit One",
+        "cert-manager.io/subject-countries": "US,AU",
+        "cert-manager.io/subject-provinces": "AZ,SA",
+        "cert-manager.io/subject-localities": "Phoenix,Adelaide"
+      },
+      "generation": 1,
+      "name": "testroute",
+      "namespace": "testspace"
+    },
+    "spec": {
+      "annotations": {
+        "aKey1": "aValue1"
+      },
+      "labels": {
+        "firstKey": "firstValue"
+      },
+      "persistentVolumeClaims": [
+        {
+          "claimName": "testroute-pvc",
+          "mountPath": "/tmp/testdir"
+        }
+      ],
+      "propSources": [
+        {
+          "name": "testroute-props"
+        },
+        {
+          "labels": {
+            "group": "ir-common"
+          }
+        }
+      ],
+      "env": [
+        {
+          "name": "ADDITIONAL_ENV_VAR_1",
+          "value": "myvalue1"
+        },
+        {
+          "name": "ADDITIONAL_ENV_VAR_2",
+          "value": "myvalue2"
+        }
+      ],
+      "envFrom": [
+        {
+          "configMapRef": {
+            "name": "my-config"
+          }
+        },
+        {
+          "secretRef": {
+            "name": "my-secret"
+          }
+        }
+      ],
+      "replicas": 2,
+      "routeConfigMap": "testroute-xml",
+      "secretSources": [
+        "testroute-secret"
+      ],
+      "tls": {
+        "keystore": {
+          "secretName": "test-tls-secret",
+          "key": "test-keystore.jks",
+          "type": "jks",
+          "passwordSecretRef": "keystore-password-ref"
+        },
+        "truststore": {
+          "configMapName": "test-tls-cm",
+          "key": "test-truststore.p12",
+          "type": "pkcs12"
+        }
+      },
+      "configMaps": [
+        {
+          "name": "test-cm-1",
+          "mountPath": "/path/to/cm1"
+        },
+        {
+          "name": "test-cm-2",
+          "mountPath": "/path/to/cm2"
+        }
+      ],
+      "resources": {
+        "limits": {
+          "memory": "5Gi"
+        },
+        "requests": {
+          "cpu": "1",
+          "memory": "2Gi"
+        }
+      }
+    }
+  }
+}
