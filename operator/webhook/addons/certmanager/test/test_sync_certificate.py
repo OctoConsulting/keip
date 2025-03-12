@@ -63,6 +63,14 @@ def test_sync_certificate_no_cluster_issuer(full_route):
     assert actual_desired_state_json == expected_desired_state_json
 
 
+def test_sync_certificate_no_name(full_route):
+    del full_route["metadata"]["name"]
+    expected_desired_state_json = json.dumps({"status": {}, "children": [{}]})
+    actual_desired_state_json = json.dumps(sync_certificate(full_route))
+
+    assert actual_desired_state_json == expected_desired_state_json
+
+
 def test_sync_certificate_no_common_name(full_route):
     del full_route["metadata"]["annotations"]["cert-manager.io/common-name"]
     expected_desired_state_json = json.dumps({"status": {}, "children": [{}]})

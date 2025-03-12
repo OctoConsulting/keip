@@ -13,6 +13,7 @@
         "dnsNames": [
           "testroute.testspace.svc.cluster.local",
           "testroute.testspace.svc",
+          "testroute.testspace",
           "testroute",
           "testroute-actuator.testspace.svc.cluster.local",
           "cloud-integration-route-actuator.testspace.svc.cluster.local"

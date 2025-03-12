@@ -19,6 +19,13 @@ def _new_certificate(parent) -> Mapping:
         _LOGGER.error("IntegrationRoute does not contain metadata.annotations.")
         return {}
 
+    name = metadata.get("name", None)
+    if name is None:
+        _LOGGER.error("IntegrationRoute does not contain metadata.name.")
+        return {}
+
+    namespace = metadata.get("namespace", "default")
+
     cluster_issuer = annotations.get("cert-manager.io/cluster-issuer", None)
     if cluster_issuer is None:
         _LOGGER.error(
@@ -78,10 +85,11 @@ def _new_certificate(parent) -> Mapping:
     )
 
     dns_names = [
-        f"{annotations['cert-manager.io/common-name']}.{metadata['namespace']}.svc.cluster.local",
-        f"{annotations['cert-manager.io/common-name']}.{metadata['namespace']}.svc",
-        annotations["cert-manager.io/common-name"],
-        f"{metadata['name']}-actuator.{metadata['namespace']}.svc.cluster.local",
+        f"{common_name}.{namespace}.svc.cluster.local",
+        f"{common_name}.{namespace}.svc",
+        f"{common_name}.{namespace}",
+        common_name,
+        f"{name}-actuator.{namespace}.svc.cluster.local",
     ]
     dns_names = dns_names + alt_names
 
@@ -102,11 +110,11 @@ def _new_certificate(parent) -> Mapping:
         "apiVersion": "cert-manager.io/v1",
         "kind": "Certificate",
         "metadata": {
-            "name": f"{metadata['name']}-certs",
-            "namespace": metadata["namespace"],
+            "name": f"{name}-certs",
+            "namespace": namespace,
         },
         "spec": {
-            "commonName": f"{common_name}.{metadata['namespace']}",
+            "commonName": f"{common_name}.{namespace}",
             "dnsNames": dns_names,
             "issuerRef": {
                 "group": "cert-manager.io",
@@ -122,7 +130,7 @@ def _new_certificate(parent) -> Mapping:
                     },
                 }
             },
-            "secretName": f"{metadata['name']}-certstore",
+            "secretName": f"{name}-certstore",
             "subject": subject,
         },
     }
