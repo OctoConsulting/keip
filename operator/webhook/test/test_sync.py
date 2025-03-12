@@ -18,9 +18,6 @@ from webhook.core.sync import (
     _generate_container_env_vars,
 )
 
-from webhook.addons.certmanager.main import (
-    sync_certificate,
-)
 
 JDK_OPTIONS_ENV_NAME = "JDK_JAVA_OPTIONS"
 
