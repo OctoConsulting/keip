@@ -1,106 +1,172 @@
 {
+  "controller": {
+    "kind": "CompositeController",
+    "apiVersion": "metacontroller.k8s.io/v1alpha1",
+    "metadata": {
+      "name": "integrationroute-controller",
+      "uid": "1dfca480-3ea5-4778-8538-54c35c11f31b",
+      "resourceVersion": "48692412",
+      "generation": 1,
+      "creationTimestamp": "2025-03-18T15:54:33Z",
+      "annotations": {
+        "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"metacontroller.k8s.io/v1alpha1\",\"kind\":\"CompositeController\",\"metadata\":{\"annotations\":{},\"name\":\"integrationroute-controller\"},\"spec\":{\"childResources\":[{\"apiVersion\":\"apps/v1\",\"resource\":\"deployments\",\"updateStrategy\":{\"method\":\"RollingRecreate\",\"statusChecks\":{\"conditions\":[{\"status\":\"True\",\"type\":\"Ready\"}]}}},{\"apiVersion\":\"v1\",\"resource\":\"services\",\"updateStrategy\":{\"method\":\"RollingRecreate\",\"statusChecks\":{\"conditions\":[{\"status\":\"True\",\"type\":\"Ready\"}]}}}],\"generateSelector\":true,\"hooks\":{\"sync\":{\"webhook\":{\"timeout\":\"10s\",\"url\":\"http://integrationroute-webhook.keip/sync\"}}},\"parentResource\":{\"apiVersion\":\"keip.octo.com/v1alpha1\",\"resource\":\"integrationroutes\",\"revisionHistory\":{\"fieldPaths\":[\"spec.routeConfigMap\"]}}}}\n"
+      },
+      "managedFields": [
+        {
+          "manager": "kubectl-client-side-apply",
+          "operation": "Update",
+          "apiVersion": "metacontroller.k8s.io/v1alpha1",
+          "time": "2025-03-18T15:54:33Z",
+          "fieldsType": "FieldsV1",
+          "fieldsV1": {
+            "f:metadata": {
+              "f:annotations": {
+                ".": {},
+                "f:kubectl.kubernetes.io/last-applied-configuration": {}
+              }
+            },
+            "f:spec": {
+              ".": {},
+              "f:childResources": {},
+              "f:generateSelector": {},
+              "f:hooks": {
+                ".": {},
+                "f:sync": {
+                  ".": {},
+                  "f:version": {},
+                  "f:webhook": { ".": {}, "f:timeout": {}, "f:url": {} }
+                }
+              },
+              "f:parentResource": {
+                ".": {},
+                "f:apiVersion": {},
+                "f:resource": {},
+                "f:revisionHistory": { ".": {}, "f:fieldPaths": {} }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "spec": {
+      "parentResource": {
+        "apiVersion": "keip.octo.com/v1alpha1",
+        "resource": "integrationroutes",
+        "revisionHistory": { "fieldPaths": ["spec.routeConfigMap"] }
+      },
+      "childResources": [
+        {
+          "apiVersion": "apps/v1",
+          "resource": "deployments",
+          "updateStrategy": {
+            "method": "RollingRecreate",
+            "statusChecks": {
+              "conditions": [{ "type": "Ready", "status": "True" }]
+            }
+          }
+        },
+        {
+          "apiVersion": "v1",
+          "resource": "services",
+          "updateStrategy": {
+            "method": "RollingRecreate",
+            "statusChecks": {
+              "conditions": [{ "type": "Ready", "status": "True" }]
+            }
+          }
+        }
+      ],
+      "hooks": {
+        "sync": {
+          "version": "v1",
+          "webhook": {
+            "url": "http://integrationroute-webhook.keip/sync",
+            "timeout": "10s"
+          }
+        }
+      },
+      "generateSelector": true
+    },
+    "status": {}
+  },
   "parent": {
     "apiVersion": "keip.octo.com/v1alpha1",
     "kind": "IntegrationRoute",
     "metadata": {
       "annotations": {
-        "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"keip.octo.com/v1alpha1\",\"kind\":\"IntegrationRoute\",\"metadata\":{\"annotations\":{},\"name\":\"testroute\",\"namespace\":\"demo\"},\"spec\":{\"annotations\":{\"aKey1\":\"aValue1\"},\"labels\":{\"firstKey\":\"firstValue\"},\"persistentVolumeClaims\":[{\"claimName\":\"testroute-pvc\",\"mountPath\":\"/tmp/testdir\"}],\"propSources\":[{\"name\":\"testroute-props\"},{\"labels\":{\"group\":\"ir-common\"}}],\"replicas\":2,\"routeConfigMap\":\"testroute-xml\",\"secretSources\":[\"testroute-secret\"]}}\n",
-        "cert-manager.io/alt-names": "cloud-integration-route-actuator.testspace.svc.cluster.local",
-        "cert-manager.io/cluster-issuer": "test-cluster-issuer",
+        "cert-manager.io/alt-names": "cloud-integration-route-actuator.default.svc.cluster.local",
+        "cert-manager.io/cluster-issuer": "test-selfsigned",
         "cert-manager.io/common-name": "testroute",
-        "cert-manager.io/subject-organizationalunits": "Unit One",
-        "cert-manager.io/subject-countries": "US,AU",
-        "cert-manager.io/subject-provinces": "AZ,SA",
-        "cert-manager.io/subject-localities": "Phoenix,Adelaide"
+        "cert-manager.io/subject-countries": "US",
+        "cert-manager.io/subject-localities": "A Park",
+        "cert-manager.io/subject-organizationalunits": "Parks and Recreation",
+        "cert-manager.io/subject-provinces": "FL",
+        "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"keip.octo.com/v1alpha1\",\"kind\":\"IntegrationRoute\",\"metadata\":{\"annotations\":{\"cert-manager.io/alt-names\":\"cloud-integration-route-actuator.default.svc.cluster.local\",\"cert-manager.io/cluster-issuer\":\"test-selfsigned\",\"cert-manager.io/common-name\":\"testroute\",\"cert-manager.io/subject-countries\":\"US\",\"cert-manager.io/subject-localities\":\"A Park\",\"cert-manager.io/subject-organizationalunits\":\"Parks and Recreation\",\"cert-manager.io/subject-provinces\":\"FL\"},\"name\":\"testroute\",\"namespace\":\"default\"},\"spec\":{\"propSources\":[{\"name\":\"testroute-props\"}],\"routeConfigMap\":\"testroute-xml\",\"secretSources\":[\"testroute-secret\"],\"tls\":{\"keystore\":{\"key\":\"keystore.jks\",\"passwordSecretRef\":\"jks-password\",\"secretName\":\"testroute-certstore\",\"type\":\"jks\"}}}}\n"
       },
-      "creationTimestamp": "2023-09-06T01:16:27Z",
+      "creationTimestamp": "2025-03-18T15:55:04Z",
       "generation": 1,
+      "managedFields": [
+        {
+          "apiVersion": "keip.octo.com/v1alpha1",
+          "fieldsType": "FieldsV1",
+          "fieldsV1": {
+            "f:metadata": {
+              "f:annotations": {
+                ".": {},
+                "f:cert-manager.io/alt-names": {},
+                "f:cert-manager.io/cluster-issuer": {},
+                "f:cert-manager.io/common-name": {},
+                "f:cert-manager.io/subject-countries": {},
+                "f:cert-manager.io/subject-localities": {},
+                "f:cert-manager.io/subject-organizationalunits": {},
+                "f:cert-manager.io/subject-provinces": {},
+                "f:kubectl.kubernetes.io/last-applied-configuration": {}
+              }
+            },
+            "f:spec": {
+              ".": {},
+              "f:propSources": {},
+              "f:replicas": {},
+              "f:routeConfigMap": {},
+              "f:secretSources": {},
+              "f:tls": {
+                ".": {},
+                "f:keystore": {
+                  ".": {},
+                  "f:key": {},
+                  "f:passwordSecretRef": {},
+                  "f:secretName": {},
+                  "f:type": {}
+                }
+              }
+            }
+          },
+          "manager": "kubectl-client-side-apply",
+          "operation": "Update",
+          "time": "2025-03-18T15:55:04Z"
+        }
+      ],
       "name": "testroute",
-      "namespace": "testspace",
-      "uid": "b10e0347-1ab2-4146-864f-1f4225b06d4d"
+      "namespace": "testnamespace",
+      "resourceVersion": "48692499",
+      "uid": "c4d501ce-0196-42f1-bd8c-8dd82759d890"
     },
     "spec": {
-      "annotations": {
-        "aKey1": "aValue1"
-      },
-      "labels": {
-        "firstKey": "firstValue"
-      },
-      "persistentVolumeClaims": [
-        {
-          "claimName": "testroute-pvc",
-          "mountPath": "/tmp/testdir"
-        }
-      ],
-      "propSources": [
-        {
-          "name": "testroute-props"
-        },
-        {
-          "labels": {
-            "group": "ir-common"
-          }
-        }
-      ],
-      "env": [
-        {
-          "name": "ADDITIONAL_ENV_VAR_1",
-          "value": "myvalue1"
-        },
-        {
-          "name": "ADDITIONAL_ENV_VAR_2",
-          "value": "myvalue2"
-        }
-      ],
-      "envFrom": [
-        {
-          "configMapRef": {
-            "name": "my-config"
-          }
-        },
-        {
-          "secretRef": {
-            "name": "my-secret"
-          }
-        }
-      ],
-      "replicas": 2,
+      "propSources": [{ "name": "testroute-props" }],
+      "replicas": 1,
       "routeConfigMap": "testroute-xml",
-      "secretSources": [
-        "testroute-secret"
-      ],
+      "secretSources": ["testroute-secret"],
       "tls": {
         "keystore": {
-          "secretName": "test-tls-secret",
-          "key": "test-keystore.jks",
-          "type": "jks",
-          "passwordSecretRef": "keystore-password-ref"
-        },
-        "truststore": {
-          "configMapName": "test-tls-cm",
-          "key": "test-truststore.p12",
-          "type": "pkcs12"
-        }
-      },
-      "configMaps": [
-        {
-          "name": "test-cm-1",
-          "mountPath": "/path/to/cm1"
-        },
-        {
-          "name": "test-cm-2",
-          "mountPath": "/path/to/cm2"
-        }
-      ],
-      "resources": {
-        "limits": {
-          "memory": "5Gi"
-        },
-        "requests": {
-          "cpu": "1",
-          "memory": "2Gi"
+          "key": "keystore.jks",
+          "passwordSecretRef": "jks-password",
+          "secretName": "testroute-certstore",
+          "type": "jks"
         }
       }
     }
-  }
+  },
+  "children": { "Deployment.apps/v1": {}, "Service.v1": {} },
+  "related": {},
+  "finalizing": false
 }

@@ -10,12 +10,9 @@
           "app.kubernetes.io/managed-by": "integrationroute-controller",
           "app.kubernetes.io/name": "integrationroute",
           "app.kubernetes.io/instance": "integrationroute-testroute",
-          "app.kubernetes.io/version": "latest",
-          "firstKey": "firstValue"
+          "app.kubernetes.io/version": "latest"
         },
-        "annotations": {
-          "aKey1": "aValue1"
-        }
+        "annotations": {}
       },
       "spec": {
         "selector": {
@@ -23,18 +20,14 @@
             "app.kubernetes.io/instance": "integrationroute-testroute"
           }
         },
-        "replicas": 2,
+        "replicas": 1,
         "template": {
           "metadata": {
             "labels": {
               "app.kubernetes.io/managed-by": "integrationroute-controller",
               "app.kubernetes.io/name": "integrationroute",
               "app.kubernetes.io/instance": "integrationroute-testroute",
-              "app.kubernetes.io/version": "latest",
-              "firstKey": "firstValue"
-            },
-            "annotations": {
-              "aKey1": "aValue1"
+              "app.kubernetes.io/version": "latest"
             }
           },
           "spec": {
@@ -52,23 +45,6 @@
                     "name": "testroute-secret",
                     "readOnly": true,
                     "mountPath": "/etc/secrets/testroute-secret"
-                  },
-                  {
-                    "name": "testroute-pvc",
-                    "mountPath": "/tmp/testdir"
-                  },
-                  {
-                    "name": "test-cm-1",
-                    "mountPath": "/path/to/cm1"
-                  },
-                  {
-                    "name": "test-cm-2",
-                    "mountPath": "/path/to/cm2"
-                  },
-                  {
-                    "name": "truststore",
-                    "readOnly": true,
-                    "mountPath": "/etc/cabundle"
                   },
                   {
                     "name": "keystore",
@@ -106,110 +82,39 @@
                 "env": [
                   {
                     "name": "SPRING_APPLICATION_JSON",
-                    "value": "{\"spring\": {\"application\": {\"name\": \"testroute\"}, \"config.import\": \"kubernetes:\", \"cloud\": {\"kubernetes\": {\"config\": {\"fail-fast\": true, \"namespace\": \"testspace\", \"sources\": [{\"name\": \"testroute-props\"}, {\"labels\": {\"group\": \"ir-common\"}}]}, \"secrets\": {\"paths\": \"/etc/secrets\"}}}}, \"server\": {\"ssl\": {\"key-alias\": \"certificate\", \"key-store\": \"/etc/keystore/test-keystore.jks\", \"key-store-type\": \"JKS\"}, \"port\": 8443}, \"management\": {\"endpoint\": {\"health\": {\"enabled\": true}, \"prometheus\": {\"enabled\": true}}, \"endpoints\": {\"web\": {\"exposure\": {\"include\": \"health,prometheus\"}}}}}"
-                  },
-                  {
-                    "name": "JDK_JAVA_OPTIONS",
-                    "value": "-Djavax.net.ssl.trustStore=/etc/cabundle/test-truststore.p12 -Djavax.net.ssl.trustStorePassword= -Djavax.net.ssl.trustStoreType=PKCS12"
+                    "value": "{\"spring\": {\"application\": {\"name\": \"testroute\"}, \"config.import\": \"kubernetes:\", \"cloud\": {\"kubernetes\": {\"config\": {\"fail-fast\": true, \"namespace\": \"testnamespace\", \"sources\": [{\"name\": \"testroute-props\"}]}, \"secrets\": {\"paths\": \"/etc/secrets\"}}}}, \"server\": {\"ssl\": {\"key-alias\": \"certificate\", \"key-store\": \"/etc/keystore/keystore.jks\", \"key-store-type\": \"JKS\"}, \"port\": 8443}, \"management\": {\"endpoint\": {\"health\": {\"enabled\": true}, \"prometheus\": {\"enabled\": true}}, \"endpoints\": {\"web\": {\"exposure\": {\"include\": \"health,prometheus\"}}}}}"
                   },
                   {
                     "name": "SERVER_SSL_KEYSTOREPASSWORD",
                     "valueFrom": {
                       "secretKeyRef": {
-                        "name": "keystore-password-ref",
+                        "name": "jks-password",
                         "key": "password"
                       }
                     }
                   },
-                  {
-                    "name": "SERVICE_NAME",
-                    "value": "testroute"
-                  },
-                  {
-                    "name": "ADDITIONAL_ENV_VAR_1",
-                    "value": "myvalue1"
-                  },
-                  {
-                    "name": "ADDITIONAL_ENV_VAR_2",
-                    "value": "myvalue2"
-                  }
-                ],
-                "envFrom": [
-                  {
-                    "configMapRef": {
-                      "name": "my-config"
-                    }
-                  },
-                  {
-                    "secretRef": {
-                      "name": "my-secret"
-                    }
-                  }
+                  { "name": "SERVICE_NAME", "value": "testroute" }
                 ],
                 "resources": {
-                  "requests": {
-                    "cpu": "1",
-                    "memory": "2Gi"
-                  },
-                  "limits": {
-                    "memory": "5Gi"
-                  }
+                  "requests": { "cpu": "500m", "memory": "1Gi" },
+                  "limits": { "memory": "2Gi" }
                 }
               }
             ],
             "volumes": [
               {
                 "name": "integration-route-config",
-                "configMap": {
-                  "name": "testroute-xml"
-                }
+                "configMap": { "name": "testroute-xml" }
               },
               {
                 "name": "testroute-secret",
-                "secret": {
-                  "secretName": "testroute-secret"
-                }
-              },
-              {
-                "name": "testroute-pvc",
-                "persistentVolumeClaim": {
-                  "claimName": "testroute-pvc"
-                }
-              },
-              {
-                "name": "test-cm-1",
-                "configMap": {
-                  "name": "test-cm-1"
-                }
-              },
-              {
-                "name": "test-cm-2",
-                "configMap": {
-                  "name": "test-cm-2"
-                }
-              },
-              {
-                "name": "truststore",
-                "configMap": {
-                  "name": "test-tls-cm",
-                  "items": [
-                    {
-                      "key": "test-truststore.p12",
-                      "path": "test-truststore.p12"
-                    }
-                  ]
-                }
+                "secret": { "secretName": "testroute-secret" }
               },
               {
                 "name": "keystore",
                 "secret": {
-                  "secretName": "test-tls-secret",
-                  "items": [
-                    {
-                      "key": "test-keystore.jks",
-                      "path": "test-keystore.jks"
-                    }
-                  ]
+                  "secretName": "testroute-certstore",
+                  "items": [{ "key": "keystore.jks", "path": "keystore.jks" }]
                 }
               }
             ]

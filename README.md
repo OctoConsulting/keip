@@ -41,11 +41,11 @@ IntegrationRoute webhook (lambda controller) pods.
 
 ```shell
 kubectl -n keip get po
-```
-```
+
 NAME                                        READY   STATUS    RESTARTS   AGE
 integrationroute-webhook-6644b989d5-r6htn   1/1     Running   0          2m30s
-
+```
+```
 kubectl -n metacontroller get po
 
 NAME                                        READY   STATUS    RESTARTS   AGE

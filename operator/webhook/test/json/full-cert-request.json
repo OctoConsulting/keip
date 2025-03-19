@@ -1,0 +1,150 @@
+{
+  "controller": {
+    "kind": "DecoratorController",
+    "apiVersion": "metacontroller.k8s.io/v1alpha1",
+    "metadata": {
+      "name": "certmanager-controller",
+      "uid": "79dfff16-d192-439f-8af2-aaa75409514e",
+      "resourceVersion": "48689094",
+      "generation": 1,
+      "creationTimestamp": "2025-03-18T15:19:49Z",
+      "annotations": {
+        "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"metacontroller.k8s.io/v1alpha1\",\"kind\":\"DecoratorController\",\"metadata\":{\"annotations\":{},\"name\":\"certmanager-controller\"},\"spec\":{\"attachments\":[{\"apiVersion\":\"cert-manager.io/v1\",\"resource\":\"certificates\",\"updateStrategy\":{\"method\":\"RollingRecreate\"}}],\"hooks\":{\"sync\":{\"webhook\":{\"url\":\"http://integrationroute-webhook.keip/addons/certmanager/sync\"}}},\"resources\":[{\"apiVersion\":\"keip.octo.com/v1alpha1\",\"resource\":\"integrationroutes\"}]}}\n"
+      },
+      "managedFields": [
+        {
+          "manager": "kubectl-client-side-apply",
+          "operation": "Update",
+          "apiVersion": "metacontroller.k8s.io/v1alpha1",
+          "time": "2025-03-18T15:19:49Z",
+          "fieldsType": "FieldsV1",
+          "fieldsV1": {
+            "f:metadata": {
+              "f:annotations": {
+                ".": {},
+                "f:kubectl.kubernetes.io/last-applied-configuration": {}
+              }
+            },
+            "f:spec": {
+              ".": {},
+              "f:attachments": {},
+              "f:hooks": {
+                ".": {},
+                "f:sync": {
+                  ".": {},
+                  "f:version": {},
+                  "f:webhook": { ".": {}, "f:url": {} }
+                }
+              },
+              "f:resources": {}
+            }
+          }
+        }
+      ]
+    },
+    "spec": {
+      "resources": [
+        {
+          "apiVersion": "keip.octo.com/v1alpha1",
+          "resource": "integrationroutes"
+        }
+      ],
+      "attachments": [
+        {
+          "apiVersion": "cert-manager.io/v1",
+          "resource": "certificates",
+          "updateStrategy": { "method": "RollingRecreate" }
+        }
+      ],
+      "hooks": {
+        "sync": {
+          "version": "v1",
+          "webhook": {
+            "url": "http://integrationroute-webhook.keip/addons/certmanager/sync"
+          }
+        }
+      }
+    },
+    "status": {}
+  },
+  "object": {
+    "apiVersion": "keip.octo.com/v1alpha1",
+    "kind": "IntegrationRoute",
+    "metadata": {
+      "annotations": {
+        "cert-manager.io/alt-names": "cloud-integration-route-actuator.testnamespace.svc.cluster.local",
+        "cert-manager.io/cluster-issuer": "test-selfsigned",
+        "cert-manager.io/common-name": "testroute",
+        "cert-manager.io/subject-countries": "US",
+        "cert-manager.io/subject-localities": "A Park",
+        "cert-manager.io/subject-organizationalunits": "Parks and Recreation",
+        "cert-manager.io/subject-provinces": "FL",
+        "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"keip.octo.com/v1alpha1\",\"kind\":\"IntegrationRoute\",\"metadata\":{\"annotations\":{\"cert-manager.io/alt-names\":\"cloud-integration-route-actuator.default.svc.cluster.local\",\"cert-manager.io/cluster-issuer\":\"test-selfsigned\",\"cert-manager.io/common-name\":\"testroute\",\"cert-manager.io/subject-countries\":\"US\",\"cert-manager.io/subject-localities\":\"A Park\",\"cert-manager.io/subject-organizationalunits\":\"Parks and Recreation\",\"cert-manager.io/subject-provinces\":\"FL\"},\"name\":\"testroute\",\"namespace\":\"default\"},\"spec\":{\"propSources\":[{\"name\":\"testroute-props\"}],\"routeConfigMap\":\"testroute-xml\",\"secretSources\":[\"testroute-secret\"],\"tls\":{\"keystore\":{\"key\":\"keystore.jks\",\"passwordSecretRef\":\"jks-password\",\"secretName\":\"testroute-certstore\",\"type\":\"jks\"}}}}\n"
+      },
+      "creationTimestamp": "2025-03-18T15:55:04Z",
+      "generation": 1,
+      "managedFields": [
+        {
+          "apiVersion": "keip.octo.com/v1alpha1",
+          "fieldsType": "FieldsV1",
+          "fieldsV1": {
+            "f:metadata": {
+              "f:annotations": {
+                ".": {},
+                "f:cert-manager.io/alt-names": {},
+                "f:cert-manager.io/cluster-issuer": {},
+                "f:cert-manager.io/common-name": {},
+                "f:cert-manager.io/subject-countries": {},
+                "f:cert-manager.io/subject-localities": {},
+                "f:cert-manager.io/subject-organizationalunits": {},
+                "f:cert-manager.io/subject-provinces": {},
+                "f:kubectl.kubernetes.io/last-applied-configuration": {}
+              }
+            },
+            "f:spec": {
+              ".": {},
+              "f:propSources": {},
+              "f:replicas": {},
+              "f:routeConfigMap": {},
+              "f:secretSources": {},
+              "f:tls": {
+                ".": {},
+                "f:keystore": {
+                  ".": {},
+                  "f:key": {},
+                  "f:passwordSecretRef": {},
+                  "f:secretName": {},
+                  "f:type": {}
+                }
+              }
+            }
+          },
+          "manager": "kubectl-client-side-apply",
+          "operation": "Update",
+          "time": "2025-03-18T15:55:04Z"
+        }
+      ],
+      "name": "testroute",
+      "namespace": "testnamespace",
+      "resourceVersion": "48692499",
+      "uid": "c4d501ce-0196-42f1-bd8c-8dd82759d890"
+    },
+    "spec": {
+      "propSources": [{ "name": "testroute-props" }],
+      "replicas": 1,
+      "routeConfigMap": "testroute-xml",
+      "secretSources": ["testroute-secret"],
+      "tls": {
+        "keystore": {
+          "key": "keystore.jks",
+          "passwordSecretRef": "jks-password",
+          "secretName": "testroute-certstore",
+          "type": "jks"
+        }
+      }
+    }
+  },
+  "attachments": { "Certificate.cert-manager.io/v1": {} },
+  "related": {},
+  "finalizing": false
+}

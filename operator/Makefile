@@ -1,6 +1,6 @@
 VERSION ?= 0.7.0
 GIT_TAG := operator_v$(VERSION)
-KEIP_INTEGRATION_IMAGE ?= ghcr.io/octoconsulting/keip/minimal-app:latest
+KEIP_INTEGRATION_IMAGE ?= ghcr.io/octoconsulting/keip/minimal-app:0.0.4
 
 KUBECTL := kubectl
 KUBECTL_DELETE := $(KUBECTL) delete --ignore-not-found
@@ -18,8 +18,14 @@ get-tag:
 
 prep-release:
 	rm -rf output
-	mkdir output
-	kustomize build ./controller > ./output/controller.yaml
+	mkdir -p output/addons
+	echo "Running kustomize build on ./controller"
+	kustomize build ./controller > ./output/core-controller.yaml
+	for dir in ./controller/addons/*/ ; do \
+		echo "Running kustomize build on $$dir" ; \
+		echo "---" >> ./output/addons/addons-controller.yaml ; \
+		kustomize build $$dir >> ./output/addons/addons-controller.yaml ; \
+	done
 	kustomize build ./crd > ./output/crd.yaml
 	ls -al ./output
 
@@ -34,8 +40,14 @@ controller/deploy: crd/deploy
 	$(KUBECTL) -n $(CONTROLLER_NAMESPACE) create cm keip-controller-props --from-literal=integration-image=$(KEIP_INTEGRATION_IMAGE) -o yaml --dry-run=client | $(KUBECTL) apply -f -
 
 controller/undeploy: crd/undeploy
-	-$(KUBECTL_DELETE) -n $(CONTROLLER_NAMESPACE) cm keip-controller-props
-	-$(KUBECTL_DELETE) -k controller
+	$(KUBECTL_DELETE) -n $(CONTROLLER_NAMESPACE) cm keip-controller-props
+	$(KUBECTL_DELETE) -k controller
+
+addons/certmanager/deploy:
+	$(KUBECTL) apply -k controller/addons/certmanager
+
+addons/certmanager/undeploy:
+	$(KUBECTL_DELETE) -k controller/addons/certmanager
 
 crd/deploy:
 	$(KUBECTL) apply -k crd

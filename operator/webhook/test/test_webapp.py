@@ -1,9 +1,9 @@
+import json
 import os
 import pytest
 from starlette.testclient import TestClient
-
+from typing import Mapping
 from webhook.app import app
-from webhook.test.test_sync import load_json_as_dict
 
 
 def test_status_endpoint(test_client):
@@ -17,12 +17,6 @@ def test_sync_endpoint_success(test_client):
     request = load_json_as_dict(
         f"{os.path.dirname(os.path.abspath(__file__))}/json/full-iroute-request.json"
     )
-    request = request | {
-        "controller": {},
-        "children": [],
-        "related": [],
-        "finalizing": False,
-    }
 
     response = test_client.post("/sync", json=request)
     expected = load_json_as_dict(
@@ -35,16 +29,10 @@ def test_sync_endpoint_success(test_client):
 
 def test_sync_certificate_endpoint_success(test_client):
     request = load_json_as_dict(
-        f"{os.path.dirname(os.path.abspath(__file__))}/json/full-iroute-request.json"
+        f"{os.path.dirname(os.path.abspath(__file__))}/json/full-cert-request.json"
     )
-    request = request | {
-        "controller": {},
-        "children": [],
-        "related": [],
-        "finalizing": False,
-    }
 
-    response = test_client.post("/add-ons/cert-manager/sync", json=request)
+    response = test_client.post("/addons/certmanager/sync", json=request)
     expected = load_json_as_dict(
         f"{os.path.dirname(os.path.abspath(__file__))}/json/full-cert-response.json"
     )
@@ -57,7 +45,7 @@ def test_sync_certificate_endpoint_success(test_client):
     "endpoint, status_code",
     [
         ("/sync", 400),
-        ("/add-ons/cert-manager/sync", 400),
+        ("/addons/certmanager/sync", 400),
     ],
 )
 def test_sync_endpoint_invalid_json(test_client, endpoint, status_code):
@@ -70,13 +58,21 @@ def test_sync_endpoint_invalid_json(test_client, endpoint, status_code):
     "endpoint, status_code",
     [
         ("/sync", 400),
-        ("/add-ons/cert-manager/sync", 400),
+        ("/addons/certmanager/sync", 400),
     ],
 )
 def test_sync_endpoint_empty_body(test_client, endpoint, status_code):
     response = test_client.post(endpoint, json={})
 
     assert response.status_code == status_code
+
+
+def load_json_as_dict(filepath: str) -> Mapping:
+    try:
+        with open(filepath, "r") as f:
+            return json.load(f)
+    except FileNotFoundError as e:
+        _LOGGER.error(f"File not found: {filepath}\n{e}")
 
 
 @pytest.fixture(scope="module")

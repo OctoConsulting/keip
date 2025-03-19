@@ -8,8 +8,8 @@ _LOGGER = logging.getLogger(__name__)
 from webhook.core.sync import sync
 
 
-def _new_certificate(parent) -> Mapping:
-    metadata = parent.get("metadata", None)
+def _new_certificate(object) -> Mapping:
+    metadata = object.get("metadata", None)
     if metadata is None:
         _LOGGER.error("IntegrationRoute does not contain metadata.")
         return {}
@@ -40,8 +40,8 @@ def _new_certificate(parent) -> Mapping:
         )
         return {}
 
-    keystore_type = _get_keystore_type(parent)
-    password_secret_ref_name = _get_password_secret_ref_name(parent)
+    keystore_type = _get_keystore_type(object)
+    password_secret_ref_name = _get_password_secret_ref_name(object)
 
     alt_names = (
         [n.strip() for n in annotations.get("cert-manager.io/alt-names").split(",")]
@@ -138,18 +138,16 @@ def _new_certificate(parent) -> Mapping:
     return cert
 
 
-def _get_keystore_type(parent) -> str:
-    return parent["spec"]["tls"]["keystore"]["type"]
+def _get_keystore_type(object) -> str:
+    return object["spec"]["tls"]["keystore"]["type"]
 
 
-def _get_password_secret_ref_name(parent) -> str:
-    return parent["spec"]["tls"]["keystore"]["passwordSecretRef"]
+def _get_password_secret_ref_name(object) -> str:
+    return object["spec"]["tls"]["keystore"]["passwordSecretRef"]
 
 
-def sync_certificate(parent) -> Mapping:
-    _LOGGER.debug("\n\nRequest:\n%s", parent)
-    # Status can be filled in with useful information about the state of managed children
-    # desired_state = {"status": {}, "children": [sync(parent), _new_certificate(parent)]}
-    desired_state = {"status": {}, "children": [_new_certificate(parent)]}
+def sync_certificate(object) -> Mapping:
+    _LOGGER.debug("\n\nRequest:\n%s", object)
+    desired_state = {"status": {}, "attachments": [_new_certificate(object)]}
     _LOGGER.debug("\n\nDesired state:\n%s", desired_state)
     return desired_state

@@ -1,3 +1,3 @@
 resources:
-  - integrationroute-controller.yaml
-  - integrationroute-privileges.yaml
+  - core-controller.yaml
+  - core-privileges.yaml

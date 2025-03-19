@@ -2,6 +2,14 @@ apiVersion: keip.octo.com/v1alpha1
 kind: IntegrationRoute
 metadata:
   name: testroute
+  annotations:
+    cert-manager.io/alt-names: "cloud-integration-route-actuator.default.svc.cluster.local"
+    cert-manager.io/cluster-issuer: "test-selfsigned"
+    cert-manager.io/common-name: "testroute"
+    cert-manager.io/subject-organizationalunits: "Parks and Recreation"
+    cert-manager.io/subject-countries: "US"
+    cert-manager.io/subject-provinces: "FL"
+    cert-manager.io/subject-localities: "A Park"
 spec:
   routeConfigMap: testroute-xml
   propSources:
@@ -11,9 +19,10 @@ spec:
     #     group: abc
   secretSources:
     - testroute-secret
+  # Optional TLS configuration
   tls:
     keystore:
-      secretName: test-keystore
+      secretName: testroute-certstore
       type: jks
       key: keystore.jks
       passwordSecretRef: jks-password

@@ -1,54 +1,37 @@
 {
   "status": {},
-  "children": [
+  "attachments": [
     {
       "apiVersion": "cert-manager.io/v1",
       "kind": "Certificate",
-      "metadata": {
-        "name": "testroute-certs",
-        "namespace": "testspace"
-      },
+      "metadata": { "name": "testroute-certs", "namespace": "testnamespace" },
       "spec": {
-        "commonName": "testroute.testspace",
+        "commonName": "testroute.testnamespace",
         "dnsNames": [
-          "testroute.testspace.svc.cluster.local",
-          "testroute.testspace.svc",
-          "testroute.testspace",
+          "testroute.testnamespace.svc.cluster.local",
+          "testroute.testnamespace.svc",
+          "testroute.testnamespace",
           "testroute",
-          "testroute-actuator.testspace.svc.cluster.local",
-          "cloud-integration-route-actuator.testspace.svc.cluster.local"
+          "testroute-actuator.testnamespace.svc.cluster.local",
+          "cloud-integration-route-actuator.testnamespace.svc.cluster.local"
         ],
         "issuerRef": {
           "group": "cert-manager.io",
           "kind": "ClusterIssuer",
-          "name": "test-cluster-issuer"
+          "name": "test-selfsigned"
         },
         "keystores": {
           "jks": {
             "create": true,
-            "passwordSecretRef": {
-              "key": "password",
-              "name": "keystore-password-ref"
-            }
+            "passwordSecretRef": { "key": "password", "name": "jks-password" }
           }
         },
         "secretName": "testroute-certstore",
         "subject": {
-          "organizationalUnits": [
-            "Unit One"
-          ],
-          "countries": [
-            "US",
-            "AU"
-          ],
-          "provinces": [
-            "AZ",
-            "SA"
-          ],
-          "localities": [
-            "Phoenix",
-            "Adelaide"
-          ]
+          "organizationalUnits": ["Parks and Recreation"],
+          "countries": ["US"],
+          "provinces": ["FL"],
+          "localities": ["A Park"]
         }
       }
     }
