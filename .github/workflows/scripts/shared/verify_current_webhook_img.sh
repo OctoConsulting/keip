@@ -1,5 +1,5 @@
 OPERATOR_DIR=operator
-OPERATOR_CONTROLLER_YAML=$OPERATOR_DIR/controller/integrationroute-controller.yaml
+OPERATOR_CONTROLLER_YAML=$OPERATOR_DIR/controller/core-controller.yaml
 
 verify_current_webhook_img() {
   current_webhook_img=$(make --no-print-directory -C operator/webhook get-image-name)
