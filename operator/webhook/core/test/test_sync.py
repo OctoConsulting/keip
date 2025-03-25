@@ -37,42 +37,42 @@ def test_full_integration_route(full_route):
 
 
 def test_vol_config_missing_route_map_raise_exception(full_route):
-    del full_route["spec"]["routeConfigMap"]
+    del full_route["parent"]["spec"]["routeConfigMap"]
     with pytest.raises(KeyError):
-        VolumeConfig(full_route["spec"])
+        VolumeConfig(full_route["parent"]["spec"])
 
 
 def test_vol_config_missing_optional_vols_no_fail(full_route):
-    del full_route["spec"]["secretSources"]
-    del full_route["spec"]["persistentVolumeClaims"]
-    del full_route["spec"]["configMaps"]
-    vol_conf = VolumeConfig(full_route["spec"])
+    del full_route["parent"]["spec"]["secretSources"]
+    del full_route["parent"]["spec"]["persistentVolumeClaims"]
+    del full_route["parent"]["spec"]["configMaps"]
+    vol_conf = VolumeConfig(full_route["parent"]["spec"])
 
     assert len(vol_conf.get_volumes()) > 0
     assert len(vol_conf.get_mounts()) > 0
 
 
 def test_spring_app_config_json_missing_props_sources(full_route):
-    del full_route["spec"]["propSources"]
+    del full_route["parent"]["spec"]["propSources"]
 
-    spring_conf = _spring_cloud_k8s_config(full_route)
+    spring_conf = _spring_cloud_k8s_config(full_route["parent"])
 
     assert spring_conf["kubernetes"]["secrets"] == {"paths": SECRETS_ROOT}
 
 
 def test_spring_app_config_json_missing_secret_sources(full_route):
-    del full_route["spec"]["secretSources"]
+    del full_route["parent"]["spec"]["secretSources"]
 
-    spring_conf = _spring_cloud_k8s_config(full_route)
+    spring_conf = _spring_cloud_k8s_config(full_route["parent"])
 
     assert spring_conf["kubernetes"]["config"]["sources"] is not None
 
 
 def test_spring_app_config_json_missing_props_and_secret_sources(full_route):
-    del full_route["spec"]["propSources"]
-    del full_route["spec"]["secretSources"]
+    del full_route["parent"]["spec"]["propSources"]
+    del full_route["parent"]["spec"]["secretSources"]
 
-    spring_conf = _spring_app_config_env_var(full_route)
+    spring_conf = _spring_app_config_env_var(full_route["parent"])
     actual_json = spring_conf["value"]
 
     assert spring_conf["name"] == "SPRING_APPLICATION_JSON"
@@ -102,27 +102,27 @@ def test_spring_app_config_json_missing_props_and_secret_sources(full_route):
 
 
 def test_pod_template_no_annotations(full_route):
-    del full_route["spec"]["annotations"]
+    del full_route["parent"]["spec"]["annotations"]
 
-    deployment = _new_deployment(full_route)
+    deployment = _new_deployment(full_route["parent"])
 
     pod_template = deployment["spec"]["template"]
     assert pod_template["metadata"].get("annotations") is None
 
 
 def test_pod_template_empty_annotations(full_route):
-    full_route["spec"]["annotations"] = {}
+    full_route["parent"]["spec"]["annotations"] = {}
 
-    deployment = _new_deployment(full_route)
+    deployment = _new_deployment(full_route["parent"])
 
     pod_template = deployment["spec"]["template"]
     assert pod_template["metadata"].get("annotations") is None
 
 
 def test_pod_template_no_tls(full_route):
-    del full_route["spec"]["tls"]
+    del full_route["parent"]["spec"]["tls"]
 
-    deployment = _new_deployment(full_route)
+    deployment = _new_deployment(full_route["parent"])
 
     check_pod_probe_protocol(deployment, "HTTP", 8080)
     check_volume_absent(deployment, "truststore")
@@ -132,9 +132,9 @@ def test_pod_template_no_tls(full_route):
 
 
 def test_pod_template_no_truststore(full_route):
-    del full_route["spec"]["tls"]["truststore"]
+    del full_route["parent"]["spec"]["tls"]["truststore"]
 
-    deployment = _new_deployment(full_route)
+    deployment = _new_deployment(full_route["parent"])
 
     check_pod_probe_protocol(deployment, "HTTPS", 8443)
     check_volume_absent(deployment, "truststore")
@@ -142,9 +142,9 @@ def test_pod_template_no_truststore(full_route):
 
 
 def test_pod_template_no_keystore(full_route):
-    del full_route["spec"]["tls"]["keystore"]
+    del full_route["parent"]["spec"]["tls"]["keystore"]
 
-    deployment = _new_deployment(full_route)
+    deployment = _new_deployment(full_route["parent"])
 
     check_pod_probe_protocol(deployment, "HTTP", 8080)
     check_volume_absent(deployment, "keystore")
@@ -152,7 +152,7 @@ def test_pod_template_no_keystore(full_route):
 
 
 def test_jdk_options_pkcs12_type(full_route):
-    tls_config = full_route["spec"]["tls"]
+    tls_config = full_route["parent"]["spec"]["tls"]
     options = _get_java_jdk_options(tls_config)
 
     assert options["name"] == JDK_OPTIONS_ENV_NAME
@@ -166,7 +166,7 @@ def test_jdk_options_pkcs12_type(full_route):
 
 
 def test_jdk_options_jks_type(full_route):
-    tls_config = full_route["spec"]["tls"]
+    tls_config = full_route["parent"]["spec"]["tls"]
     tls_config["truststore"]["type"] = "jks"
     tls_config["truststore"]["key"] = "test-truststore.jks"
 
@@ -182,15 +182,15 @@ def test_jdk_options_jks_type(full_route):
 
 
 def test_env_vars_no_keystore(full_route):
-    del full_route["spec"]["tls"]["keystore"]
+    del full_route["parent"]["spec"]["tls"]["keystore"]
 
-    options = _generate_container_env_vars(full_route)
+    options = _generate_container_env_vars(full_route["parent"])
 
     assert not any(x for x in options if x.get("name") == "SERVER_SSL_KEYSTOREPASSWORD")
 
 
 def test_env_var_service_name(full_route):
-    actual_env_vars = _generate_container_env_vars(full_route)
+    actual_env_vars = _generate_container_env_vars(full_route["parent"])
     actual_service_name_env_var = next(
         (
             actual_env_var
@@ -227,7 +227,7 @@ def test_no_additional_env_vars(full_route):
                 0
             ]["env"].remove(env_var)
 
-    del full_route["spec"]["env"]
+    del full_route["parent"]["spec"]["env"]
     actual_response = sync(full_route)
 
     assert expected_response == actual_response
@@ -241,34 +241,34 @@ def test_no_env_from(full_route):
         "envFrom"
     ]
 
-    del full_route["spec"]["envFrom"]
+    del full_route["parent"]["spec"]["envFrom"]
     actual_response = sync(full_route)
 
     assert expected_response == actual_response
 
 
 def test_deployment_missing_labels(full_route):
-    del full_route["spec"]["labels"]
+    del full_route["parent"]["spec"]["labels"]
 
-    deployment = _new_deployment(full_route)
+    deployment = _new_deployment(full_route["parent"])
 
     labels = deployment["metadata"]["labels"]
     assert len(labels) > 0
 
 
 def test_deployment_empty_labels(full_route):
-    full_route["spec"]["labels"] = {}
+    full_route["parent"]["spec"]["labels"] = {}
 
-    deployment = _new_deployment(full_route)
+    deployment = _new_deployment(full_route["parent"])
 
     labels = deployment["metadata"]["labels"]
     assert len(labels) > 0
 
 
 def test_deployment_missing_annotations(full_route):
-    del full_route["spec"]["annotations"]
+    del full_route["parent"]["spec"]["annotations"]
 
-    deployment = _new_deployment(full_route)
+    deployment = _new_deployment(full_route["parent"])
 
     assert "annotations" in deployment["metadata"]
     annotations = deployment["metadata"]["annotations"]
@@ -276,9 +276,9 @@ def test_deployment_missing_annotations(full_route):
 
 
 def test_deployment_empty_annotations(full_route):
-    full_route["spec"]["annotations"] = {}
+    full_route["parent"]["spec"]["annotations"] = {}
 
-    deployment = _new_deployment(full_route)
+    deployment = _new_deployment(full_route["parent"])
 
     assert "annotations" in deployment["metadata"]
     annotations = deployment["metadata"]["annotations"]
@@ -286,9 +286,11 @@ def test_deployment_empty_annotations(full_route):
 
 
 def test_pod_missing_resources(full_route):
-    del full_route["spec"]["resources"]
+    del full_route["parent"]["spec"]["resources"]
 
-    pod = _create_pod_template(full_route, labels=None, integration_image=None)
+    pod = _create_pod_template(
+        full_route["parent"], labels=None, integration_image=None
+    )
 
     resources = pod["spec"]["containers"][0].get("resources")
     assert resources["requests"]["cpu"] == "500m"
@@ -298,9 +300,11 @@ def test_pod_missing_resources(full_route):
 
 
 def test_pod_resources_limits_only(full_route):
-    del full_route["spec"]["resources"]["requests"]
+    del full_route["parent"]["spec"]["resources"]["requests"]
 
-    pod = _create_pod_template(full_route, labels=None, integration_image=None)
+    pod = _create_pod_template(
+        full_route["parent"], labels=None, integration_image=None
+    )
 
     pod_resources = pod["spec"]["containers"][0]["resources"]
     assert "requests" not in pod_resources
@@ -308,9 +312,11 @@ def test_pod_resources_limits_only(full_route):
 
 
 def test_pod_resources_requests_only(full_route):
-    del full_route["spec"]["resources"]["limits"]
+    del full_route["parent"]["spec"]["resources"]["limits"]
 
-    pod = _create_pod_template(full_route, labels=None, integration_image=None)
+    pod = _create_pod_template(
+        full_route["parent"], labels=None, integration_image=None
+    )
 
     pod_resources = pod["spec"]["containers"][0]["resources"]
     assert "limits" not in pod_resources
@@ -320,14 +326,13 @@ def test_pod_resources_requests_only(full_route):
 
 @pytest.fixture()
 def full_route(full_route_load: dict):
-    return copy.deepcopy(full_route_load["parent"])
+    return copy.deepcopy(full_route_load)
 
 
 @pytest.fixture(scope="module")
 def full_route_load() -> Mapping:
     cwd = os.path.dirname(os.path.abspath(__file__))
-    if os.path.exists(f"{cwd}/json/full-iroute-request.json"):
-        return load_json_as_dict(f"{cwd}/json/full-iroute-request.json")
+    return load_json_as_dict(f"{cwd}/json/full-iroute-request.json")
 
 
 def load_json_as_dict(filepath: str) -> Mapping:

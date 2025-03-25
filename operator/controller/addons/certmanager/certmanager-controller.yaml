@@ -11,7 +11,7 @@ spec:
     - apiVersion: cert-manager.io/v1
       resource: certificates
       updateStrategy:
-        method: RollingRecreate
+        method: InPlace
   hooks:
     sync:
       webhook:

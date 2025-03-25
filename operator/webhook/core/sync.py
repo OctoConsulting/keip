@@ -449,10 +449,11 @@ def _gen_children(parent) -> List[Mapping]:
     return [_new_deployment(parent), _new_actuator_service(parent)]
 
 
-def sync(parent) -> Mapping:
+def sync(body) -> Mapping:
+    # Request API at https://metacontroller.github.io/metacontroller/api/compositecontroller.html#sync-hook-request
+    _LOGGER.debug("\n\nRequest:\n%s", body)
+    parent = body["parent"]
     # Status can be filled in with useful about the state of managed children
-    # (e.g. number of children pods currently running)
-    _LOGGER.debug("Integration Route from request:\n%s", parent)
     desired_state = {"status": {}, "children": _gen_children(parent)}
-    _LOGGER.debug("Desired state response:\n%s", desired_state)
+    _LOGGER.debug("\n\nDesired state:\n%s", desired_state)
     return desired_state

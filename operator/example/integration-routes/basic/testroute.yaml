@@ -1,0 +1,13 @@
+apiVersion: keip.octo.com/v1alpha1
+kind: IntegrationRoute
+metadata:
+  name: testroute
+spec:
+  routeConfigMap: testroute-xml
+  propSources:
+    - name: testroute-props
+    # Can also select ConfigMaps using labels:
+    # - labels:
+    #     group: abc
+  secretSources:
+    - testroute-secret

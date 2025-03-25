@@ -17,7 +17,7 @@ configMapGenerator:
 secretGenerator:
   - name: testroute-secret
     literals:
-      - test.secret=pass123
+      - test.secret=certmanager-addon
   - name: jks-password
     literals:
       - password=password

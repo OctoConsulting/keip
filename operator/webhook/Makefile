@@ -28,11 +28,11 @@ start-dev-server:
 
 .PHONY: test
 test:
-	rm -rf $(TEST_COVERAGE_DIR) && mkdir -p $(TEST_COVERAGE_DIR) && coverage run --data-file=$(TEST_COVERAGE_FILE) -m pytest -vv
+	mkdir -p $(TEST_COVERAGE_DIR) && coverage run --data-file=$(TEST_COVERAGE_FILE) -m pytest -vv
 
 .PHONY: win-test
 win-test:
-	(if exist $(TEST_COVERAGE_DIR) rmdir /s /q $(TEST_COVERAGE_DIR)) && mkdir $(TEST_COVERAGE_DIR) && coverage run --data-file=$(TEST_COVERAGE_FILE) -m pytest -vv
+	(if not exist $(TEST_COVERAGE_DIR) mkdir $(TEST_COVERAGE_DIR)) && coverage run --data-file=$(TEST_COVERAGE_FILE) -m pytest -vv
 
 .PHONY: report-test-coverage
 report-test-coverage: test
