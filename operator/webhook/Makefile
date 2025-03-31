@@ -76,7 +76,10 @@ win-report-test-coverage-html: win-test
 .PHONY: precommit
 precommit: test format lint
 
-.PHONY: start-dev
+.PHONY: win-precommit
+win-precommit: win-test format lint
+
+.PHONY: start-dev-server
 start-dev-server:
 	$(PYTHON) -m uvicorn --port 7080 --reload --app-dir .. webhook.app:app
 

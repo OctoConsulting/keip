@@ -6,15 +6,19 @@ KUBECTL := kubectl
 KUBECTL_DELETE := $(KUBECTL) delete --ignore-not-found
 CONTROLLER_NAMESPACE := keip
 
-.PHONY: all
-all: metacontroller/deploy controller/deploy
+.PHONY: deploy
+deploy: metacontroller/deploy controller/deploy
 
-.PHONY: clean
-clean: controller/undeploy metacontroller/undeploy
+.PHONY: undeploy
+undeploy: controller/undeploy metacontroller/undeploy
 
 .PHONY: get-tag
 get-tag:
 	@echo $(GIT_TAG)
+
+.PHONY: clean
+clean:
+	rm -rf output
 
 prep-release:
 	@rm -rf output
