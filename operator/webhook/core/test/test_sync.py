@@ -336,11 +336,8 @@ def full_route_load() -> Mapping:
 
 
 def load_json_as_dict(filepath: str) -> Mapping:
-    try:
-        with open(filepath, "r") as f:
-            return json.load(f)
-    except FileNotFoundError as e:
-        _LOGGER.error(f"File not found: {filepath}\n{e}")
+    with open(filepath, "r") as f:
+        return json.load(f)
 
 
 def check_env_var_absent(deployment: Mapping, name: str):
