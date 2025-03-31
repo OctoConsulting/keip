@@ -71,7 +71,7 @@ k8s.
    NodePort.
 
 ```yaml
-# integrationroute-controller.yaml
+# core-controller.yaml
 apiVersion: v1
 kind: Service
 metadata:

@@ -7,7 +7,7 @@
       "metadata": {
         "name": "testroute",
         "labels": {
-          "app.kubernetes.io/managed-by": "integrationroute-controller",
+          "app.kubernetes.io/managed-by": "keip-integrationroute-controller",
           "app.kubernetes.io/name": "integrationroute",
           "app.kubernetes.io/instance": "integrationroute-testroute",
           "app.kubernetes.io/version": "latest",
@@ -27,7 +27,7 @@
         "template": {
           "metadata": {
             "labels": {
-              "app.kubernetes.io/managed-by": "integrationroute-controller",
+              "app.kubernetes.io/managed-by": "keip-integrationroute-controller",
               "app.kubernetes.io/name": "integrationroute",
               "app.kubernetes.io/instance": "integrationroute-testroute",
               "app.kubernetes.io/version": "latest",

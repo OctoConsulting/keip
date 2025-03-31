@@ -21,14 +21,14 @@ prep-release:
 	@rm -rf output
 	@mkdir -p output/addons
 	@echo "Running kustomize build on ./controller/"
-	kustomize build ./controller/ > ./output/core-controller.yaml
+	kustomize build ./controller/ > ./output/keip-core-controller.yaml
 	@for dir in ./controller/addons/*/ ; do \
 		echo "Running kustomize build on $$dir" ; \
 		addon=$$(basename $$dir) ; \
 		mkdir -p output/addons/$$addon ; \
-		kustomize build $$dir >> ./output/addons/$$addon/$${addon}-addon-controller.yaml ; \
-		echo "---" >> ./output/addons/addons-controllers.yaml ; \
-		kustomize build $$dir >> ./output/addons/addons-controllers.yaml ; \
+		kustomize build $$dir >> ./output/addons/$$addon/keip-$${addon}-addon-controller.yaml ; \
+		echo "---" >> ./output/addons/keip-addon-controllers.yaml ; \
+		kustomize build $$dir >> ./output/addons/keip-addon-controllers.yaml ; \
 	done
 	@echo "Running kustomize build on ./crd/"
 	kustomize build ./crd/ > ./output/crd.yaml

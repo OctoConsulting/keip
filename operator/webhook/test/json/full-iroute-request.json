@@ -3,13 +3,13 @@
     "kind": "CompositeController",
     "apiVersion": "metacontroller.k8s.io/v1alpha1",
     "metadata": {
-      "name": "integrationroute-controller",
+      "name": "keip-integrationroute-controller",
       "uid": "1dfca480-3ea5-4778-8538-54c35c11f31b",
       "resourceVersion": "48692412",
       "generation": 1,
       "creationTimestamp": "2025-03-18T15:54:33Z",
       "annotations": {
-        "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"metacontroller.k8s.io/v1alpha1\",\"kind\":\"CompositeController\",\"metadata\":{\"annotations\":{},\"name\":\"integrationroute-controller\"},\"spec\":{\"childResources\":[{\"apiVersion\":\"apps/v1\",\"resource\":\"deployments\",\"updateStrategy\":{\"method\":\"RollingRecreate\",\"statusChecks\":{\"conditions\":[{\"status\":\"True\",\"type\":\"Ready\"}]}}},{\"apiVersion\":\"v1\",\"resource\":\"services\",\"updateStrategy\":{\"method\":\"RollingRecreate\",\"statusChecks\":{\"conditions\":[{\"status\":\"True\",\"type\":\"Ready\"}]}}}],\"generateSelector\":true,\"hooks\":{\"sync\":{\"webhook\":{\"timeout\":\"10s\",\"url\":\"http://integrationroute-webhook.keip/sync\"}}},\"parentResource\":{\"apiVersion\":\"keip.octo.com/v1alpha1\",\"resource\":\"integrationroutes\",\"revisionHistory\":{\"fieldPaths\":[\"spec.routeConfigMap\"]}}}}\n"
+        "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"metacontroller.k8s.io/v1alpha1\",\"kind\":\"CompositeController\",\"metadata\":{\"annotations\":{},\"name\":\"keip-integrationroute-controller\"},\"spec\":{\"childResources\":[{\"apiVersion\":\"apps/v1\",\"resource\":\"deployments\",\"updateStrategy\":{\"method\":\"RollingRecreate\",\"statusChecks\":{\"conditions\":[{\"status\":\"True\",\"type\":\"Ready\"}]}}},{\"apiVersion\":\"v1\",\"resource\":\"services\",\"updateStrategy\":{\"method\":\"RollingRecreate\",\"statusChecks\":{\"conditions\":[{\"status\":\"True\",\"type\":\"Ready\"}]}}}],\"generateSelector\":true,\"hooks\":{\"sync\":{\"webhook\":{\"timeout\":\"10s\",\"url\":\"http://integrationroute-webhook.keip/sync\"}}},\"parentResource\":{\"apiVersion\":\"keip.octo.com/v1alpha1\",\"resource\":\"integrationroutes\",\"revisionHistory\":{\"fieldPaths\":[\"spec.routeConfigMap\"]}}}}\n"
       },
       "managedFields": [
         {

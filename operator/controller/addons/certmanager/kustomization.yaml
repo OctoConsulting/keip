@@ -1,2 +1,2 @@
 resources:
-  - certmanager-controller.yaml
+  - keip-certmanager-controller.yaml

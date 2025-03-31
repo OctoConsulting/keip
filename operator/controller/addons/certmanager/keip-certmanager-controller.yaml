@@ -2,7 +2,7 @@
 apiVersion: metacontroller.k8s.io/v1alpha1
 kind: DecoratorController
 metadata:
-  name: certmanager-controller
+  name: keip-certmanager-controller
 spec:
   resources:
     - apiVersion: keip.octo.com/v1alpha1

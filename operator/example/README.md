@@ -28,7 +28,7 @@ This should result in the creation of the following resources:
 - Secret `testroute-secret`: Confidential information that will be mounted as a volume in the running
   pod.
 - Service `testroute-actuator`: Exposes the Spring Actuator.
-- IntegrationRoute Controller `metacontroller.k8s.io/v1alpha1/integrationroute-controller`: A `metacontroller.k8s.io/v1alpha1/CompositeController` that creates a `Deployment` and a `Service` from a `keip.octo.com/v1alpha1/IntegrationRoute`.
+- IntegrationRoute Controller `metacontroller.k8s.io/v1alpha1/keip-integrationroute-controller`: A `metacontroller.k8s.io/v1alpha1/CompositeController` that creates a `Deployment` and a `Service` from a `keip.octo.com/v1alpha1/IntegrationRoute`.
 
 Check that pod `testroute` is `Running` and `1/1` is ready:
 ```shell
@@ -125,8 +125,8 @@ This should result in the creation of the following resources:
 - Service `testroute-actuator`: Exposes the Spring Actuator.
 - Self-Signed Certificate `certificate.cert-manager.io/testroute-certs`: A `certificate.cert-manager.io/Certificate` resource that creates the `testroute-certstore` `Secret` using the `jks-password` `Secret`.
 - Cluster Issuer `clusterissuer.cert-manager.io/test-selfsigned`: A self-signed `cert-manager.io/v1/ClusterIssuer` used to sign certificates.
-- IntegrationRoute Controller `metacontroller.k8s.io/v1alpha1/integrationroute-controller`: A `metacontroller.k8s.io/v1alpha1/CompositeController` that creates a `Deployment` and a `Service` from a `keip.octo.com/v1alpha1/IntegrationRoute`.
-- Certmanager Controller `metacontroller.k8s.io/v1alpha1/certmanager-controller`: A `metacontroller.k8s.io/v1alpha1/DecoratorController` that creates a `Certificate` from a `keip.octo.com/v1alpha1/IntegrationRoute`.
+- IntegrationRoute Controller `metacontroller.k8s.io/v1alpha1/keip-integrationroute-controller`: A `metacontroller.k8s.io/v1alpha1/CompositeController` that creates a `Deployment` and a `Service` from a `keip.octo.com/v1alpha1/IntegrationRoute`.
+- Certmanager Controller `metacontroller.k8s.io/v1alpha1/keip-certmanager-controller`: A `metacontroller.k8s.io/v1alpha1/DecoratorController` that creates a `Certificate` from a `keip.octo.com/v1alpha1/IntegrationRoute`.
 
 Check that pod `testroute` is `Running` and `1/1` is ready:
 ```shell

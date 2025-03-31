@@ -3,13 +3,13 @@
     "kind": "DecoratorController",
     "apiVersion": "metacontroller.k8s.io/v1alpha1",
     "metadata": {
-      "name": "certmanager-controller",
+      "name": "keip-certmanager-controller",
       "uid": "79dfff16-d192-439f-8af2-aaa75409514e",
       "resourceVersion": "48689094",
       "generation": 1,
       "creationTimestamp": "2025-03-18T15:19:49Z",
       "annotations": {
-        "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"metacontroller.k8s.io/v1alpha1\",\"kind\":\"DecoratorController\",\"metadata\":{\"annotations\":{},\"name\":\"certmanager-controller\"},\"spec\":{\"attachments\":[{\"apiVersion\":\"cert-manager.io/v1\",\"resource\":\"certificates\",\"updateStrategy\":{\"method\":\"RollingRecreate\"}}],\"hooks\":{\"sync\":{\"webhook\":{\"url\":\"http://integrationroute-webhook.keip/addons/certmanager/sync\"}}},\"resources\":[{\"apiVersion\":\"keip.octo.com/v1alpha1\",\"resource\":\"integrationroutes\"}]}}\n"
+        "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"metacontroller.k8s.io/v1alpha1\",\"kind\":\"DecoratorController\",\"metadata\":{\"annotations\":{},\"name\":\"keip-certmanager-controller\"},\"spec\":{\"attachments\":[{\"apiVersion\":\"cert-manager.io/v1\",\"resource\":\"certificates\",\"updateStrategy\":{\"method\":\"RollingRecreate\"}}],\"hooks\":{\"sync\":{\"webhook\":{\"url\":\"http://integrationroute-webhook.keip/addons/certmanager/sync\"}}},\"resources\":[{\"apiVersion\":\"keip.octo.com/v1alpha1\",\"resource\":\"integrationroutes\"}]}}\n"
       },
       "managedFields": [
         {
