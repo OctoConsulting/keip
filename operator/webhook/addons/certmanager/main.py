@@ -22,65 +22,32 @@ def _new_certificate(obj) -> Mapping:
         annotation for annotation in annotations if "cert-manager.io" in annotation
     ]
 
-    if cert_manager_io_annotations:
-        cluster_issuer = annotations.get("cert-manager.io/cluster-issuer", None)
-        if cluster_issuer is None:
-            _LOGGER.error(
-                "IntegrationRoute does not contain metadata.annotations.cert-manager.io/cluster-issuer"
-            )
-            return {}
-
-        common_name = annotations.get("cert-manager.io/common-name", None)
-        if common_name is None:
-            _LOGGER.error(
-                "IntegrationRoute does not contain metadata.annotations.cert-manager.io/common-name"
-            )
-            return {}
-    else:
+    if not cert_manager_io_annotations:
         return {}
 
-    keystore_type = _get_keystore_type(obj)
-    password_secret_ref_name = _get_password_secret_ref_name(obj)
+    common_name = annotations.get("cert-manager.io/common-name", name)
 
-    alt_names = (
-        [n.strip() for n in annotations.get("cert-manager.io/alt-names").split(",")]
-        if annotations.get("cert-manager.io/alt-names", None) is not None
-        else []
+    cluster_issuer = annotations.get("cert-manager.io/cluster-issuer", None)
+    if cluster_issuer is None:
+        _LOGGER.error(
+            "IntegrationRoute does not contain metadata.annotations.cert-manager.io/cluster-issuer"
+        )
+        return {}
+
+    alt_names = _get_annotation_vals_as_list(
+        annotations.get("cert-manager.io/alt-names")
     )
-    organizational_units = (
-        [
-            u.strip()
-            for u in annotations.get(
-                "cert-manager.io/subject-organizationalunits"
-            ).split(",")
-        ]
-        if annotations.get("cert-manager.io/subject-organizationalunits", None)
-        is not None
-        else []
+    organizational_units = _get_annotation_vals_as_list(
+        annotations.get("cert-manager.io/subject-organizationalunits")
     )
-    countries = (
-        [
-            c.strip()
-            for c in annotations.get("cert-manager.io/subject-countries").split(",")
-        ]
-        if annotations.get("cert-manager.io/subject-countries", None) is not None
-        else []
+    countries = _get_annotation_vals_as_list(
+        annotations.get("cert-manager.io/subject-countries")
     )
-    provinces = (
-        [
-            p.strip()
-            for p in annotations.get("cert-manager.io/subject-provinces").split(",")
-        ]
-        if annotations.get("cert-manager.io/subject-provinces", None) is not None
-        else []
+    provinces = _get_annotation_vals_as_list(
+        annotations.get("cert-manager.io/subject-provinces")
     )
-    localities = (
-        [
-            l.strip()
-            for l in annotations.get("cert-manager.io/subject-localities").split(",")
-        ]
-        if annotations.get("cert-manager.io/subject-localities", None) is not None
-        else []
+    localities = _get_annotation_vals_as_list(
+        annotations.get("cert-manager.io/subject-localities")
     )
 
     dns_names = [
@@ -104,6 +71,9 @@ def _new_certificate(obj) -> Mapping:
 
     if localities:
         subject["localities"] = localities
+
+    keystore_type = _get_keystore_type(obj)
+    password_secret_ref_name = _get_password_secret_ref_name(obj)
 
     cert = {
         "apiVersion": "cert-manager.io/v1",
@@ -137,6 +107,14 @@ def _new_certificate(obj) -> Mapping:
     return cert
 
 
+def _get_annotation_vals_as_list(annotation_val) -> List:
+    return (
+        [val for i in annotation_val.split(",") if (val := i.strip())]
+        if annotation_val
+        else []
+    )
+
+
 def _get_keystore_type(obj) -> str:
     return obj["spec"]["tls"]["keystore"]["type"]
 
@@ -147,7 +125,6 @@ def _get_password_secret_ref_name(obj) -> str:
 
 def sync_certificate(body) -> Mapping:
     # Request API at for DecoratorController at https://metacontroller.github.io/metacontroller/api/decoratorcontroller.html#sync-hook-request
-    _LOGGER.debug("\n\nRequest:\n%s", body)
     obj = body["object"]
     certificate = _new_certificate(obj)
     attachments = [certificate] if certificate else []

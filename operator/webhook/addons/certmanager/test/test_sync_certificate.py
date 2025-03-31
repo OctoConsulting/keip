@@ -8,6 +8,7 @@ import pytest
 
 from webhook.addons.certmanager.main import (
     sync_certificate,
+    _get_annotation_vals_as_list,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -53,6 +54,34 @@ def test_sync_certificate_no_alt_names(full_route):
     assert actual_desired_state_json == expected_desired_state_json
 
 
+def test_get_annotation_vals_as_list():
+    annotation_vals = "annotation1, annotation2, annotation3"
+    actual_annotation_list = _get_annotation_vals_as_list(annotation_vals)
+    expected_annotation_list = ["annotation1", "annotation2", "annotation3"]
+    assert actual_annotation_list == expected_annotation_list
+
+
+def test_get_annotation_vals_as_list_empty_string():
+    annotation_vals = ""
+    actual_annotation_list = _get_annotation_vals_as_list(annotation_vals)
+    expected_annotation_list = []
+    assert actual_annotation_list == expected_annotation_list
+
+
+def test_get_annotation_vals_as_list_only_separator():
+    annotation_vals = ","
+    actual_annotation_list = _get_annotation_vals_as_list(annotation_vals)
+    expected_annotation_list = []
+    assert actual_annotation_list == expected_annotation_list
+
+
+def test_get_annotation_vals_as_list_extra_separators():
+    annotation_vals = ",annotation1,,annotation2,,, annotation3,"
+    actual_annotation_list = _get_annotation_vals_as_list(annotation_vals)
+    expected_annotation_list = ["annotation1", "annotation2", "annotation3"]
+    assert actual_annotation_list == expected_annotation_list
+
+
 def test_sync_certificate_no_cluster_issuer(full_route):
     del full_route["object"]["metadata"]["annotations"][
         "cert-manager.io/cluster-issuer"
@@ -65,7 +94,10 @@ def test_sync_certificate_no_cluster_issuer(full_route):
 
 def test_sync_certificate_no_common_name(full_route):
     del full_route["object"]["metadata"]["annotations"]["cert-manager.io/common-name"]
-    expected_desired_state_json = json.dumps({"status": {}, "attachments": []})
+    expected_desired_state_dict = load_json_as_dict(
+        f"{os.path.dirname(os.path.abspath(__file__))}/json/full-response.json"
+    )
+    expected_desired_state_json = json.dumps(expected_desired_state_dict)
     actual_desired_state_json = json.dumps(sync_certificate(full_route))
 
     assert actual_desired_state_json == expected_desired_state_json
@@ -179,8 +211,5 @@ def full_route_load() -> Mapping:
 
 
 def load_json_as_dict(filepath: str) -> Mapping:
-    try:
-        with open(filepath, "r") as f:
-            return json.load(f)
-    except FileNotFoundError as e:
-        _LOGGER.error(f"File not found: {filepath}\n{e}")
+    with open(filepath, "r") as f:
+        return json.load(f)
