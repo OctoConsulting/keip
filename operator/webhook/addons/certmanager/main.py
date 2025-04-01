@@ -11,7 +11,7 @@ def _new_certificate(obj) -> Mapping:
 
     namespace = metadata["namespace"]
 
-    annotations = metadata.get("annotations", None)
+    annotations = metadata.get("annotations")
     if annotations is None:
         _LOGGER.debug(
             "IntegrationRoute does not contain metadata.annotations. No certificate will be generated."
@@ -27,12 +27,26 @@ def _new_certificate(obj) -> Mapping:
 
     common_name = annotations.get("cert-manager.io/common-name", name)
 
-    cluster_issuer = annotations.get("cert-manager.io/cluster-issuer", None)
-    if cluster_issuer is None:
+    issuer = annotations.get("cert-manager.io/issuer")
+    cluster_issuer = annotations.get("cert-manager.io/cluster-issuer")
+
+    if issuer is not None and cluster_issuer is not None:
         _LOGGER.error(
-            "IntegrationRoute does not contain metadata.annotations.cert-manager.io/cluster-issuer"
+            "IntegrationRoute cannot have metadata.annotations.cert-manager.io/issuer and metadata.annotations.cert-manager.io/cluster-issuer"
         )
         return {}
+
+    if issuer is None and cluster_issuer is None:
+        _LOGGER.error(
+            "IntegrationRoute must have metadata.annotations.cert-manager.io/issuer or metadata.annotations.cert-manager.io/cluster-issuer"
+        )
+        return {}
+
+    if issuer is not None:
+        issuer_kind = "Issuer"
+    else:
+        issuer_kind = "ClusterIssuer"
+        issuer = cluster_issuer
 
     alt_names = _get_annotation_vals_as_list(
         annotations.get("cert-manager.io/alt-names")
@@ -87,8 +101,8 @@ def _new_certificate(obj) -> Mapping:
             "dnsNames": dns_names,
             "issuerRef": {
                 "group": "cert-manager.io",
-                "kind": "ClusterIssuer",
-                "name": cluster_issuer,
+                "kind": issuer_kind,
+                "name": issuer,
             },
             "keystores": {
                 keystore_type: {
@@ -129,5 +143,4 @@ def sync_certificate(body) -> Mapping:
     certificate = _new_certificate(obj)
     attachments = [certificate] if certificate else []
     desired_state = {"status": {}, "attachments": attachments}
-    _LOGGER.debug("\n\nDesired state:\n%s", desired_state)
     return desired_state

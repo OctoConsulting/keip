@@ -1,11 +1,8 @@
 import json
-import logging
 from pathlib import PurePosixPath
 from typing import List, Mapping, Optional, Any
 
 from webhook import config as cfg
-
-_LOGGER = logging.getLogger(__name__)
 
 SECRETS_ROOT = "/etc/secrets"
 
@@ -454,5 +451,4 @@ def sync(body) -> Mapping:
     parent = body["parent"]
     # Status can be filled in with useful about the state of managed children
     desired_state = {"status": {}, "children": _gen_children(parent)}
-    _LOGGER.debug("\n\nDesired state:\n%s", desired_state)
     return desired_state

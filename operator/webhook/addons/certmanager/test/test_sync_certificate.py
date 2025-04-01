@@ -82,10 +82,54 @@ def test_get_annotation_vals_as_list_extra_separators():
     assert actual_annotation_list == expected_annotation_list
 
 
-def test_sync_certificate_no_cluster_issuer(full_route):
+def test_sync_certificate_iroute_has_issuer(full_route):
     del full_route["object"]["metadata"]["annotations"][
         "cert-manager.io/cluster-issuer"
     ]
+
+    full_route["object"]["metadata"]["annotations"][
+        "cert-manager.io/issuer"
+    ] = "test-issuer"
+    expected_desired_state_dict = load_json_as_dict(
+        f"{os.path.dirname(os.path.abspath(__file__))}/json/full-response.json"
+    )
+    expected_desired_state_dict["attachments"][0]["spec"]["issuerRef"][
+        "kind"
+    ] = "Issuer"
+    expected_desired_state_dict["attachments"][0]["spec"]["issuerRef"][
+        "name"
+    ] = "test-issuer"
+    expected_desired_state_json = json.dumps(expected_desired_state_dict)
+    actual_desired_state_json = json.dumps(sync_certificate(full_route))
+
+    assert actual_desired_state_json == expected_desired_state_json
+
+
+def test_sync_certificate_iroute_has_cluster_issuer(full_route):
+    expected_desired_state_dict = load_json_as_dict(
+        f"{os.path.dirname(os.path.abspath(__file__))}/json/full-response.json"
+    )
+    expected_desired_state_json = json.dumps(expected_desired_state_dict)
+    actual_desired_state_json = json.dumps(sync_certificate(full_route))
+
+    assert actual_desired_state_json == expected_desired_state_json
+
+
+def test_sync_certificate_iroute_has_neither_issuer_or_cluster_issuer(
+    full_route,
+):
+    del full_route["object"]["metadata"]["annotations"][
+        "cert-manager.io/cluster-issuer"
+    ]
+    expected_desired_state_json = json.dumps({"status": {}, "attachments": []})
+    actual_desired_state_json = json.dumps(sync_certificate(full_route))
+
+    assert actual_desired_state_json == expected_desired_state_json
+
+
+def test_sync_certificate_iroute_has_issuer_and_cluster_issuer(full_route):
+    full_route["object"]["metadata"]["annotations"][
+        "cert-manager.io/issuer"] = "test-issuer"
     expected_desired_state_json = json.dumps({"status": {}, "attachments": []})
     actual_desired_state_json = json.dumps(sync_certificate(full_route))
 
