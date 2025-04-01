@@ -127,7 +127,7 @@ spec:
 EOF
 ```
 
-For more in-depth examples, see the [operator/examples](./operator/example) directory.
+For more in-depth examples, see the [operator/examples](./operator/examples) directory.
 
 ## Clean up
 
@@ -143,6 +143,21 @@ To remove the keip operator and all related resources from your cluster:
 ```shell
 cd operator && make undeploy
 ```
+
+## Troubleshooting
+
+The keip webhook and metacontroller pod logs can be useful when debugging errors:
+
+```shell
+# Metacontroller logs
+kubectl -n metacontroller logs -f sts/metacontroller
+
+# Keip webhook logs
+kubectl -n keip logs -f deployments/integrationroute-webhook
+```
+
+To increase the verbosity of the keip webhook logs, set the `LOG_LEVEL` environment variable for the deployment
+to `DEBUG` (e.g. using `kubectl -n keip edit deployments/integrationroute-webhook`).
 
 ## Contributing
 

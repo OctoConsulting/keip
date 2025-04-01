@@ -9,13 +9,12 @@
 
     <int:channel id="output"/>
 
-    <int:inbound-channel-adapter channel="output" expression="'${greeting}. Testing the (${test.secret}) integration route.'">
+    <int:inbound-channel-adapter channel="output"
+                                 expression="'${greeting}. The password is: ${test.password}'">
         <int:poller fixed-rate="5000"/>
     </int:inbound-channel-adapter>
-
 
     <int:logging-channel-adapter
             channel="output"
             log-full-message="true"/>
-
 </beans>
