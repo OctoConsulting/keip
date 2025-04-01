@@ -33,7 +33,7 @@ def test_sync_certificate_no_route(full_route):
 
 def test_sync_certificate_no_cert_manager_annotations(full_route):
     del full_route["object"]["metadata"]["annotations"]
-    expected_desired_state_json = json.dumps({"status": {}, "attachments": []})
+    expected_desired_state_json = json.dumps({"attachments": []})
     actual_desired_state_json = json.dumps(sync_certificate(full_route))
 
     assert actual_desired_state_json == expected_desired_state_json
@@ -121,7 +121,7 @@ def test_sync_certificate_iroute_has_neither_issuer_or_cluster_issuer(
     del full_route["object"]["metadata"]["annotations"][
         "cert-manager.io/cluster-issuer"
     ]
-    expected_desired_state_json = json.dumps({"status": {}, "attachments": []})
+    expected_desired_state_json = json.dumps({"attachments": []})
     actual_desired_state_json = json.dumps(sync_certificate(full_route))
 
     assert actual_desired_state_json == expected_desired_state_json
@@ -130,7 +130,7 @@ def test_sync_certificate_iroute_has_neither_issuer_or_cluster_issuer(
 def test_sync_certificate_iroute_has_issuer_and_cluster_issuer(full_route):
     full_route["object"]["metadata"]["annotations"][
         "cert-manager.io/issuer"] = "test-issuer"
-    expected_desired_state_json = json.dumps({"status": {}, "attachments": []})
+    expected_desired_state_json = json.dumps({"attachments": []})
     actual_desired_state_json = json.dumps(sync_certificate(full_route))
 
     assert actual_desired_state_json == expected_desired_state_json

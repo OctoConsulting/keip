@@ -142,5 +142,5 @@ def sync_certificate(body) -> Mapping:
     obj = body["object"]
     certificate = _new_certificate(obj)
     attachments = [certificate] if certificate else []
-    desired_state = {"status": {}, "attachments": attachments}
+    desired_state = {"attachments": attachments}
     return desired_state
