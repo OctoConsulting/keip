@@ -1,7 +1,6 @@
 VERSION ?= 0.7.0
 GIT_TAG := operator_v$(VERSION)
-# TODO: Change back to :latest when CI is fixed
-KEIP_INTEGRATION_IMAGE ?= ghcr.io/octoconsulting/keip/minimal-app:0.0.4
+KEIP_INTEGRATION_IMAGE ?= ghcr.io/octoconsulting/keip/minimal-app:latest
 
 KUBECTL := kubectl
 KUBECTL_DELETE := $(KUBECTL) delete --ignore-not-found
