@@ -11,7 +11,7 @@
 
     <groupId>com.octo.keip</groupId>
     <artifactId>minimal-app</artifactId>
-    <version>0.0.4</version>
+    <version>0.1.0</version>
 
     <properties>
         <docker.registry>ghcr.io/octoconsulting</docker.registry>

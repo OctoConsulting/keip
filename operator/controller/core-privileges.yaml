@@ -9,7 +9,7 @@ metadata:
   name: spring-cloud-kubernetes
 rules:
   - apiGroups: [""]
-    resources: ["configmaps"]
+    resources: ["configmaps", "pods"]
     verbs: ["get", "list", "watch"]
 ---
 kind: RoleBinding

@@ -1,0 +1,245 @@
+{
+  "status": {},
+  "children": [
+    {
+      "apiVersion": "apps/v1",
+      "kind": "Deployment",
+      "metadata": {
+        "name": "testroute",
+        "labels": {
+          "app.kubernetes.io/managed-by": "keip-integrationroute-controller",
+          "app.kubernetes.io/name": "integrationroute",
+          "app.kubernetes.io/instance": "integrationroute-testroute",
+          "app.kubernetes.io/version": "latest",
+          "firstKey": "firstValue"
+        },
+        "annotations": {
+          "aKey1": "aValue1"
+        }
+      },
+      "spec": {
+        "selector": {
+          "matchLabels": {
+            "app.kubernetes.io/instance": "integrationroute-testroute"
+          }
+        },
+        "replicas": 2,
+        "template": {
+          "metadata": {
+            "labels": {
+              "app.kubernetes.io/managed-by": "keip-integrationroute-controller",
+              "app.kubernetes.io/name": "integrationroute",
+              "app.kubernetes.io/instance": "integrationroute-testroute",
+              "app.kubernetes.io/version": "latest",
+              "firstKey": "firstValue"
+            },
+            "annotations": {
+              "aKey1": "aValue1"
+            }
+          },
+          "spec": {
+            "serviceAccountName": "integrationroute-service",
+            "containers": [
+              {
+                "name": "integration-app",
+                "image": "keip-integration",
+                "volumeMounts": [
+                  {
+                    "name": "integration-route-config",
+                    "mountPath": "/var/spring/xml"
+                  },
+                  {
+                    "name": "testroute-secret",
+                    "readOnly": true,
+                    "mountPath": "/etc/secrets/testroute-secret"
+                  },
+                  {
+                    "name": "testroute-pvc",
+                    "mountPath": "/tmp/testdir"
+                  },
+                  {
+                    "name": "test-cm-1",
+                    "mountPath": "/path/to/cm1"
+                  },
+                  {
+                    "name": "test-cm-2",
+                    "mountPath": "/path/to/cm2"
+                  },
+                  {
+                    "name": "truststore",
+                    "readOnly": true,
+                    "mountPath": "/etc/cabundle"
+                  },
+                  {
+                    "name": "keystore",
+                    "readOnly": true,
+                    "mountPath": "/etc/keystore"
+                  }
+                ],
+                "livenessProbe": {
+                  "httpGet": {
+                    "path": "/actuator/health/liveness",
+                    "port": 8443,
+                    "scheme": "HTTPS"
+                  },
+                  "failureThreshold": 3,
+                  "timeoutSeconds": 3
+                },
+                "readinessProbe": {
+                  "httpGet": {
+                    "path": "/actuator/health/readiness",
+                    "port": 8443,
+                    "scheme": "HTTPS"
+                  },
+                  "failureThreshold": 2,
+                  "timeoutSeconds": 3
+                },
+                "startupProbe": {
+                  "httpGet": {
+                    "path": "/actuator/health/liveness",
+                    "port": 8443,
+                    "scheme": "HTTPS"
+                  },
+                  "failureThreshold": 12,
+                  "timeoutSeconds": 3
+                },
+                "env": [
+                  {
+                    "name": "SPRING_APPLICATION_JSON",
+                    "value": "{\"spring\": {\"application\": {\"name\": \"testroute\"}, \"config.import\": \"kubernetes:\", \"cloud\": {\"kubernetes\": {\"config\": {\"fail-fast\": true, \"namespace\": \"testspace\", \"sources\": [{\"name\": \"testroute-props\"}, {\"labels\": {\"group\": \"ir-common\"}}]}, \"secrets\": {\"paths\": \"/etc/secrets\"}}}}, \"server\": {\"ssl\": {\"key-alias\": \"certificate\", \"key-store\": \"/etc/keystore/test-keystore.jks\", \"key-store-type\": \"JKS\"}, \"port\": 8443}, \"management\": {\"endpoint\": {\"health\": {\"enabled\": true}, \"prometheus\": {\"enabled\": true}}, \"endpoints\": {\"web\": {\"exposure\": {\"include\": \"health,prometheus\"}}}}}"
+                  },
+                  {
+                    "name": "JDK_JAVA_OPTIONS",
+                    "value": "-Djavax.net.ssl.trustStore=/etc/cabundle/test-truststore.p12 -Djavax.net.ssl.trustStorePassword= -Djavax.net.ssl.trustStoreType=PKCS12"
+                  },
+                  {
+                    "name": "SERVER_SSL_KEYSTOREPASSWORD",
+                    "valueFrom": {
+                      "secretKeyRef": {
+                        "name": "keystore-password-ref",
+                        "key": "password"
+                      }
+                    }
+                  },
+                  {
+                    "name": "SERVICE_NAME",
+                    "value": "testroute"
+                  },
+                  {
+                    "name": "ADDITIONAL_ENV_VAR_1",
+                    "value": "myvalue1"
+                  },
+                  {
+                    "name": "ADDITIONAL_ENV_VAR_2",
+                    "value": "myvalue2"
+                  }
+                ],
+                "envFrom": [
+                  {
+                    "configMapRef": {
+                      "name": "my-config"
+                    }
+                  },
+                  {
+                    "secretRef": {
+                      "name": "my-secret"
+                    }
+                  }
+                ],
+                "resources": {
+                  "requests": {
+                    "cpu": "1",
+                    "memory": "2Gi"
+                  },
+                  "limits": {
+                    "memory": "5Gi"
+                  }
+                }
+              }
+            ],
+            "volumes": [
+              {
+                "name": "integration-route-config",
+                "configMap": {
+                  "name": "testroute-xml"
+                }
+              },
+              {
+                "name": "testroute-secret",
+                "secret": {
+                  "secretName": "testroute-secret"
+                }
+              },
+              {
+                "name": "testroute-pvc",
+                "persistentVolumeClaim": {
+                  "claimName": "testroute-pvc"
+                }
+              },
+              {
+                "name": "test-cm-1",
+                "configMap": {
+                  "name": "test-cm-1"
+                }
+              },
+              {
+                "name": "test-cm-2",
+                "configMap": {
+                  "name": "test-cm-2"
+                }
+              },
+              {
+                "name": "truststore",
+                "configMap": {
+                  "name": "test-tls-cm",
+                  "items": [
+                    {
+                      "key": "test-truststore.p12",
+                      "path": "test-truststore.p12"
+                    }
+                  ]
+                }
+              },
+              {
+                "name": "keystore",
+                "secret": {
+                  "secretName": "test-tls-secret",
+                  "items": [
+                    {
+                      "key": "test-keystore.jks",
+                      "path": "test-keystore.jks"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "labels": {
+          "integration-route": "testroute",
+          "prometheus-metrics-enabled": "true"
+        },
+        "name": "testroute-actuator"
+      },
+      "spec": {
+        "ports": [
+          {
+            "name": "https",
+            "port": 8443,
+            "protocol": "TCP",
+            "targetPort": 8443
+          }
+        ],
+        "selector": {
+          "app.kubernetes.io/instance": "integrationroute-testroute"
+        }
+      }
+    }
+  ]
+}

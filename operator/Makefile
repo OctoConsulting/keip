@@ -1,4 +1,4 @@
-VERSION ?= 0.6.0
+VERSION ?= 0.7.0
 GIT_TAG := operator_v$(VERSION)
 KEIP_INTEGRATION_IMAGE ?= ghcr.io/octoconsulting/keip/minimal-app:latest
 
@@ -17,11 +17,22 @@ get-tag:
 	@echo $(GIT_TAG)
 
 prep-release:
-	rm -rf output
-	mkdir output
-	kustomize build ./controller > ./output/controller.yaml
-	kustomize build ./crd > ./output/crd.yaml
-	ls -al ./output
+	@rm -rf output
+	@mkdir -p output/addons
+	@echo "Running kustomize build on ./controller/"
+	kustomize build ./controller/ > ./output/keip-core-controller.yaml
+	@for dir in ./controller/addons/*/ ; do \
+		echo "Running kustomize build on $$dir" ; \
+		addon=$$(basename $$dir) ; \
+		mkdir -p output/addons/$$addon ; \
+		kustomize build $$dir >> ./output/addons/$$addon/addon-$${addon}-controller.yaml ; \
+		echo "---" >> ./output/addons/all-addons.yaml ; \
+		kustomize build $$dir >> ./output/addons/all-addons.yaml ; \
+	done
+	@echo "Running kustomize build on ./crd/"
+	kustomize build ./crd/ > ./output/crd.yaml
+	@echo "Files that will be released:"
+	@find ./output -type f
 
 metacontroller/deploy:
 	$(KUBECTL) apply -k metacontroller
@@ -36,6 +47,12 @@ controller/deploy: crd/deploy
 controller/undeploy: crd/undeploy
 	-$(KUBECTL_DELETE) -n $(CONTROLLER_NAMESPACE) cm keip-controller-props
 	-$(KUBECTL_DELETE) -k controller
+
+addons/certmanager/deploy:
+	$(KUBECTL) apply -k controller/addons/certmanager
+
+addons/certmanager/undeploy:
+	$(KUBECTL_DELETE) -k controller/addons/certmanager
 
 crd/deploy:
 	$(KUBECTL) apply -k crd

@@ -2,7 +2,7 @@
 apiVersion: metacontroller.k8s.io/v1alpha1
 kind: CompositeController
 metadata:
-  name: integrationroute-controller
+  name: keip-integrationroute-controller
 spec:
   generateSelector: true
   parentResource:
@@ -58,7 +58,7 @@ spec:
     spec:
       containers:
         - name: webhook
-          image: ghcr.io/octoconsulting/keip/route-webhook:0.10.0
+          image: ghcr.io/octoconsulting/keip/route-webhook:0.11.0
           ports:
             - containerPort: 7080
               name: webhook-http

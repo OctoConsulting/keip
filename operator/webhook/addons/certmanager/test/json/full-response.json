@@ -1,0 +1,38 @@
+{
+  "attachments": [
+    {
+      "apiVersion": "cert-manager.io/v1",
+      "kind": "Certificate",
+      "metadata": { "name": "testroute-certs", "namespace": "testnamespace" },
+      "spec": {
+        "commonName": "testroute.testnamespace",
+        "dnsNames": [
+          "testroute.testnamespace.svc.cluster.local",
+          "testroute.testnamespace.svc",
+          "testroute.testnamespace",
+          "testroute",
+          "testroute-actuator.testnamespace.svc.cluster.local",
+          "cloud-integration-route-actuator.testnamespace.svc.cluster.local"
+        ],
+        "issuerRef": {
+          "group": "cert-manager.io",
+          "kind": "ClusterIssuer",
+          "name": "test-selfsigned"
+        },
+        "keystores": {
+          "jks": {
+            "create": true,
+            "passwordSecretRef": { "key": "password", "name": "jks-password" }
+          }
+        },
+        "secretName": "testroute-certstore",
+        "subject": {
+          "organizationalUnits": ["Parks and Recreation"],
+          "countries": ["US"],
+          "provinces": ["FL"],
+          "localities": ["A Park"]
+        }
+      }
+    }
+  ]
+}

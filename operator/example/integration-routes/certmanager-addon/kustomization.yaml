@@ -1,7 +1,5 @@
 resources:
-  - https://github.com/cert-manager/cert-manager/releases/download/v1.15.2/cert-manager.yaml
   - testroute.yaml
-  - cert.yaml
 
 generatorOptions:
   disableNameSuffixHash: true
@@ -19,7 +17,7 @@ configMapGenerator:
 secretGenerator:
   - name: testroute-secret
     literals:
-      - test.secret=pass123
+      - test.secret=certmanager-addon
   - name: jks-password
     literals:
       - password=password
