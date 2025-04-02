@@ -39,7 +39,7 @@ jobs:
         name: generate release files
 
   release:
-#    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -83,5 +83,4 @@ jobs:
           name: Release ${{ steps.tag_version.outputs.new_tag }}
           body: ${{ steps.tag_version.outputs.changelog }}
           artifactErrorsFailBuild: true
-#          artifacts: ${{ env.WORKING_DIR }}/output/*.yaml,${{ env.WORKING_DIR }}/output/**/*.yaml
           artifacts: ${{ env.WORKING_DIR }}/output/**/*.yaml
