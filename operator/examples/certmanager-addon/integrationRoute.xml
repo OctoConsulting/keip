@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:int="http://www.springframework.org/schema/integration"
+       xmlns:int-http="http://www.springframework.org/schema/integration/http"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+           https://www.springframework.org/schema/beans/spring-beans.xsd
+           http://www.springframework.org/schema/integration
+           https://www.springframework.org/schema/integration/spring-integration.xsd
+           http://www.springframework.org/schema/integration/http
+           https://www.springframework.org/schema/integration/http/spring-integration-http.xsd">
+
+    <int:channel id="testLogger"/>
+    <int:channel id="requests"/>
+
+    <int:channel id="responses">
+        <int:interceptors>
+            <int:wire-tap channel="testLogger"/>
+        </int:interceptors>
+    </int:channel>
+
+    <int:logging-channel-adapter
+            channel="testLogger"
+            log-full-message="true"/>
+
+    <int-http:inbound-gateway id="inboundGateway"
+                              request-channel="requests"
+                              reply-channel="responses"
+                              supported-methods="GET"
+                              path="/greeting/{name}"
+    >
+        <int-http:header name="userName" expression="#pathVariables.name"/>
+    </int-http:inbound-gateway>
+
+    <int:transformer input-channel="requests"
+                     output-channel="responses"
+                     expression="'hello ' + headers.userName"/>
+</beans>

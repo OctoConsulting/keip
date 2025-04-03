@@ -1,37 +1,70 @@
-# Metacontroller IntegrationRoute Lambda Controller
+# Keip Integration Route Webhook
 
-A python web server that implements
+A Python web server that implements
 a [lambda controller from the Metacontroller API](https://metacontroller.github.io/metacontroller/concepts.html#lambda-controller).
 The webhook will be called as part of the Metacontroller control loop when `IntegrationRoute` parent
-resources are detected.  
+resources are detected.
 
 The webhook contains two endpoints, `/sync` and `/addons/certmanager/sync`.
-- `/sync`: The core logic that creates the Kubernetes resources for `IntegrationRoute`s.
-- `/addons/certmanager/sync`: An add-on that creates a [cert-manager.io/v1.Certificate](https://cert-manager.io/docs/reference/api-docs/#cert-manager.io/v1.Certificate) based on annotations in an `IntegrationRoute`.
 
+- `/sync`: The core logic that creates a `Deployment` from `IntegrationRoute` resources.
+- `/addons/certmanager/sync`: An add-on that creates
+  a [cert-manager.io/v1.Certificate](https://cert-manager.io/docs/reference/api-docs/#cert-manager.io/v1.Certificate)
+  based on annotations in an `IntegrationRoute`.
 
 The format for the request and response JSON payloads can be
 seen [here](https://metacontroller.github.io/metacontroller/api/compositecontroller.html#sync-hook)
 
-### Dev Environment Setup
+## Developer Guide
 
-First, configure a Python virtual environment with version 3.11 or later (e.g.
-using [venv](https://docs.python.org/3/library/venv.html)
-or [conda](https://conda.io/projects/conda/en/latest/user-guide/getting-started.html#managing-python)).
-Once that's set up, activate your virtual environment and run the following to install the necessary
-packages:
+Requirements:
+
+- Python v3.11
+
+### Create the Python virtual environment
 
 ```shell
-pip install -r requirements-dev.txt
-pip install -r requirements.txt
+make venv
 ```
 
-You should now be able to use the `Makefile` for running tests or starting a dev server, among other
-tasks.
+You should now have a [virtual environment](https://docs.python.org/3.11/library/venv.html) installed in `./venv` that
+includes all the dependencies required by the project.
+You can point your IDE of choice to `./venv/bin/python3` to enable its Python toolchain for this project.
 
-> **_NOTE:_**  There are some `make` tasks prefixed with `win-` in `Makefile` that are specific to Windows. 
+### Run Tests
 
-#### Code Formatting
+```shell
+make test
+```
 
-To keep diffs small, consider using
-the [Black formatter](https://black.readthedocs.io/en/stable/integrations/editors.html).
+### Run the Dev Server
+
+```shell
+make start-dev-server
+```
+
+### Code Formatting and Linting
+
+To keep diffs small, we use the [Black](https://black.readthedocs.io/en/stable/index.html) formatter (included as part
+of the `venv` install). [See here](https://black.readthedocs.io/en/stable/integrations/editors.html) for instructions on
+integrating it with your editor.
+
+```shell
+make format
+make lint
+```
+
+### Precommit Task
+
+For convenience, there is a `precommit` task that runs unit tests, formatting, and linting. This task should be run
+prior to every commit, as such you are encouraged to add it as
+a [pre-commit git hook](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks).
+
+```shell
+make precommit
+```
+
+### Windows Development
+
+There are Windows-compatible equivalents for most of the `make` commands listed above, prefixed with `win-` (
+e.g. `test` -> `win-test`). See the [Makefile](Makefile) for more details.

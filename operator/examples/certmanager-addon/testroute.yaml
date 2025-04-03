@@ -12,13 +12,6 @@ metadata:
     cert-manager.io/subject-localities: "A Park"
 spec:
   routeConfigMap: testroute-xml
-  propSources:
-    - name: testroute-props
-    # Can also select ConfigMaps using labels:
-    # - labels:
-    #     group: abc
-  secretSources:
-    - testroute-secret
   # Optional TLS configuration
   tls:
     keystore:
@@ -26,3 +19,16 @@ spec:
       type: jks
       key: keystore.jks
       passwordSecretRef: jks-password
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: testroute
+spec:
+  selector:
+    app.kubernetes.io/instance: integrationroute-testroute
+  ports:
+    - name: https-port
+      port: 8443
+      protocol: TCP
+      targetPort: 8443
