@@ -129,7 +129,8 @@ def test_sync_certificate_iroute_has_neither_issuer_or_cluster_issuer(
 
 def test_sync_certificate_iroute_has_issuer_and_cluster_issuer(full_route):
     full_route["object"]["metadata"]["annotations"][
-        "cert-manager.io/issuer"] = "test-issuer"
+        "cert-manager.io/issuer"
+    ] = "test-issuer"
     expected_desired_state_json = json.dumps({"attachments": []})
     actual_desired_state_json = json.dumps(sync_certificate(full_route))
 

@@ -127,9 +127,7 @@ spec:
 EOF
 ```
 
-For more in-depth examples, see the [operator/examples](./operator/examples) directory.
-
-## Clean up
+### Clean up
 
 To delete the example route:
 
@@ -143,6 +141,10 @@ To remove the keip operator and all related resources from your cluster:
 ```shell
 cd operator && make undeploy
 ```
+
+## Examples
+
+For more in-depth examples, see the [operator/examples](./operator/examples) directory.
 
 ## Troubleshooting
 
