@@ -15,10 +15,10 @@ spec:
   # Optional TLS configuration
   tls:
     keystore:
-      secretName: testroute-certstore
-      type: jks
-      key: keystore.jks
-      passwordSecretRef: jks-password
+      pkcs12:
+        secretName: testroute-certstore
+        key: keystore.p12
+        passwordSecretRef: pkcs12-password
 ---
 apiVersion: v1
 kind: Service

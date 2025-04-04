@@ -1,6 +1,5 @@
 import copy
 import json
-import logging
 import os
 from typing import Mapping
 
@@ -10,8 +9,6 @@ from webhook.addons.certmanager.main import (
     sync_certificate,
     _get_annotation_vals_as_list,
 )
-
-_LOGGER = logging.getLogger(__name__)
 
 
 def test_sync_certificate(full_route):
@@ -222,11 +219,12 @@ def test_sync_certificate_jks_keystore(full_route):
 
 
 def test_sync_certificate_pkcs12_keystore(full_route):
-    full_route["object"]["spec"]["tls"]["keystore"]["key"] = "keystore.p12"
-    full_route["object"]["spec"]["tls"]["keystore"][
-        "passwordSecretRef"
-    ] = "pkcs12-password"
-    full_route["object"]["spec"]["tls"]["keystore"]["type"] = "pkcs12"
+    del full_route["object"]["spec"]["tls"]["keystore"]["jks"]
+    full_route["object"]["spec"]["tls"]["keystore"]["pkcs12"] = {
+        "key": "keystore.p12",
+        "passwordSecretRef": "pkcs12-password",
+        "secretName": "testroute-certstore",
+    }
     expected_desired_state_dict = load_json_as_dict(
         f"{os.path.dirname(os.path.abspath(__file__))}/json/full-response.json"
     )

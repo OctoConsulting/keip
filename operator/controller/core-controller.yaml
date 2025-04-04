@@ -58,7 +58,7 @@ spec:
     spec:
       containers:
         - name: webhook
-          image: ghcr.io/octoconsulting/keip/route-webhook:0.11.1
+          image: ghcr.io/octoconsulting/keip/route-webhook:0.12.0
           ports:
             - containerPort: 7080
               name: webhook-http

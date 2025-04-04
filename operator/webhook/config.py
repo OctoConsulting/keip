@@ -1,6 +1,10 @@
+import logging
 from starlette.config import Config
 
-cfg = Config(".env")
+logging.captureWarnings(True)
+
+env_file = ".env"
+cfg = Config(env_file)
 
 # Server
 DEBUG = cfg("DEBUG", cast=bool, default=False)
