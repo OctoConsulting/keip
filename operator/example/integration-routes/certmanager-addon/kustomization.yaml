@@ -18,6 +18,6 @@ secretGenerator:
   - name: testroute-secret
     literals:
       - test.secret=certmanager-addon
-  - name: jks-password
+  - name: pkcs12-password
     literals:
       - password=password

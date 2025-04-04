@@ -158,10 +158,11 @@
       "secretSources": ["testroute-secret"],
       "tls": {
         "keystore": {
-          "key": "keystore.jks",
-          "passwordSecretRef": "jks-password",
-          "secretName": "testroute-certstore",
-          "type": "jks"
+          "jks": {
+            "key": "keystore.jks",
+            "passwordSecretRef": "jks-password",
+            "secretName": "testroute-certstore"
+          }
         }
       }
     }
