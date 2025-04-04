@@ -125,7 +125,7 @@ spec:
                           type: string
                         memory:
                           type: string
-                      
+
 
                 replicas: # not yet implemented
                   description: "Number of containers running the integration route"
@@ -171,22 +171,42 @@ spec:
                       description: "Configure HTTP server TLS connections using a JKS or PKCS12 keystore. The keystore password should be stored in a secret and referenced in the route Custom Resource. The format of the secret should be `password=<password>`."
                       type: object
                       properties:
-                        secretName:
-                          type: string
-                        key:
-                          type: string
-                        type:
-                          type: string
-                          enum:
+                        jks:
+                          type: object
+                          properties:
+                            alias:
+                              description: "Alias specifies the alias of the key in the keystore which is required by the JKS format. If not provided, the default alias `certificate` will be used."
+                              type: string
+                            secretName:
+                              type: string
+                            key:
+                              type: string
+                            passwordSecretRef:
+                              type: string
+                          required:
+                            - secretName
+                            - key
+                            - passwordSecretRef
+                        pkcs12:
+                          type: object
+                          properties:
+                            secretName:
+                              type: string
+                            key:
+                              type: string
+                            passwordSecretRef:
+                              type: string
+                          required:
+                            - secretName
+                            - key
+                            - passwordSecretRef
+                      oneOf:
+                        - properties:
+                          required:
                             - jks
+                        - properties:
+                          required:
                             - pkcs12
-                        passwordSecretRef:
-                          type: string
-                      required:
-                        - secretName
-                        - key
-                        - type
-                        - passwordSecretRef
               required:
                 - routeConfigMap
           required:

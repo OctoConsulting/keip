@@ -1,4 +1,4 @@
-VERSION ?= 0.11.0
+VERSION ?= 0.12.0
 HOST_PORT ?= 7080
 GIT_TAG := webhook_v$(VERSION)
 
@@ -7,6 +7,7 @@ IMG_NAME := keip/route-webhook
 FULL_IMAGE_NAME := $(IMG_REGISTRY)/$(IMG_NAME):$(VERSION)
 CONTAINER_NAME := integration-route-webhook
 PYTHON ?= python3
+LOG_LEVEL ?= INFO
 TEST_COVERAGE_DIR := .test_coverage
 TEST_COVERAGE_FILE := $(TEST_COVERAGE_DIR)/.coverage
 
@@ -28,11 +29,11 @@ start-dev-server:
 
 .PHONY: test
 test:
-	mkdir -p $(TEST_COVERAGE_DIR) && coverage run --data-file=$(TEST_COVERAGE_FILE) -m pytest -vv
+	mkdir -p $(TEST_COVERAGE_DIR) && coverage run --data-file=$(TEST_COVERAGE_FILE) -m pytest -vv --log-cli-level=$(LOG_LEVEL)
 
 .PHONY: win-test
 win-test:
-	(if not exist $(TEST_COVERAGE_DIR) mkdir $(TEST_COVERAGE_DIR)) && coverage run --data-file=$(TEST_COVERAGE_FILE) -m pytest -vv
+	(if not exist $(TEST_COVERAGE_DIR) mkdir $(TEST_COVERAGE_DIR)) && coverage run --data-file=$(TEST_COVERAGE_FILE) -m pytest -vv --log-cli-level=$(LOG_LEVEL)
 
 .PHONY: report-test-coverage
 report-test-coverage: test

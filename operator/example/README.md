@@ -109,7 +109,7 @@ kubectl apply -k bases/certmanager/issuer
 ```shell
 kubectl apply -k integration-routes/certmanager-addon
 ```
-*_Note_*: The example uses a `keystore.jks` file and a certificate created by [Cert Manager](https://cert-manager.io/).
+*_Note_*: The example uses a `keystore.p12` file and a certificate created by [Cert Manager](https://cert-manager.io/).
 
 This should result in the creation of the following resources:
 
@@ -121,9 +121,9 @@ This should result in the creation of the following resources:
 - Secret `testroute-secret`: Confidential information that will be mounted as a volume in the running
   pod.
 - Secret `testroute-certstore`: Private key and certificate signed by the denoted issuer.
-- Secret `jks-password`: Password to the JKS keystore.
+- Secret `pkcs12-password`: Password to the PKCS12 keystore.
 - Service `testroute-actuator`: Exposes the Spring Actuator.
-- Self-Signed Certificate `certificate.cert-manager.io/testroute-certs`: A `certificate.cert-manager.io/Certificate` resource that creates the `testroute-certstore` `Secret` using the `jks-password` `Secret`.
+- Self-Signed Certificate `certificate.cert-manager.io/testroute-certs`: A `certificate.cert-manager.io/Certificate` resource that creates the `testroute-certstore` `Secret` using the `pkcs12-password` `Secret`.
 - Cluster Issuer `clusterissuer.cert-manager.io/test-selfsigned`: A self-signed `cert-manager.io/v1/ClusterIssuer` used to sign certificates.
 - IntegrationRoute Controller `metacontroller.k8s.io/v1alpha1/keip-integrationroute-controller`: A `metacontroller.k8s.io/v1alpha1/CompositeController` that creates a `Deployment` and a `Service` from a `keip.octo.com/v1alpha1/IntegrationRoute`.
 - Certmanager Controller `metacontroller.k8s.io/v1alpha1/keip-certmanager-controller`: A `metacontroller.k8s.io/v1alpha1/DecoratorController` that creates a `Certificate` from a `keip.octo.com/v1alpha1/IntegrationRoute`.
@@ -135,7 +135,7 @@ kubectl get pods -n default
 NAME                         READY   STATUS    RESTARTS   AGE
 testroute-74d574bf85-tbv9m   1/1     Running   0          99s
 ```
-*_Note_*: Cert Manager takes a few seconds to create the certificate and keystore secret. The testroute pod will not start until the `keystore.jks` secret is available to mount.
+*_Note_*: Cert Manager takes a few seconds to create the certificate and keystore secret. The testroute pod will not start until the `keystore.p12` secret is available to mount.
 
 Describe the `Certificate`:
 ```shell
@@ -146,9 +146,9 @@ Get the `Secrets`:
 ```shell
 kubectl get secrets -n default
 NAME                  TYPE                DATA   AGE
-jks-password          Opaque              1      109s
-testroute-certstore   kubernetes.io/tls   5      107s
-testroute-secret      Opaque              1      109s
+pkcs12-password       Opaque              1      60s
+testroute-certstore   kubernetes.io/tls   5      59s
+testroute-secret      Opaque              1      60s
 ```
 
 Describe the `IntegrationRoute`:

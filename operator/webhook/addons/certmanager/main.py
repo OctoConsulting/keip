@@ -1,10 +1,10 @@
 import logging
-from typing import Mapping, List
+from typing import Mapping, List, Any
 
 _LOGGER = logging.getLogger(__name__)
 
 
-def _new_certificate(obj) -> Mapping:
+def _new_certificate(obj) -> Mapping[str, Any]:
     metadata = obj["metadata"]
 
     name = metadata["name"]
@@ -27,6 +27,47 @@ def _new_certificate(obj) -> Mapping:
 
     common_name = annotations.get("cert-manager.io/common-name", name)
 
+    issuer = _get_issuer_ref(annotations)
+    if not issuer:
+        return {}
+
+    cert = {
+        "apiVersion": "cert-manager.io/v1",
+        "kind": "Certificate",
+        "metadata": {
+            "name": f"{name}-certs",
+            "namespace": namespace,
+        },
+        "spec": {
+            "commonName": f"{common_name}.{namespace}",
+            "dnsNames": _get_dns_names(annotations, name, common_name, namespace),
+            "issuerRef": issuer,
+            "keystores": _get_keystores(obj["spec"]["tls"]["keystore"]),
+            "secretName": f"{name}-certstore",
+            "subject": _get_subject(annotations, name, common_name, namespace),
+        },
+    }
+
+    return cert
+
+
+def _get_dns_names(annotations, name, common_name, namespace) -> List[str]:
+    alt_names = _get_annotation_vals_as_list(
+        annotations.get("cert-manager.io/alt-names")
+    )
+
+    dns_names = [
+        f"{common_name}.{namespace}.svc.cluster.local",
+        f"{common_name}.{namespace}.svc",
+        f"{common_name}.{namespace}",
+        common_name,
+        f"{name}-actuator.{namespace}.svc.cluster.local",
+    ]
+    dns_names = dns_names + alt_names
+    return dns_names
+
+
+def _get_issuer_ref(annotations) -> Mapping[str, str]:
     issuer = annotations.get("cert-manager.io/issuer")
     cluster_issuer = annotations.get("cert-manager.io/cluster-issuer")
 
@@ -48,9 +89,14 @@ def _new_certificate(obj) -> Mapping:
         issuer_kind = "ClusterIssuer"
         issuer = cluster_issuer
 
-    alt_names = _get_annotation_vals_as_list(
-        annotations.get("cert-manager.io/alt-names")
-    )
+    return {
+        "group": "cert-manager.io",
+        "kind": issuer_kind,
+        "name": issuer,
+    }
+
+
+def _get_subject(annotations, name, common_name, namespace) -> Mapping[str, List[str]]:
     organizational_units = _get_annotation_vals_as_list(
         annotations.get("cert-manager.io/subject-organizationalunits")
     )
@@ -63,15 +109,6 @@ def _new_certificate(obj) -> Mapping:
     localities = _get_annotation_vals_as_list(
         annotations.get("cert-manager.io/subject-localities")
     )
-
-    dns_names = [
-        f"{common_name}.{namespace}.svc.cluster.local",
-        f"{common_name}.{namespace}.svc",
-        f"{common_name}.{namespace}",
-        common_name,
-        f"{name}-actuator.{namespace}.svc.cluster.local",
-    ]
-    dns_names = dns_names + alt_names
 
     subject = {}
     if organizational_units:
@@ -86,42 +123,25 @@ def _new_certificate(obj) -> Mapping:
     if localities:
         subject["localities"] = localities
 
-    keystore_type = _get_keystore_type(obj)
-    password_secret_ref_name = _get_password_secret_ref_name(obj)
+    return subject
 
-    cert = {
-        "apiVersion": "cert-manager.io/v1",
-        "kind": "Certificate",
-        "metadata": {
-            "name": f"{name}-certs",
-            "namespace": namespace,
-        },
-        "spec": {
-            "commonName": f"{common_name}.{namespace}",
-            "dnsNames": dns_names,
-            "issuerRef": {
-                "group": "cert-manager.io",
-                "kind": issuer_kind,
-                "name": issuer,
+
+def _get_keystores(keystore) -> Mapping[str, Mapping[str, Any]]:
+    keystore_type = _get_keystore_type(keystore)
+    password_secret_ref_name = keystore[keystore_type]["passwordSecretRef"]
+
+    return {
+        keystore_type: {
+            "create": True,
+            "passwordSecretRef": {
+                "key": "password",
+                "name": password_secret_ref_name,
             },
-            "keystores": {
-                keystore_type: {
-                    "create": True,
-                    "passwordSecretRef": {
-                        "key": "password",
-                        "name": password_secret_ref_name,
-                    },
-                }
-            },
-            "secretName": f"{name}-certstore",
-            "subject": subject,
         },
     }
 
-    return cert
 
-
-def _get_annotation_vals_as_list(annotation_val) -> List:
+def _get_annotation_vals_as_list(annotation_val) -> List[str]:
     return (
         [val for i in annotation_val.split(",") if (val := i.strip())]
         if annotation_val
@@ -129,15 +149,11 @@ def _get_annotation_vals_as_list(annotation_val) -> List:
     )
 
 
-def _get_keystore_type(obj) -> str:
-    return obj["spec"]["tls"]["keystore"]["type"]
+def _get_keystore_type(keystore) -> str:
+    return "jks" if "jks" in keystore else "pkcs12"
 
 
-def _get_password_secret_ref_name(obj) -> str:
-    return obj["spec"]["tls"]["keystore"]["passwordSecretRef"]
-
-
-def sync_certificate(body) -> Mapping:
+def sync_certificate(body) -> Mapping[str, List[Mapping[str, Any]]]:
     # Request API at for DecoratorController at https://metacontroller.github.io/metacontroller/api/decoratorcontroller.html#sync-hook-request
     obj = body["object"]
     certificate = _new_certificate(obj)
