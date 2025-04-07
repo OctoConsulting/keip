@@ -20,15 +20,20 @@ main() {
                                                                             -e 'test/'  \
                                                                             -e 'requirements-dev\.txt$' \
                                                                             -e '\.md$' \
-                                                                            $ADDITIONAL_DIFF_IGNORE)
+                                                                            $ADDITIONAL_DIFF_IGNORE \
+                                                                            || true)
+
+  echo "Comparing current branch and $GITHUB_BASE_REF at directory: ${DIRECTORY}"
 
   if [ -n "$filtered_changes" ]; then
-    echo "Found changes between current branch and $GITHUB_BASE_REF"
     echo "$filtered_changes"
     if git tag | grep -x "$POTENTIAL_GIT_TAG"; then
-      echo "$POTENTIAL_GIT_TAG was already released. Please increment the version if changes were made to $DIRECTORY."
+      echo "ERROR: $POTENTIAL_GIT_TAG was already released. Please increment the version if changes were made to $DIRECTORY."
       exit 1
     fi
+    echo "Ready for release"
+  else
+    echo "Detected changes do not require a release"
   fi
 }
 
