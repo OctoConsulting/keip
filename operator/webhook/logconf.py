@@ -3,10 +3,10 @@ import os
 
 
 def get_log_level_from_env():
-    level = os.getenv("LOG_LEVEL", "").upper()
+    level = os.getenv('LOG_LEVEL', '').upper()
     if level in logging.getLevelNamesMapping().keys():
         return level
-    return "INFO"
+    return 'INFO'
 
 
 LOG_CONF = {
@@ -21,7 +21,7 @@ LOG_CONF = {
         "stdout": {
             "class": "logging.StreamHandler",
             "stream": "ext://sys.stdout",
-            "formatter": "standard",
+            "formatter": "standard"
         }
     },
     "root": {"handlers": ["stdout"], "level": get_log_level_from_env()},
