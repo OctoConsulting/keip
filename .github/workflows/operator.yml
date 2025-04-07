@@ -4,15 +4,19 @@ on:
   pull_request:
     paths:
       - operator/**
-      - "!operator/webhook/**"
       - .github/workflows/operator.yml
       - .github/workflows/scripts
+      - "!operator/webhook/**"
+      - '!**.md'
+      - '!operator/examples/**'
   push:
     branches:
       - main
     paths:
       - operator/**
       - "!operator/webhook/**"
+      - '!**.md'
+      - '!operator/examples/**'
 
 env:
   WORKING_DIR: ./operator

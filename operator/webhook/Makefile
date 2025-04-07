@@ -1,4 +1,4 @@
-VERSION ?= 0.11.0
+VERSION ?= 0.11.1
 HOST_PORT ?= 7080
 GIT_TAG := webhook_v$(VERSION)
 
@@ -6,9 +6,13 @@ IMG_REGISTRY := ghcr.io/octoconsulting
 IMG_NAME := keip/route-webhook
 FULL_IMAGE_NAME := $(IMG_REGISTRY)/$(IMG_NAME):$(VERSION)
 CONTAINER_NAME := integration-route-webhook
-PYTHON ?= python3
 TEST_COVERAGE_DIR := .test_coverage
 TEST_COVERAGE_FILE := $(TEST_COVERAGE_DIR)/.coverage
+
+HOST_PYTHON ?= python3.11
+
+PYTHON = venv/bin/python3
+PIP = venv/bin/pip
 
 .PHONY: get-tag
 get-tag:
@@ -22,33 +26,62 @@ get-registry:
 get-image-name:
 	@echo $(FULL_IMAGE_NAME)
 
-.PHONY: start-dev
-start-dev-server:
-	$(PYTHON) -m uvicorn --port 7080 --reload --app-dir .. webhook.app:app
+.PHONY: clean
+clean:
+	rm -rf venv
+
+venv: venv/touchfile
+
+venv/touchfile: requirements.txt requirements-dev.txt
+	$(HOST_PYTHON) -m venv venv
+	$(PIP) install -r requirements-dev.txt; $(PIP) install -r requirements.txt
+	touch venv/touchfile
+
+.PHONY: format
+format: venv/touchfile
+	$(PYTHON) -m black .
+
+.PHONY: lint
+lint: venv/touchfile
+	$(PYTHON) -m ruff check
+
+# Suppress Starlette warning when '.env' file is missing
+.env:
+	touch ./.env
 
 .PHONY: test
-test:
-	mkdir -p $(TEST_COVERAGE_DIR) && coverage run --data-file=$(TEST_COVERAGE_FILE) -m pytest -vv
+test: venv/touchfile .env
+	mkdir -p $(TEST_COVERAGE_DIR) && $(PYTHON) -m coverage run --data-file=$(TEST_COVERAGE_FILE) -m pytest
 
 .PHONY: win-test
 win-test:
-	(if not exist $(TEST_COVERAGE_DIR) mkdir $(TEST_COVERAGE_DIR)) && coverage run --data-file=$(TEST_COVERAGE_FILE) -m pytest -vv
+	(if not exist $(TEST_COVERAGE_DIR) mkdir $(TEST_COVERAGE_DIR)) && $(PYTHON) -m coverage run --data-file=$(TEST_COVERAGE_FILE) -m pytest
 
 .PHONY: report-test-coverage
 report-test-coverage: test
-	coverage report --data-file $(TEST_COVERAGE_FILE)
+	$(PYTHON) -m coverage report --data-file $(TEST_COVERAGE_FILE)
 
 .PHONY: win-report-test-coverage
 win-report-test-coverage: win-test
-	coverage report --data-file $(TEST_COVERAGE_FILE)
+	$(PYTHON) -m coverage report --data-file $(TEST_COVERAGE_FILE)
 
 .PHONY: report-test-coverage-html
 report-test-coverage-html: test
-	coverage html --data-file $(TEST_COVERAGE_FILE) --directory $(TEST_COVERAGE_DIR)/html && open $(TEST_COVERAGE_DIR)/html/index.html
+	$(PYTHON) -m coverage html --data-file $(TEST_COVERAGE_FILE) --directory $(TEST_COVERAGE_DIR)/html && open $(TEST_COVERAGE_DIR)/html/index.html
 
 .PHONY: win-report-test-coverage-html
 win-report-test-coverage-html: win-test
-	coverage html --data-file $(TEST_COVERAGE_FILE) --directory $(TEST_COVERAGE_DIR)/html && start "" $(TEST_COVERAGE_DIR)/html/index.html
+	$(PYTHON) -m coverage html --data-file $(TEST_COVERAGE_FILE) --directory $(TEST_COVERAGE_DIR)/html && start "" $(TEST_COVERAGE_DIR)/html/index.html
+
+.PHONY: precommit
+precommit: test format lint
+
+.PHONY: win-precommit
+win-precommit: win-test format lint
+
+.PHONY: start-dev-server
+start-dev-server:
+	$(PYTHON) -m uvicorn --port 7080 --reload --app-dir .. webhook.app:app
 
 .PHONY: deploy
 deploy: build
@@ -56,10 +89,7 @@ deploy: build
 
 .PHONY: build
 build:
-	docker buildx build \
-	--platform=linux/amd64,linux/arm64 \
-  	--tag $(FULL_IMAGE_NAME) \
-  	.
+	docker build --tag $(FULL_IMAGE_NAME) .
 
 .PHONY: run-container
 run-container: build
