@@ -18,7 +18,7 @@ main() {
   git fetch origin $GITHUB_BASE_REF
   git fetch --tags
 
-  filtered_changes=$(git diff --fake-flag --name-only origin/$GITHUB_BASE_REF -- $DIRECTORY | grep -E -v \
+  filtered_changes=$(git diff --name-only origin/$GITHUB_BASE_REF -- $DIRECTORY | grep --no-fail -E -v \
                                                                             -e 'test/'  \
                                                                             -e 'requirements-dev\.txt$' \
                                                                             -e '\.md$' \
