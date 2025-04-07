@@ -1,7 +1,7 @@
 # Verifies changes to directory have an updated version
 
 if [ -z "$1" ] || [ -z "$2" ]; then
-  echo "Usage: sh $0 [potential_git_tag] <path_to_directory>"
+  echo "Usage: sh $0 <potential_git_tag> <path_to_directory> [extra_regex_excludes]"
   exit 1
 fi
 
