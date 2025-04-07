@@ -17,9 +17,9 @@ main() {
   git fetch --tags
 
   filtered_changes=$(git diff --name-only origin/$GITHUB_BASE_REF -- $DIRECTORY | grep -E -v \
-                                                                            -e '.*/test/.*'  \
-                                                                            -e '.*/requirements-dev.txt' \
-                                                                            -e '*.md$' \
+                                                                            -e 'test/'  \
+                                                                            -e 'requirements-dev\.txt$' \
+                                                                            -e '\.md$' \
                                                                             $ADDITIONAL_DIFF_IGNORE)
 
   if [ -n "$filtered_changes" ]; then
