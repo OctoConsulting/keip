@@ -18,6 +18,11 @@ main() {
   git fetch origin $GITHUB_BASE_REF
   git fetch --tags
 
+  # if 'grep -v' (inverted-match) matches all the file-paths in the list, an error code is returned, which immediately
+  # exits the script. This behavior is not desirable, since an empty list of diffs is valid in the context of
+  # checking if a release is required. A '|| true' is added at the end of the command to force a non-error return code.
+  # To still be able to catch any unexpected errors with the 'grep' command, stderr is piped to a file that is later
+  # checked for errors.
   filtered_changes=$(git diff --name-only origin/$GITHUB_BASE_REF -- $DIRECTORY | grep -E -v \
                                                                             -e 'test/'  \
                                                                             -e 'requirements-dev\.txt$' \
