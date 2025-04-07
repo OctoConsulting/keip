@@ -11,6 +11,8 @@ POTENTIAL_GIT_TAG=$1
 DIRECTORY=$2
 ADDITIONAL_DIFF_IGNORE=${3:-}
 
+GREP_FILTER_STDERR_OUTPUT="/tmp/diff_grep_filter_stderr"
+
 main() {
   # github actions job does not fetch other git objects by default
   git fetch origin $GITHUB_BASE_REF
@@ -21,7 +23,14 @@ main() {
                                                                             -e 'requirements-dev\.txt$' \
                                                                             -e '\.md$' \
                                                                             $ADDITIONAL_DIFF_IGNORE \
+                                                                            2> $GREP_FILTER_STDERR_OUTPUT \
                                                                             || true)
+
+  if [ -s "$GREP_FILTER_STDERR_OUTPUT" ]; then
+    echo "ERROR: failed to find changed files"
+    cat $GREP_FILTER_STDERR_OUTPUT
+    exit 1
+  fi
 
   echo "Comparing current branch and $GITHUB_BASE_REF at directory: ${DIRECTORY}"
 
