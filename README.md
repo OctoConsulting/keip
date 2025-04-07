@@ -39,20 +39,30 @@ operator makes it easy to manage integration flows, enhancing scalability and re
 3. The `make deploy` target creates the `keip` and `metacontroller` namespaces and deploys the Metacontroller and
    `IntegrationRoute` webhook pods.
 
-Verify those two are running:
+Verify `metacontroller` pod is running:
+
+```shell
+kubectl -n metacontroller get po
+```
+
+Output:
+
+```
+NAME                                        READY   STATUS    RESTARTS   AGE
+metacontroller-0                            1/1     Running   0          2m31s
+```
+
+Verify `integrationroute-webhook` pod is running:
 
 ```shell
 kubectl -n keip get po
+```
 
+Output:
+
+```
 NAME                                        READY   STATUS    RESTARTS   AGE
 integrationroute-webhook-6644b989d5-r6htn   1/1     Running   0          2m30s
-```
-
-```
-kubectl -n metacontroller get po
-
-NAME                                        READY   STATUS    RESTARTS   AGE
-metacontroller-0                            1/1     Running   0          2m31s
 ```
 
 ### Customizing Your keip Container

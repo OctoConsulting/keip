@@ -20,13 +20,14 @@ This should result in the creation of the following resources:
 
 - IntegrationRoute `keip.octo.com/v1alpha1/testroute`: The custom resource representing a Spring Integration
   application.
-- Deployment `testroute`: The controller-created deployment that starts up a pod running
-  the `keip-integration` image and executes the configured integration route.
 - ConfigMap `testroute-xml`: Contains the Spring Integration XML configuration.
 - ConfigMap `testroute-props`: Contains the application's configurable properties.
 - Secret `testroute-secret`: Confidential information that will be mounted as a volume in the running
   pod.
-- Service `testroute-actuator`: Exposes the Spring Actuator.
+- Managed by keip controllers:
+    - Deployment `testroute`: Starts up pods running the `keip-integration`
+      image (configured in the `keip-controller-props` ConfigMap) and executes the provided integration logic.
+    - Service `testroute-actuator`: Exposes the Spring Actuator.
 
 Check that pod `testroute` is `Running` and `1/1` is ready:
 

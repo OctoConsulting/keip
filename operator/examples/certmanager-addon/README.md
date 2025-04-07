@@ -48,8 +48,8 @@ This should result in the creation of the following resources:
 - Cluster Issuer `clusterissuer.cert-manager.io/test-selfsigned`: A self-signed `cert-manager.io/v1/ClusterIssuer` used
   to sign certificates.
 - Managed by keip controllers:
-    - Deployment `testroute`: The controller-created deployment that starts up a pod running
-      the `keip-integration` image and executes the configured integration route.
+    - Deployment `testroute`: Starts up pods running the `keip-integration`
+      image (configured in the `keip-controller-props` ConfigMap) and executes the provided integration logic.
     - Secret `testroute-certstore`: Private key and certificate signed by the denoted issuer.
     - Service `testroute-actuator`: Exposes the Spring Actuator.
     - Certificate `testroute-certs`: A `certificate.cert-manager.io/Certificate`

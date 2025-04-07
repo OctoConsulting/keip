@@ -55,7 +55,7 @@ test: venv/touchfile .env
 
 .PHONY: win-test
 win-test:
-	(if not exist $(TEST_COVERAGE_DIR) mkdir $(TEST_COVERAGE_DIR)) && $(PYTHON) -m coverage run --data-file=$(TEST_COVERAGE_FILE) -m pytest -vv
+	(if not exist $(TEST_COVERAGE_DIR) mkdir $(TEST_COVERAGE_DIR)) && $(PYTHON) -m coverage run --data-file=$(TEST_COVERAGE_FILE) -m pytest
 
 .PHONY: report-test-coverage
 report-test-coverage: test
