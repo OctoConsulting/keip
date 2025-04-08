@@ -13,7 +13,9 @@ LOG_LEVEL ?= INFO
 
 HOST_PYTHON ?= python3.11
 PYTHON = venv/bin/python3
+WIN_PYTHON = .\venv\Scripts\python.exe
 PIP = venv/bin/pip
+WIN_PIP = .\venv\Scripts\pip.exe
 
 .PHONY: get-tag
 get-tag:
@@ -31,24 +33,47 @@ get-image-name:
 clean:
 	rm -rf venv
 
+.PHONY: win-clean
+win-clean:
+	if exist venv rmdir /s /q venv
+
 venv: venv/touchfile
+
+win-venv: win-venv/touchfile
 
 venv/touchfile: requirements.txt requirements-dev.txt
 	$(HOST_PYTHON) -m venv venv
 	$(PIP) install -r requirements-dev.txt; $(PIP) install -r requirements.txt
 	touch venv/touchfile
 
+win-venv/touchfile: requirements.txt requirements-dev.txt
+	$(HOST_PYTHON) -m venv venv
+	$(WIN_PIP) install -r requirements-dev.txt && $(WIN_PIP) install -r requirements.txt
+	type nul > venv\touchfile
+
 .PHONY: format
 format: venv/touchfile
 	$(PYTHON) -m black .
+
+.PHONY: win-format
+win-format: win-venv/touchfile
+	$(WIN_PYTHON) -m black .
 
 .PHONY: lint
 lint: venv/touchfile
 	$(PYTHON) -m ruff check
 
-# Suppress Starlette warning when '.env' file is missing
+.PHONY: win-lint
+win-lint: win-venv/touchfile
+	$(WIN_PYTHON) -m ruff check
+
+# Suppress Starlette warning when '.env' file is missing on *nix/Mac
 .env:
 	touch ./.env
+
+# Suppress Starlette warning when '.env' file is missing on Windows
+.win-env:
+	type nul > .\.env
 
 .PHONY: test
 test: venv/touchfile .env
@@ -56,7 +81,7 @@ test: venv/touchfile .env
 
 .PHONY: win-test
 win-test:
-	(if not exist $(TEST_COVERAGE_DIR) mkdir $(TEST_COVERAGE_DIR)) && $(PYTHON) -m coverage run --data-file=$(TEST_COVERAGE_FILE) -m pytest -vv --log-cli-level=$(LOG_LEVEL)
+	(if not exist $(TEST_COVERAGE_DIR) mkdir $(TEST_COVERAGE_DIR)) && $(WIN_PYTHON) -m coverage run --data-file=$(TEST_COVERAGE_FILE) -m pytest -vv --log-cli-level=$(LOG_LEVEL)
 
 .PHONY: report-test-coverage
 report-test-coverage: test
@@ -64,7 +89,7 @@ report-test-coverage: test
 
 .PHONY: win-report-test-coverage
 win-report-test-coverage: win-test
-	$(PYTHON) -m coverage report --data-file $(TEST_COVERAGE_FILE)
+	$(WIN_PYTHON) -m coverage report --data-file $(TEST_COVERAGE_FILE)
 
 .PHONY: report-test-coverage-html
 report-test-coverage-html: test
@@ -72,17 +97,21 @@ report-test-coverage-html: test
 
 .PHONY: win-report-test-coverage-html
 win-report-test-coverage-html: win-test
-	$(PYTHON) -m coverage html --data-file $(TEST_COVERAGE_FILE) --directory $(TEST_COVERAGE_DIR)/html && start "" $(TEST_COVERAGE_DIR)/html/index.html
+	$(WIN_PYTHON) -m coverage html --data-file $(TEST_COVERAGE_FILE) --directory $(TEST_COVERAGE_DIR)/html && start "" $(TEST_COVERAGE_DIR)/html/index.html
 
 .PHONY: precommit
 precommit: test format lint
 
 .PHONY: win-precommit
-win-precommit: win-test format lint
+win-precommit: win-test win-format win-lint
 
 .PHONY: start-dev-server
 start-dev-server:
 	$(PYTHON) -m uvicorn --port 7080 --reload --app-dir .. webhook.app:app
+
+.PHONY: win-start-dev-server
+win-start-dev-server:
+	$(WIN_PYTHON) -m uvicorn --port 7080 --reload --app-dir .. webhook.app:app
 
 .PHONY: deploy
 deploy: build
