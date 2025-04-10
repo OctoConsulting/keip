@@ -1,4 +1,5 @@
 import json
+from datetime import datetime, timezone
 from pathlib import PurePosixPath
 from typing import List, Mapping, Optional, Any
 
@@ -375,9 +376,9 @@ def _create_pod_template(parent, labels, integration_image) -> Mapping[str, Any]
             "limits": {"memory": "2Gi"},
         }
 
-    envFrom = parent["spec"].get("envFrom")
-    if envFrom:
-        pod_template["spec"]["containers"][0]["envFrom"] = envFrom
+    env_from = parent["spec"].get("envFrom")
+    if env_from:
+        pod_template["spec"]["containers"][0]["envFrom"] = env_from
 
     return pod_template
 
@@ -453,6 +454,79 @@ def _new_actuator_service(parent):
     return service
 
 
+def _compute_status(parent: Mapping, children: Mapping) -> Mapping:
+    route_name = parent["metadata"]["name"]
+    expected_replicas = parent["spec"]["replicas"]
+
+    init_status = {
+        "expectedReplicas": expected_replicas,
+        "readyReplicas": 0,
+        "runningReplicas": 0,
+    }
+
+    deployments = children["Deployment.apps/v1"]
+
+    if route_name not in deployments:
+        return init_status
+
+    deployment_status = deployments[route_name].get("status")
+
+    if not deployment_status:
+        return init_status
+
+    ready_replicas = deployment_status.get("readyReplicas", 0)
+
+    available_conditions = [
+        c for c in deployment_status["conditions"] if c["type"] == "Available"
+    ]
+
+    ready_conditions = [
+        _get_status_ready_condition(
+            parent["status"], expected_replicas == ready_replicas
+        )
+    ]
+
+    return {
+        "expectedReplicas": expected_replicas,
+        "readyReplicas": ready_replicas,
+        "runningReplicas": deployment_status.get("replicas", 0),
+        "conditions": available_conditions + ready_conditions,
+    }
+
+
+def _get_status_ready_condition(parent_status: Mapping, is_ready: bool) -> Mapping:
+    condition_type = "Ready"
+
+    ready_condition_list = (
+        [c for c in parent_status["conditions"] if c["type"] == condition_type]
+        if parent_status
+        else {}
+    )
+
+    ready_condition = ready_condition_list[0] if ready_condition_list else None
+    if ready_condition and ready_condition.get("status") == str(is_ready):
+        return ready_condition
+
+    transition_time = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+    if is_ready:
+        return {
+            "lastTransitionTime": transition_time,
+            "message": "All IntegrationRoute pod replicas are ready",
+            "reason": "ReplicasReady",
+            "status": str(is_ready),
+            "type": condition_type,
+        }
+    else:
+        return {
+            "lastTransitionTime": transition_time,
+            "message": "Some IntegrationRoute pod replicas are not ready",
+            "reason": "ReplicasNotReady",
+            "status": str(is_ready),
+            "type": condition_type,
+        }
+
+
 def _has_tls(parent) -> bool:
     return "tls" in parent["spec"] and "keystore" in parent["spec"]["tls"]
 
@@ -472,6 +546,10 @@ def _gen_children(parent) -> List[Mapping]:
 def sync(body) -> Mapping:
     # Request API at https://metacontroller.github.io/metacontroller/api/compositecontroller.html#sync-hook-request
     parent = body["parent"]
+    curr_children = body["children"]
     # Status can be filled in with useful about the state of managed children
-    desired_state = {"status": {}, "children": _gen_children(parent)}
+    desired_state = {
+        "status": _compute_status(parent, curr_children),
+        "children": _gen_children(parent),
+    }
     return desired_state

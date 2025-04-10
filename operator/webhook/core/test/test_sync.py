@@ -1,4 +1,3 @@
-import copy
 import json
 import os
 from pathlib import PurePosixPath
@@ -18,12 +17,12 @@ from webhook.core.sync import (
     _generate_container_env_vars,
     _get_server_ssl_config,
 )
-
+from webhook.core.test.json_io import load_json_as_dict, full_route, full_route_load
 
 JDK_OPTIONS_ENV_NAME = "JDK_JAVA_OPTIONS"
 
 
-def test_empty_parent_raises_exception(full_route):
+def test_empty_parent_raises_exception(full_route_load):
     with pytest.raises(KeyError):
         sync({})
 
@@ -497,22 +496,6 @@ def test_pod_resources_requests_only(full_route):
     assert "limits" not in pod_resources
     assert pod_resources["requests"].get("cpu") == "1"
     assert pod_resources["requests"].get("memory") == "2Gi"
-
-
-@pytest.fixture()
-def full_route(full_route_load: dict):
-    return copy.deepcopy(full_route_load)
-
-
-@pytest.fixture(scope="module")
-def full_route_load() -> Mapping:
-    cwd = os.path.dirname(os.path.abspath(__file__))
-    return load_json_as_dict(f"{cwd}/json/full-iroute-request.json")
-
-
-def load_json_as_dict(filepath: str) -> Mapping:
-    with open(filepath, "r") as f:
-        return json.load(f)
 
 
 def check_env_var_absent(deployment: Mapping, name: str):
