@@ -215,7 +215,61 @@ spec:
                             - pkcs12
               required:
                 - routeConfigMap
+            status:
+              type: object
+              properties:
+                conditions:
+                  description: |-
+                    List of status conditions to indicate the status of IntegrationRoute Deployments.
+                    Known condition types are `Ready` and `Available`.
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - status
+                      - type
+                    properties:
+                      lastTransitionTime:
+                        description: |-
+                          LastTransitionTime is the timestamp corresponding to the last status
+                          change of this condition.
+                        type: string
+                        format: date-time
+                      message:
+                        description: |-
+                          A human readable message indicating details about the transition.
+                        type: string
+                      observedGeneration:
+                        description: |-
+                          The generation observed by the IntegrationRoute controller.
+                        type: integer
+                        format: int64
+                      reason:
+                        description: |-
+                          A programmatic identifier indicating the reason for the condition's last transition
+                        type: string
+                      status:
+                        description: Status of the condition, one of (`True`, `False`, `Unknown`).
+                        type: string
+                        enum:
+                          - "True"
+                          - "False"
+                          - Unknown
+                      type:
+                        description: Type of the condition, known values are (`Ready`, `Available`).
+                        type: string
+                expectedReplicas:
+                  description: "Target number of replica pods requested by IntegrationRoute"
+                  type: integer
+                readyReplicas:
+                  description: "number of pods targeted by this IntegrationRoute with a Ready Condition"
+                  type: integer
+                runningReplicas:
+                  description: "Total number of non-terminated pods targeted by this IntegrationRoute"
+                  type: integer
+
           required:
             - spec
-      subresources: # Can be used to add status information to CustomResource objects
+      subresources:
+        # Enables adding status information to CustomResource
         status: { }
