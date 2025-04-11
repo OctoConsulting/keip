@@ -498,12 +498,6 @@ def test_pod_resources_requests_only(full_route):
     assert pod_resources["requests"].get("memory") == "2Gi"
 
 
-def check_env_var_absent(deployment: Mapping, name: str):
-    container = get_container(deployment)
-    env_var_names = [env_var["name"] for env_var in container.get("env")]
-    assert name not in env_var_names
-
-
 def check_volume_absent(deployment: Mapping, name: str):
     vols = deployment["spec"]["template"]["spec"]["volumes"]
     vol_names = [v["name"] for v in vols]
