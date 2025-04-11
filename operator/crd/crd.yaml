@@ -178,7 +178,7 @@ spec:
                               description: "Specifies the unique identifier for the key in the JKS keystore. If not provided, the default alias of `certificate` is used."
                               type: string
                             secretName:
-                              description: "The name of the Secret resource containing the private key (tls.key), requsted certificate and certificate chain (tls.crt), keystore (keystore.jks), Certificate Authority's (CA) certificate (ca.crt), and truststore (truststore.jks)."
+                              description: "The name of the Secret resource containing the keystore (keystore.jks)."
                               type: string
                             key:
                               description: "The name of the key, containing the keystore, in the Secret resource (secretName)."
@@ -194,7 +194,7 @@ spec:
                           type: object
                           properties:
                             secretName:
-                              description: "The name of the Secret resource containing the private key (tls.key), requsted certificate and certificate chain (tls.crt), keystore (keystore.p12), Certificate Authority's (CA) certificate (ca.crt), and truststore (truststore.p12)."
+                              description: "The name of the Secret resource containing the keystore (keystore.p12)."
                               type: string
                             key:
                               description: "The name of the key, containing the keystore, in the Secret resource (secretName)."

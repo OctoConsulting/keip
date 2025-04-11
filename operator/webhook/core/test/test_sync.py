@@ -312,35 +312,33 @@ def test_volume_jks_keystore_and_jks_truststore(full_route):
 
 def test_jks_keystore_custom_key_alias(full_route):
     full_route["parent"]["spec"]["tls"]["keystore"]["jks"]["alias"] = "mykeyalias"
-    expected_ssl_config_json = json.dumps(
-        {
-            "ssl": {
-                "key-alias": "mykeyalias",
-                "key-store": "/etc/keystore/test-keystore.jks",
-                "key-store-type": "JKS",
-            },
-            "port": 8443,
-        }
-    )
-    actual_ssl_config_json = json.dumps(_get_server_ssl_config(full_route["parent"]))
+    expected_ssl_config = {
+        "ssl": {
+            "key-alias": "mykeyalias",
+            "key-store": "/etc/keystore/test-keystore.jks",
+            "key-store-type": "JKS",
+        },
+        "port": 8443,
+    }
 
-    assert actual_ssl_config_json == expected_ssl_config_json
+    actual_ssl_config = _get_server_ssl_config(full_route["parent"])
+
+    assert actual_ssl_config == expected_ssl_config
 
 
 def test_jks_keystore_no_key_alias(full_route):
-    expected_ssl_config_json = json.dumps(
-        {
-            "ssl": {
-                "key-alias": "certificate",
-                "key-store": "/etc/keystore/test-keystore.jks",
-                "key-store-type": "JKS",
-            },
-            "port": 8443,
-        }
-    )
-    actual_ssl_config_json = json.dumps(_get_server_ssl_config(full_route["parent"]))
+    expected_ssl_config = {
+        "ssl": {
+            "key-alias": "certificate",
+            "key-store": "/etc/keystore/test-keystore.jks",
+            "key-store-type": "JKS",
+        },
+        "port": 8443,
+    }
 
-    assert actual_ssl_config_json == expected_ssl_config_json
+    actual_ssl_config = _get_server_ssl_config(full_route["parent"])
+
+    assert actual_ssl_config == expected_ssl_config
 
 
 def test_pkcs12_keystore(full_route):
@@ -352,19 +350,18 @@ def test_pkcs12_keystore(full_route):
             "passwordSecretRef": "keystore-password-ref",
         }
     }
-    expected_ssl_config_json = json.dumps(
-        {
-            "ssl": {
-                "key-alias": "1",
-                "key-store": "/etc/keystore/test-keystore.p12",
-                "key-store-type": "PKCS12",
-            },
-            "port": 8443,
-        }
-    )
-    actual_ssl_config_json = json.dumps(_get_server_ssl_config(full_route["parent"]))
+    expected_ssl_config = {
+        "ssl": {
+            "key-alias": "1",
+            "key-store": "/etc/keystore/test-keystore.p12",
+            "key-store-type": "PKCS12",
+        },
+        "port": 8443,
+    }
 
-    assert actual_ssl_config_json == expected_ssl_config_json
+    actual_ssl_config = _get_server_ssl_config(full_route["parent"])
+
+    assert actual_ssl_config == expected_ssl_config
 
 
 def test_env_var_service_name(full_route):
