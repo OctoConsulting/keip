@@ -9,13 +9,11 @@ spec:
     apiVersion: keip.octo.com/v1alpha1
     resource: integrationroutes
     revisionHistory:
-      # TODO: Does this actually work if only the CM's content changes?
       fieldPaths:
         - spec.routeConfigMap
   childResources:
     - apiVersion: apps/v1
       resource: deployments
-      # TODO: Experiment with different update methods
       updateStrategy:
         method: RollingRecreate
         statusChecks:
