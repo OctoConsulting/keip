@@ -4,14 +4,7 @@
     "kind": "IntegrationRoute",
     "metadata": {
       "annotations": {
-        "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"keip.octo.com/v1alpha1\",\"kind\":\"IntegrationRoute\",\"metadata\":{\"annotations\":{},\"name\":\"testroute\",\"namespace\":\"demo\"},\"spec\":{\"annotations\":{\"aKey1\":\"aValue1\"},\"labels\":{\"firstKey\":\"firstValue\"},\"persistentVolumeClaims\":[{\"claimName\":\"testroute-pvc\",\"mountPath\":\"/tmp/testdir\"}],\"propSources\":[{\"name\":\"testroute-props\"},{\"labels\":{\"group\":\"ir-common\"}}],\"replicas\":2,\"routeConfigMap\":\"testroute-xml\",\"secretSources\":[\"testroute-secret\"]}}\n",
-        "cert-manager.io/alt-names": "cloud-integration-route-actuator.testspace.svc.cluster.local",
-        "cert-manager.io/cluster-issuer": "test-cluster-issuer",
-        "cert-manager.io/common-name": "testroute",
-        "cert-manager.io/subject-organizationalunits": "Unit One",
-        "cert-manager.io/subject-countries": "US,AU",
-        "cert-manager.io/subject-provinces": "AZ,SA",
-        "cert-manager.io/subject-localities": "Phoenix,Adelaide"
+        "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"keip.octo.com/v1alpha1\",\"kind\":\"IntegrationRoute\",\"metadata\":{\"annotations\":{},\"name\":\"testroute\",\"namespace\":\"demo\"},\"spec\":{\"annotations\":{\"aKey1\":\"aValue1\"},\"labels\":{\"firstKey\":\"firstValue\"},\"persistentVolumeClaims\":[{\"claimName\":\"testroute-pvc\",\"mountPath\":\"/tmp/testdir\"}],\"propSources\":[{\"name\":\"testroute-props\"},{\"labels\":{\"group\":\"ir-common\"}}],\"replicas\":2,\"routeConfigMap\":\"testroute-xml\",\"secretSources\":[\"testroute-secret\"]}}\n"
       },
       "creationTimestamp": "2023-09-06T01:16:27Z",
       "generation": 1,
@@ -100,6 +93,72 @@
         "requests": {
           "cpu": "1",
           "memory": "2Gi"
+        }
+      }
+    },
+    "status": {
+      "conditions": [
+        {
+          "lastTransitionTime": "2023-09-06T01:25:12Z",
+          "message": "Deployment has minimum availability.",
+          "reason": "MinimumReplicasAvailable",
+          "status": "True",
+          "type": "Available"
+        },
+        {
+          "lastTransitionTime": "2023-09-06T01:25:45Z",
+          "message": "All IntegrationRoute pod replicas are ready",
+          "reason": "ReplicasReady",
+          "status": "True",
+          "type": "Ready"
+        },
+        {
+          "message": "latest ControllerRevision: integrationroutes.keip.octo.com-f09ae6b579e26c5b591f2305d1daf1024e293fa7",
+          "reason": "OnLatestRevision",
+          "status": "True",
+          "type": "Updated"
+        }
+      ],
+      "expectedReplicas": 2,
+      "readyReplicas": 2,
+      "runningReplicas": 2
+    }
+  },
+  "children": {
+    "Deployment.apps/v1": {
+      "testroute": {
+        "apiVersion": "apps/v1",
+        "kind": "Deployment",
+        "metadata": {
+          "name": "testroute",
+          "namespace": "soaesb",
+          "resourceVersion": "1517216",
+          "uid": "1df8704c-c84d-43d0-ae11-34c88f7eb585"
+        },
+        "status": {
+          "availableReplicas": 2,
+          "conditions": [
+            {
+              "lastTransitionTime": "2023-09-06T01:25:12Z",
+              "lastUpdateTime": "2023-09-06T01:25:12Z",
+              "message": "Deployment has minimum availability.",
+              "reason": "MinimumReplicasAvailable",
+              "status": "True",
+              "type": "Available"
+            },
+            {
+              "lastTransitionTime": "2023-09-06T01:25:02Z",
+              "lastUpdateTime": "2023-09-06T01:25:02Z",
+              "message": "ReplicaSet \"testroute-6ffd578d5c\" has successfully progressed.",
+              "reason": "NewReplicaSetAvailable",
+              "status": "True",
+              "type": "Progressing"
+            }
+          ],
+          "observedGeneration": 1,
+          "readyReplicas": 2,
+          "replicas": 2,
+          "updatedReplicas": 2
         }
       }
     }

@@ -19,7 +19,7 @@ kubectl apply -k certmanager
 Install the `cert-manager` addon controller (from the `operator/` directory)
 
 ```shell
-make -f ../../Makefile addons/certmanager/deploy
+make -C ../.. addons/certmanager/deploy
 ```
 
 Install the `ClusterIssuer`
@@ -55,13 +55,13 @@ This should result in the creation of the following resources:
     - Certificate `testroute-certs`: A `certificate.cert-manager.io/Certificate`
       resource that creates the `testroute-certstore` `Secret`.
 
-Check that pod `testroute` is `Running` and `1/1` is ready:
+Check that `testroute` deployment is `Running` and `1/1` is ready:
 
 ```shell
-kubectl get pods -l app.kubernetes.io/instance=integrationroute-testroute
+kubectl get deployment testroute
 
-NAME                         READY   STATUS    RESTARTS   AGE
-testroute-74d574bf85-tbv9m   1/1     Running   0          99s
+NAME        READY   UP-TO-DATE   AVAILABLE   AGE
+testroute   1/1     1            1           99s
 ```
 
 *_Note_*: Cert Manager takes a few seconds to create the certificate and keystore secret. The testroute pod will not

@@ -1,4 +1,4 @@
-VERSION ?= 0.12.0
+VERSION ?= 0.13.0
 HOST_PORT ?= 7080
 GIT_TAG := webhook_v$(VERSION)
 
@@ -11,9 +11,11 @@ TEST_COVERAGE_FILE := $(TEST_COVERAGE_DIR)/.coverage
 EXTRA_PYTEST_ARGS ?=
 
 HOST_PYTHON ?= python3.11
+
 PYTHON = venv/bin/python3
-WIN_PYTHON = .\venv\Scripts\python.exe
 PIP = venv/bin/pip
+
+WIN_PYTHON = .\venv\Scripts\python.exe
 WIN_PIP = .\venv\Scripts\pip.exe
 
 .PHONY: get-tag

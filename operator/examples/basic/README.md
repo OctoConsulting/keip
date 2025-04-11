@@ -29,13 +29,13 @@ This should result in the creation of the following resources:
       image (configured in the `keip-controller-props` ConfigMap) and executes the provided integration logic.
     - Service `testroute-actuator`: Exposes the Spring Actuator.
 
-Check that pod `testroute` is `Running` and `1/1` is ready:
+Check that `testroute` is `Ready`:
 
 ```shell
-kubectl get pod -l app.kubernetes.io/instance=integrationroute-testroute
+kubectl get ir testroute
 
-NAME                         READY   STATUS    RESTARTS   AGE
-testroute-74d574bf85-tbv9m   1/1     Running   0          99s
+NAME        READY   DEPLOYMENT   AGE
+testroute   True    testroute    72s
 ```
 
 Get the `Secret`:
@@ -43,8 +43,8 @@ Get the `Secret`:
 ```shell
 kubectl get secret testroute-secret
 
-NAME                  TYPE                DATA   AGE
-testroute-secret      Opaque              1      109s
+NAME               TYPE     DATA   AGE
+testroute-secret   Opaque   1      109s
 ```
 
 Describe the `IntegrationRoute`:

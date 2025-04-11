@@ -1,5 +1,4 @@
 {
-  "status": {},
   "children": [
     {
       "apiVersion": "apps/v1",
@@ -93,28 +92,45 @@
                       }
                     }
                   },
-                  { "name": "SERVICE_NAME", "value": "testroute" }
+                  {
+                    "name": "SERVICE_NAME",
+                    "value": "testroute"
+                  }
                 ],
                 "resources": {
-                  "requests": { "cpu": "500m", "memory": "1Gi" },
-                  "limits": { "memory": "2Gi" }
+                  "requests": {
+                    "cpu": "500m",
+                    "memory": "1Gi"
+                  },
+                  "limits": {
+                    "memory": "2Gi"
+                  }
                 }
               }
             ],
             "volumes": [
               {
                 "name": "integration-route-config",
-                "configMap": { "name": "testroute-xml" }
+                "configMap": {
+                  "name": "testroute-xml"
+                }
               },
               {
                 "name": "testroute-secret",
-                "secret": { "secretName": "testroute-secret" }
+                "secret": {
+                  "secretName": "testroute-secret"
+                }
               },
               {
                 "name": "keystore",
                 "secret": {
                   "secretName": "testroute-certstore",
-                  "items": [{ "key": "keystore.jks", "path": "keystore.jks" }]
+                  "items": [
+                    {
+                      "key": "keystore.jks",
+                      "path": "keystore.jks"
+                    }
+                  ]
                 }
               }
             ]
@@ -146,5 +162,10 @@
         }
       }
     }
-  ]
+  ],
+  "status": {
+    "expectedReplicas": 1,
+    "readyReplicas": 0,
+    "runningReplicas": 0
+  }
 }
