@@ -16,6 +16,7 @@ from webhook.core.sync import (
     _spring_app_config_env_var,
     _get_java_jdk_options,
     _generate_container_env_vars,
+    _get_server_ssl_config,
 )
 
 
@@ -68,10 +69,11 @@ def test_spring_app_config_json_missing_secret_sources(full_route):
     assert spring_conf["kubernetes"]["config"]["sources"] is not None
 
 
-def test_spring_app_config_json_missing_props_and_secret_sources(full_route):
+def test_spring_app_config_json_missing_props_and_secret_sources_jks_keystore(
+    full_route,
+):
     del full_route["parent"]["spec"]["propSources"]
     del full_route["parent"]["spec"]["secretSources"]
-
     spring_conf = _spring_app_config_env_var(full_route["parent"])
     actual_json = spring_conf["value"]
 
@@ -85,6 +87,50 @@ def test_spring_app_config_json_missing_props_and_secret_sources(full_route):
                     "key-alias": "certificate",
                     "key-store": "/etc/keystore/test-keystore.jks",
                     "key-store-type": "JKS",
+                },
+                "port": 8443,
+            },
+            "management": {
+                "endpoint": {
+                    "health": {"enabled": True},
+                    "prometheus": {"enabled": True},
+                },
+                "endpoints": {"web": {"exposure": {"include": "health,prometheus"}}},
+            },
+        }
+    )
+
+    assert actual_json == expected_json
+
+
+def test_spring_app_config_json_missing_props_and_secret_sources_pkcs12_keystore(
+    full_route,
+):
+    del full_route["parent"]["spec"]["propSources"]
+    del full_route["parent"]["spec"]["secretSources"]
+    del full_route["parent"]["spec"]["tls"]["keystore"]["jks"]
+    full_route["parent"]["spec"]["tls"]["keystore"] = {
+        "pkcs12": {
+            "alias": "1",
+            "secretName": "test-tls-secret",
+            "key": "test-keystore.p12",
+            "passwordSecretRef": "keystore-password-ref",
+        }
+    }
+
+    spring_conf = _spring_app_config_env_var(full_route["parent"])
+    actual_json = spring_conf["value"]
+
+    assert spring_conf["name"] == "SPRING_APPLICATION_JSON"
+
+    expected_json = json.dumps(
+        {
+            "spring": {"application": {"name": "testroute"}},
+            "server": {
+                "ssl": {
+                    "key-alias": "1",
+                    "key-store": "/etc/keystore/test-keystore.p12",
+                    "key-store-type": "PKCS12",
                 },
                 "port": 8443,
             },
@@ -151,7 +197,7 @@ def test_pod_template_no_keystore(full_route):
     check_volume_mounts_absent(deployment, "keystore")
 
 
-def test_jdk_options_pkcs12_type(full_route):
+def test_jdk_options_pkcs12_truststore_type(full_route):
     tls_config = full_route["parent"]["spec"]["tls"]
     options = _get_java_jdk_options(tls_config)
 
@@ -165,7 +211,7 @@ def test_jdk_options_pkcs12_type(full_route):
     assert options["value"] == expected_options
 
 
-def test_jdk_options_jks_type(full_route):
+def test_jdk_options_jks_truststore_type(full_route):
     tls_config = full_route["parent"]["spec"]["tls"]
     tls_config["truststore"]["type"] = "jks"
     tls_config["truststore"]["key"] = "test-truststore.jks"
@@ -187,6 +233,135 @@ def test_env_vars_no_keystore(full_route):
     options = _generate_container_env_vars(full_route["parent"])
 
     assert not any(x for x in options if x.get("name") == "SERVER_SSL_KEYSTOREPASSWORD")
+
+
+def test_volume_pkcs12_keystore_and_pkcs12_truststore(full_route):
+    del full_route["parent"]["spec"]["tls"]["keystore"]
+    full_route["parent"]["spec"]["tls"]["keystore"] = {
+        "pkcs12": {
+            "secretName": "test-tls-secret",
+            "key": "test-keystore.p12",
+            "passwordSecretRef": "keystore-password-ref",
+        }
+    }
+    expected_keystore_volume = {
+        "name": "keystore",
+        "secret": {
+            "secretName": "test-tls-secret",
+            "items": [{"key": "test-keystore.p12", "path": "test-keystore.p12"}],
+        },
+    }
+
+    expected_truststore_volume = {
+        "name": "truststore",
+        "configMap": {
+            "name": "test-tls-cm",
+            "items": [{"key": "test-truststore.p12", "path": "test-truststore.p12"}],
+        },
+    }
+
+    response = sync(full_route)
+    volumes = response["children"][0]["spec"]["template"]["spec"]["volumes"]
+    actual_keystore_volume = None
+    actual_truststore_volume = None
+    for volume in volumes:
+        if volume["name"] == "keystore":
+            actual_keystore_volume = volume
+        elif volume["name"] == "truststore":
+            actual_truststore_volume = volume
+
+    assert actual_keystore_volume == expected_keystore_volume
+    assert actual_truststore_volume == expected_truststore_volume
+
+
+def test_volume_jks_keystore_and_jks_truststore(full_route):
+    del full_route["parent"]["spec"]["tls"]["truststore"]
+    full_route["parent"]["spec"]["tls"]["truststore"] = {
+        "configMapName": "test-tls-cm",
+        "key": "test-truststore.jks",
+        "type": "jks",
+    }
+    expected_keystore_volume = {
+        "name": "keystore",
+        "secret": {
+            "secretName": "test-tls-secret",
+            "items": [{"key": "test-keystore.jks", "path": "test-keystore.jks"}],
+        },
+    }
+
+    expected_truststore_volume = {
+        "name": "truststore",
+        "configMap": {
+            "name": "test-tls-cm",
+            "items": [{"key": "test-truststore.jks", "path": "test-truststore.jks"}],
+        },
+    }
+    response = sync(full_route)
+    volumes = response["children"][0]["spec"]["template"]["spec"]["volumes"]
+    actual_keystore_volume = None
+    actual_truststore_volume = None
+    for volume in volumes:
+        if volume["name"] == "keystore":
+            actual_keystore_volume = volume
+        elif volume["name"] == "truststore":
+            actual_truststore_volume = volume
+
+    assert actual_keystore_volume == expected_keystore_volume
+    assert actual_truststore_volume == expected_truststore_volume
+
+
+def test_jks_keystore_custom_key_alias(full_route):
+    full_route["parent"]["spec"]["tls"]["keystore"]["jks"]["alias"] = "mykeyalias"
+    expected_ssl_config = {
+        "ssl": {
+            "key-alias": "mykeyalias",
+            "key-store": "/etc/keystore/test-keystore.jks",
+            "key-store-type": "JKS",
+        },
+        "port": 8443,
+    }
+
+    actual_ssl_config = _get_server_ssl_config(full_route["parent"])
+
+    assert actual_ssl_config == expected_ssl_config
+
+
+def test_jks_keystore_no_key_alias(full_route):
+    expected_ssl_config = {
+        "ssl": {
+            "key-alias": "certificate",
+            "key-store": "/etc/keystore/test-keystore.jks",
+            "key-store-type": "JKS",
+        },
+        "port": 8443,
+    }
+
+    actual_ssl_config = _get_server_ssl_config(full_route["parent"])
+
+    assert actual_ssl_config == expected_ssl_config
+
+
+def test_pkcs12_keystore(full_route):
+    del full_route["parent"]["spec"]["tls"]["keystore"]["jks"]
+    full_route["parent"]["spec"]["tls"]["keystore"] = {
+        "pkcs12": {
+            "secretName": "test-tls-secret",
+            "key": "test-keystore.p12",
+            "passwordSecretRef": "keystore-password-ref",
+        }
+    }
+    expected_ssl_config = {
+        "ssl": {
+            "key-alias": "1",
+            "key-store": "/etc/keystore/test-keystore.p12",
+            "key-store-type": "PKCS12",
+        },
+        "port": 8443,
+    }
+
+    actual_ssl_config = _get_server_ssl_config(full_route["parent"])
+
+    assert actual_ssl_config == expected_ssl_config
 
 
 def test_env_var_service_name(full_route):

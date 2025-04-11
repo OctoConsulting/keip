@@ -10,6 +10,6 @@ configMapGenerator:
       - integrationRoute.xml
 
 secretGenerator:
-  - name: jks-password
+  - name: pkcs12-password
     literals:
       - password=changeit

@@ -71,10 +71,11 @@
       ],
       "tls": {
         "keystore": {
-          "secretName": "test-tls-secret",
-          "key": "test-keystore.jks",
-          "type": "jks",
-          "passwordSecretRef": "keystore-password-ref"
+          "jks": {
+            "secretName": "test-tls-secret",
+            "key": "test-keystore.jks",
+            "passwordSecretRef": "keystore-password-ref"
+          }
         },
         "truststore": {
           "configMapName": "test-tls-cm",

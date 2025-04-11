@@ -36,14 +36,14 @@ Install the example `IntegrationRoute`
 kubectl apply -k .
 ```
 
-*_Note_*: The example uses a `keystore.jks` file and a certificate created by [Cert Manager](https://cert-manager.io/).
+*_Note_*: The example uses a `keystore.p12` file and a certificate created by [Cert Manager](https://cert-manager.io/).
 
 This should result in the creation of the following resources:
 
 - IntegrationRoute `keip.octo.com/v1alpha1/testroute`: The custom resource representing a Spring Integration
   application.
 - ConfigMap `testroute-xml`: Contains the Spring Integration XML configuration.
-- Secret `jks-password`: Password to the JKS keystore.
+- Secret `pkcs12-password`: Password to the PKCS12 keystore.
 - Service `testroute`: Exposes the web server endpoint.
 - Cluster Issuer `clusterissuer.cert-manager.io/test-selfsigned`: A self-signed `cert-manager.io/v1/ClusterIssuer` used
   to sign certificates.
@@ -65,7 +65,7 @@ testroute-74d574bf85-tbv9m   1/1     Running   0          99s
 ```
 
 *_Note_*: Cert Manager takes a few seconds to create the certificate and keystore secret. The testroute pod will not
-start until the `keystore.jks` secret is available to mount.
+start until the `keystore.p12` secret is available to mount.
 
 Describe the `Certificate`:
 
@@ -78,7 +78,7 @@ Get the `Secrets`:
 ```shell
 kubectl get secrets
 NAME                  TYPE                DATA   AGE
-jks-password          Opaque              1      109s
+pkcs12-password       Opaque              1      109s
 testroute-certstore   kubernetes.io/tls   5      107s
 ```
 

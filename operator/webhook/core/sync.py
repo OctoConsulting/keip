@@ -97,15 +97,16 @@ class VolumeConfig:
 
             keystore = self._tls_config.get("keystore")
             if keystore:
+                keystore_type = _get_keystore_type(keystore)
                 volumes.append(
                     {
                         "name": self._tls_keystore_name,
                         "secret": {
-                            "secretName": keystore["secretName"],
+                            "secretName": keystore[keystore_type]["secretName"],
                             "items": [
                                 {
-                                    "key": keystore["key"],
-                                    "path": keystore["key"],
+                                    "key": keystore[keystore_type]["key"],
+                                    "path": keystore[keystore_type]["key"],
                                 }
                             ],
                         },
@@ -198,18 +199,35 @@ def _get_server_ssl_config(parent) -> Optional[Mapping]:
     if not keystore:
         return None
 
-    return {
-        "ssl": {
-            "key-alias": "certificate",
-            "key-store": str(PurePosixPath(KEYSTORE_PATH, keystore["key"])),
-            "key-store-type": keystore["type"].upper(),
-        },
-        "port": HTTPS_PORT,
-    }
+    if "jks" in keystore:
+        alias = keystore["jks"].get("alias", "certificate")
+        return {
+            "ssl": {
+                "key-alias": alias,
+                "key-store": str(PurePosixPath(KEYSTORE_PATH, keystore["jks"]["key"])),
+                "key-store-type": "JKS",
+            },
+            "port": HTTPS_PORT,
+        }
+    else:
+        return {
+            "ssl": {
+                "key-alias": "1",
+                "key-store": str(
+                    PurePosixPath(KEYSTORE_PATH, keystore["pkcs12"]["key"])
+                ),
+                "key-store-type": "PKCS12",
+            },
+            "port": HTTPS_PORT,
+        }
 
 
 def _service_name_env_var(parent) -> Mapping[str, str]:
     return {"name": "SERVICE_NAME", "value": parent["metadata"]["name"]}
+
+
+def _get_keystore_type(keystore) -> str:
+    return "jks" if "jks" in keystore else "pkcs12"
 
 
 def _spring_app_config_env_var(parent) -> Optional[Mapping]:
@@ -242,10 +260,15 @@ def _get_keystore_password_env(tls) -> Mapping[str, Any]:
     if not keystore:
         return {}
 
+    keystore_type = _get_keystore_type(keystore)
+
     return {
         "name": "SERVER_SSL_KEYSTOREPASSWORD",
         "valueFrom": {
-            "secretKeyRef": {"name": keystore["passwordSecretRef"], "key": "password"}
+            "secretKeyRef": {
+                "name": keystore[keystore_type]["passwordSecretRef"],
+                "key": "password",
+            }
         },
     }
 
