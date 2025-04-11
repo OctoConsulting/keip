@@ -15,6 +15,16 @@ spec:
     - name: v1alpha1
       served: true
       storage: true
+      additionalPrinterColumns:
+        - name: Ready
+          type: string
+          jsonPath: .status.conditions[?(@.type=="Ready")].status
+        - name: Deployment
+          type: string
+          jsonPath: .metadata.name
+        - name: Age
+          type: date
+          jsonPath: .metadata.creationTimestamp
       schema:
         openAPIV3Schema:
           type: object
@@ -125,10 +135,8 @@ spec:
                           type: string
                         memory:
                           type: string
-
-
-                replicas: # not yet implemented
-                  description: "Number of containers running the integration route"
+                replicas:
+                  description: "Number of pods running the integration route"
                   type: integer
                   minimum: 1
                   maximum: 20 # TODO: Figure out a reasonable maximum
@@ -267,7 +275,6 @@ spec:
                 runningReplicas:
                   description: "Total number of non-terminated pods targeted by this IntegrationRoute"
                   type: integer
-
           required:
             - spec
       subresources:
