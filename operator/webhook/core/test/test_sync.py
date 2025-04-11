@@ -244,27 +244,34 @@ def test_volume_pkcs12_keystore_and_pkcs12_truststore(full_route):
             "passwordSecretRef": "keystore-password-ref",
         }
     }
+    expected_keystore_volume = {
+        "name": "keystore",
+        "secret": {
+            "secretName": "test-tls-secret",
+            "items": [{"key": "test-keystore.p12", "path": "test-keystore.p12"}],
+        },
+    }
+
+    expected_truststore_volume = {
+        "name": "truststore",
+        "configMap": {
+            "name": "test-tls-cm",
+            "items": [{"key": "test-truststore.p12", "path": "test-truststore.p12"}],
+        },
+    }
+
     response = sync(full_route)
     volumes = response["children"][0]["spec"]["template"]["spec"]["volumes"]
-    keystore_volume = None
-    truststore_volume = None
+    actual_keystore_volume = None
+    actual_truststore_volume = None
     for volume in volumes:
         if volume["name"] == "keystore":
-            keystore_volume = volume
+            actual_keystore_volume = volume
         elif volume["name"] == "truststore":
-            truststore_volume = volume
+            actual_truststore_volume = volume
 
-    assert keystore_volume
-    assert keystore_volume["name"] == "keystore"
-    assert keystore_volume["secret"]["secretName"] == "test-tls-secret"
-    assert keystore_volume["secret"]["items"][0]["key"] == "test-keystore.p12"
-    assert keystore_volume["secret"]["items"][0]["path"] == "test-keystore.p12"
-
-    assert truststore_volume
-    assert truststore_volume["name"] == "truststore"
-    assert truststore_volume["configMap"]["name"] == "test-tls-cm"
-    assert truststore_volume["configMap"]["items"][0]["key"] == "test-truststore.p12"
-    assert truststore_volume["configMap"]["items"][0]["path"] == "test-truststore.p12"
+    assert actual_keystore_volume == expected_keystore_volume
+    assert actual_truststore_volume == expected_truststore_volume
 
 
 def test_volume_jks_keystore_and_jks_truststore(full_route):
@@ -274,27 +281,33 @@ def test_volume_jks_keystore_and_jks_truststore(full_route):
         "key": "test-truststore.jks",
         "type": "jks",
     }
+    expected_keystore_volume = {
+        "name": "keystore",
+        "secret": {
+            "secretName": "test-tls-secret",
+            "items": [{"key": "test-keystore.jks", "path": "test-keystore.jks"}],
+        },
+    }
+
+    expected_truststore_volume = {
+        "name": "truststore",
+        "configMap": {
+            "name": "test-tls-cm",
+            "items": [{"key": "test-truststore.jks", "path": "test-truststore.jks"}],
+        },
+    }
     response = sync(full_route)
     volumes = response["children"][0]["spec"]["template"]["spec"]["volumes"]
-    keystore_volume = None
-    truststore_volume = None
+    actual_keystore_volume = None
+    actual_truststore_volume = None
     for volume in volumes:
         if volume["name"] == "keystore":
-            keystore_volume = volume
+            actual_keystore_volume = volume
         elif volume["name"] == "truststore":
-            truststore_volume = volume
+            actual_truststore_volume = volume
 
-    assert keystore_volume
-    assert keystore_volume["name"] == "keystore"
-    assert keystore_volume["secret"]["secretName"] == "test-tls-secret"
-    assert keystore_volume["secret"]["items"][0]["key"] == "test-keystore.jks"
-    assert keystore_volume["secret"]["items"][0]["path"] == "test-keystore.jks"
-
-    assert truststore_volume
-    assert truststore_volume["name"] == "truststore"
-    assert truststore_volume["configMap"]["name"] == "test-tls-cm"
-    assert truststore_volume["configMap"]["items"][0]["key"] == "test-truststore.jks"
-    assert truststore_volume["configMap"]["items"][0]["path"] == "test-truststore.jks"
+    assert actual_keystore_volume == expected_keystore_volume
+    assert actual_truststore_volume == expected_truststore_volume
 
 
 def test_jks_keystore_custom_key_alias(full_route):

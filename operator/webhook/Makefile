@@ -8,8 +8,7 @@ FULL_IMAGE_NAME := $(IMG_REGISTRY)/$(IMG_NAME):$(VERSION)
 CONTAINER_NAME := integration-route-webhook
 TEST_COVERAGE_DIR := .test_coverage
 TEST_COVERAGE_FILE := $(TEST_COVERAGE_DIR)/.coverage
-
-LOG_LEVEL ?= INFO
+EXTRA_PYTEST_ARGS ?=
 
 HOST_PYTHON ?= python3.11
 PYTHON = venv/bin/python3
@@ -75,13 +74,19 @@ win-lint: win-venv/touchfile
 .win-env:
 	type nul > .\.env
 
+# Including extra arguments for pytest
+# Example:
+# EXTRA_PYTEST_ARGS="-vv --log-cli-level=DEBUG"
 .PHONY: test
 test: venv/touchfile .env
-	mkdir -p $(TEST_COVERAGE_DIR) && $(PYTHON) -m coverage run --data-file=$(TEST_COVERAGE_FILE) -m pytest -vv --log-cli-level=$(LOG_LEVEL)
+	mkdir -p $(TEST_COVERAGE_DIR) && $(PYTHON) -m coverage run --data-file=$(TEST_COVERAGE_FILE) -m pytest $(EXTRA_PYTEST_ARGS)
 
+# Including extra arguments for pytest
+# Example:
+# $Env:EXTRA_PYTEST_ARGS="-vv --log-cli-level=DEBUG"
 .PHONY: win-test
-win-test:
-	(if not exist $(TEST_COVERAGE_DIR) mkdir $(TEST_COVERAGE_DIR)) && $(WIN_PYTHON) -m coverage run --data-file=$(TEST_COVERAGE_FILE) -m pytest -vv --log-cli-level=$(LOG_LEVEL)
+win-test: win-venv/touchfile .win-env
+	(if not exist $(TEST_COVERAGE_DIR) mkdir $(TEST_COVERAGE_DIR)) && $(WIN_PYTHON) -m coverage run --data-file=$(TEST_COVERAGE_FILE) -m pytest $(EXTRA_PYTEST_ARGS)
 
 .PHONY: report-test-coverage
 report-test-coverage: test
