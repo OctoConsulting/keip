@@ -8,7 +8,6 @@ from webhook.core.sync import (
     _compute_status,
     _get_status_ready_condition,
 )
-from webhook.core.test.json_io import full_route, full_route_load
 
 FIXED_ISO_TIMESTAMP = "2023-09-06T12:34:56Z"
 
@@ -109,7 +108,7 @@ def test_status_with_child_deployment_missing_ready_replicas_field_default_to_un
 
 
 def test_ready_status_with_parent_missing_status_field_generate_new_status(
-    patch_datetime, full_route_load
+    patch_datetime,
 ):
     ready_condition = _get_status_ready_condition({}, False)
 

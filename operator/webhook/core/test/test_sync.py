@@ -17,12 +17,12 @@ from webhook.core.sync import (
     _generate_container_env_vars,
     _get_server_ssl_config,
 )
-from webhook.core.test.json_io import load_json_as_dict, full_route, full_route_load
+from webhook.test.test_webapp import load_json_as_dict
 
 JDK_OPTIONS_ENV_NAME = "JDK_JAVA_OPTIONS"
 
 
-def test_empty_parent_raises_exception(full_route_load):
+def test_empty_parent_raises_exception():
     with pytest.raises(KeyError):
         sync({})
 
