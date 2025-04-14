@@ -19,6 +19,9 @@ spec:
         - name: Ready
           type: string
           jsonPath: .status.conditions[?(@.type=="Ready")].status
+        - name: Replicas
+          type: integer
+          jsonPath: .status.expectedReplicas
         - name: Deployment
           type: string
           jsonPath: .metadata.name

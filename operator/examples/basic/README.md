@@ -34,8 +34,8 @@ Check that `testroute` is `Ready`:
 ```shell
 kubectl get ir testroute
 
-NAME        READY   DEPLOYMENT   AGE
-testroute   True    testroute    72s
+NAME        READY   REPLICAS   DEPLOYMENT   AGE
+testroute   True    1          testroute    72s
 ```
 
 Get the `Secret`:
