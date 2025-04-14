@@ -507,24 +507,24 @@ def _get_status_ready_condition(parent_status: Mapping, is_ready: bool) -> Mappi
     if ready_condition and ready_condition.get("status") == str(is_ready):
         return ready_condition
 
-    transition_time = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    updated_condition = {
+        "lastTransitionTime": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "status": str(is_ready),
+        "type": condition_type,
+    }
 
     if is_ready:
-        return {
-            "lastTransitionTime": transition_time,
+        updated_condition |= {
             "message": "All IntegrationRoute pod replicas are ready",
             "reason": "ReplicasReady",
-            "status": str(is_ready),
-            "type": condition_type,
         }
     else:
-        return {
-            "lastTransitionTime": transition_time,
+        updated_condition |= {
             "message": "Some IntegrationRoute pod replicas are not ready",
             "reason": "ReplicasNotReady",
-            "status": str(is_ready),
-            "type": condition_type,
         }
+
+    return updated_condition
 
 
 def _has_tls(parent) -> bool:
