@@ -500,7 +500,7 @@ def _get_status_ready_condition(parent_status: Mapping, is_ready: bool) -> Mappi
     ready_condition_list = (
         [c for c in parent_status["conditions"] if c["type"] == condition_type]
         if parent_status
-        else {}
+        else []
     )
 
     ready_condition = ready_condition_list[0] if ready_condition_list else None
