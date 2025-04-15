@@ -1,4 +1,4 @@
-VERSION ?= 0.10.1
+VERSION ?= 0.11.0
 GIT_TAG := operator_v$(VERSION)
 KEIP_INTEGRATION_IMAGE ?= ghcr.io/octoconsulting/keip/minimal-app:latest
 
