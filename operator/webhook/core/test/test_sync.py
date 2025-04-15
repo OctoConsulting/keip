@@ -1,4 +1,3 @@
-import copy
 import json
 import os
 from pathlib import PurePosixPath
@@ -18,12 +17,12 @@ from webhook.core.sync import (
     _generate_container_env_vars,
     _get_server_ssl_config,
 )
-
+from webhook.test.test_webapp import load_json_as_dict
 
 JDK_OPTIONS_ENV_NAME = "JDK_JAVA_OPTIONS"
 
 
-def test_empty_parent_raises_exception(full_route):
+def test_empty_parent_raises_exception():
     with pytest.raises(KeyError):
         sync({})
 
@@ -497,28 +496,6 @@ def test_pod_resources_requests_only(full_route):
     assert "limits" not in pod_resources
     assert pod_resources["requests"].get("cpu") == "1"
     assert pod_resources["requests"].get("memory") == "2Gi"
-
-
-@pytest.fixture()
-def full_route(full_route_load: dict):
-    return copy.deepcopy(full_route_load)
-
-
-@pytest.fixture(scope="module")
-def full_route_load() -> Mapping:
-    cwd = os.path.dirname(os.path.abspath(__file__))
-    return load_json_as_dict(f"{cwd}/json/full-iroute-request.json")
-
-
-def load_json_as_dict(filepath: str) -> Mapping:
-    with open(filepath, "r") as f:
-        return json.load(f)
-
-
-def check_env_var_absent(deployment: Mapping, name: str):
-    container = get_container(deployment)
-    env_var_names = [env_var["name"] for env_var in container.get("env")]
-    assert name not in env_var_names
 
 
 def check_volume_absent(deployment: Mapping, name: str):

@@ -1,8 +1,10 @@
 import json
 import os
+from typing import Mapping
+
 import pytest
 from starlette.testclient import TestClient
-from typing import Mapping
+
 from webhook.app import app
 
 
@@ -15,12 +17,12 @@ def test_status_endpoint(test_client):
 
 def test_sync_endpoint_success(test_client):
     request = load_json_as_dict(
-        f"{os.path.dirname(os.path.abspath(__file__))}/json/full-iroute-request.json"
+        f"{os.path.dirname(os.path.abspath(__file__))}/json/full-route-request.json"
     )
 
     response = test_client.post("/sync", json=request)
     expected = load_json_as_dict(
-        f"{os.path.dirname(os.path.abspath(__file__))}/json/full-response.json"
+        f"{os.path.dirname(os.path.abspath(__file__))}/json/full-route-response.json"
     )
 
     assert expected == response.json()

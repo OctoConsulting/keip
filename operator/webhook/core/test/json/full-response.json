@@ -1,5 +1,4 @@
 {
-  "status": {},
   "children": [
     {
       "apiVersion": "apps/v1",
@@ -241,5 +240,27 @@
         }
       }
     }
-  ]
+  ],
+  "status": {
+    "expectedReplicas": 2,
+    "readyReplicas": 2,
+    "runningReplicas": 2,
+    "conditions": [
+      {
+        "lastTransitionTime": "2023-09-06T01:25:12Z",
+        "lastUpdateTime": "2023-09-06T01:25:12Z",
+        "message": "Deployment has minimum availability.",
+        "reason": "MinimumReplicasAvailable",
+        "status": "True",
+        "type": "Available"
+      },
+      {
+        "lastTransitionTime": "2023-09-06T01:25:45Z",
+        "message": "All IntegrationRoute pod replicas are ready",
+        "reason": "ReplicasReady",
+        "status": "True",
+        "type": "Ready"
+      }
+    ]
+  }
 }

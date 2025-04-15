@@ -3,6 +3,7 @@ kind: IntegrationRoute
 metadata:
   name: testroute
 spec:
+  replicas: 1
   routeConfigMap: testroute-xml
   propSources:
     - name: testroute-props

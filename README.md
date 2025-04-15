@@ -137,6 +137,18 @@ spec:
 EOF
 ```
 
+3. Check on the status of the route:
+
+```shell
+kubectl get ir
+```
+
+4. Once the route reports as ready, check the pod logs to verify the test message is printed periodically:
+
+```shell
+kubectl logs -f deployment/example-route
+```
+
 ### Clean up
 
 To delete the example route:
@@ -149,7 +161,7 @@ kubectl delete cm keip-route-xml
 To remove the keip operator and all related resources from your cluster:
 
 ```shell
-cd operator && make undeploy
+make -C operator undeploy
 ```
 
 ## Examples
