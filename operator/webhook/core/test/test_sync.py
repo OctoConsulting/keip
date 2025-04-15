@@ -466,11 +466,7 @@ def test_pod_missing_resources(full_route):
         full_route["parent"], labels=None, integration_image=None
     )
 
-    resources = pod["spec"]["containers"][0].get("resources")
-    assert resources["requests"]["cpu"] == "500m"
-    assert resources["requests"]["memory"] == "1Gi"
-    assert resources["limits"]["memory"] == "2Gi"
-    assert "cpu" not in resources["limits"]
+    assert "resources" not in pod["spec"]["containers"][0]
 
 
 def test_pod_resources_limits_only(full_route):
