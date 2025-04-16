@@ -162,22 +162,40 @@ spec:
                   type: object
                   properties:
                     truststore:
-                      description: "Configure client TLS connections using a JKS or PKCS12 truststore. A JKS truststore should have its password set to 'changeit', while a PKCS12 truststore should have an empty password."
+                      description: "Configures client TLS connections using a JKS or PKCS12 truststore. A JKS truststore should have its password set to 'changeit', while a PKCS12 truststore should have an empty password."
                       type: object
                       properties:
-                        configMapName:
-                          type: string
-                        key:
-                          type: string
-                        type:
-                          type: string
-                          enum:
+                        jks:
+                          type: object
+                          properties:
+                            configMapName:
+                              description: "The name of the ConfigMap resource containing the truststore (truststore.jks)."
+                              type: string
+                            key:
+                              description: "The name of the key containing the truststore in the ConfigMap resource (configMapName)."
+                              type: string
+                          required:
+                            - configMapName
+                            - key
+                        pkcs12:
+                          type: object
+                          properties:
+                            configMapName:
+                              description: "The name of the ConfigMap resource containing the truststore (truststore.p12)."
+                              type: string
+                            key:
+                              description: "The name of the key containing the truststore in the ConfigMap resource (configMapName)."
+                              type: string
+                          required:
+                            - configMapName
+                            - key
+                      oneOf:
+                        - properties:
+                          required:
                             - jks
+                        - properties:
+                          required:
                             - pkcs12
-                      required:
-                        - configMapName
-                        - key
-                        - type
                     keystore:
                       description: "Configures HTTP server TLS connections using a JKS or PKCS12 keystore. The keystore password should be stored in a Secret resource and referenced in the route's Custom Resource. The format of the Secret is `password=<password>`."
                       type: object
@@ -192,7 +210,7 @@ spec:
                               description: "The name of the Secret resource containing the keystore (keystore.jks)."
                               type: string
                             key:
-                              description: "The name of the key, containing the keystore, in the Secret resource (secretName)."
+                              description: "The name of the key containing the keystore in the Secret resource (secretName)."
                               type: string
                             passwordSecretRef:
                               description: "The reference to the Secret resource containing the password used to encrypt the JKS keystore."

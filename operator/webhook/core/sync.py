@@ -81,15 +81,16 @@ class VolumeConfig:
         if self._tls_config:
             truststore = self._tls_config.get("truststore")
             if truststore:
+                truststore_type = _get_tls_cert_store_type(truststore)
                 volumes.append(
                     {
                         "name": self._tls_truststore_name,
                         "configMap": {
-                            "name": truststore["configMapName"],
+                            "name": truststore[truststore_type]["configMapName"],
                             "items": [
                                 {
-                                    "key": truststore["key"],
-                                    "path": truststore["key"],
+                                    "key": truststore[truststore_type]["key"],
+                                    "path": truststore[truststore_type]["key"],
                                 }
                             ],
                         },
@@ -98,7 +99,7 @@ class VolumeConfig:
 
             keystore = self._tls_config.get("keystore")
             if keystore:
-                keystore_type = _get_keystore_type(keystore)
+                keystore_type = _get_tls_cert_store_type(keystore)
                 volumes.append(
                     {
                         "name": self._tls_keystore_name,
@@ -227,8 +228,8 @@ def _service_name_env_var(parent) -> Mapping[str, str]:
     return {"name": "SERVICE_NAME", "value": parent["metadata"]["name"]}
 
 
-def _get_keystore_type(keystore) -> str:
-    return "jks" if "jks" in keystore else "pkcs12"
+def _get_tls_cert_store_type(tls_cert_store) -> str:
+    return "jks" if "jks" in tls_cert_store else "pkcs12"
 
 
 def _spring_app_config_env_var(parent) -> Optional[Mapping]:
@@ -261,7 +262,7 @@ def _get_keystore_password_env(tls) -> Mapping[str, Any]:
     if not keystore:
         return {}
 
-    keystore_type = _get_keystore_type(keystore)
+    keystore_type = _get_tls_cert_store_type(keystore)
 
     return {
         "name": "SERVER_SSL_KEYSTOREPASSWORD",
@@ -281,12 +282,12 @@ def _get_java_jdk_options(tls) -> Optional[Mapping[str, str]]:
     if not truststore:
         return None
 
-    tls_type = truststore["type"]
-    truststore_password = "changeit" if tls_type == "jks" else ""
+    truststore_type = _get_tls_cert_store_type(truststore)
+    truststore_password = "changeit" if truststore_type == "jks" else ""
 
     return {
         "name": "JDK_JAVA_OPTIONS",
-        "value": f"-Djavax.net.ssl.trustStore={str(PurePosixPath(TRUSTSTORE_PATH, truststore['key']))} -Djavax.net.ssl.trustStorePassword={truststore_password} -Djavax.net.ssl.trustStoreType={tls_type.upper()}",
+        "value": f"-Djavax.net.ssl.trustStore={str(PurePosixPath(TRUSTSTORE_PATH, truststore[truststore_type]['key']))} -Djavax.net.ssl.trustStorePassword={truststore_password} -Djavax.net.ssl.trustStoreType={truststore_type.upper()}",
     }
 
 

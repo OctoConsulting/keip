@@ -212,8 +212,9 @@ def test_jdk_options_pkcs12_truststore_type(full_route):
 
 def test_jdk_options_jks_truststore_type(full_route):
     tls_config = full_route["parent"]["spec"]["tls"]
-    tls_config["truststore"]["type"] = "jks"
-    tls_config["truststore"]["key"] = "test-truststore.jks"
+    tls_config["truststore"] = {
+        "jks": {"configMapName": "test-tls-cm", "key": "test-truststore.jks"}
+    }
 
     options = _get_java_jdk_options(tls_config)
     assert options["name"] == JDK_OPTIONS_ENV_NAME
@@ -276,9 +277,7 @@ def test_volume_pkcs12_keystore_and_pkcs12_truststore(full_route):
 def test_volume_jks_keystore_and_jks_truststore(full_route):
     del full_route["parent"]["spec"]["tls"]["truststore"]
     full_route["parent"]["spec"]["tls"]["truststore"] = {
-        "configMapName": "test-tls-cm",
-        "key": "test-truststore.jks",
-        "type": "jks",
+        "jks": {"configMapName": "test-tls-cm", "key": "test-truststore.jks"}
     }
     expected_keystore_volume = {
         "name": "keystore",

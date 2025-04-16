@@ -71,9 +71,10 @@
           }
         },
         "truststore": {
-          "configMapName": "test-tls-cm",
-          "key": "test-truststore.p12",
-          "type": "pkcs12"
+          "pkcs12": {
+            "configMapName": "test-tls-cm",
+            "key": "test-truststore.p12"
+          }
         }
       },
       "configMaps": [
