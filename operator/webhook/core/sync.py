@@ -475,7 +475,7 @@ def _compute_status(parent: Mapping, children: Mapping) -> Mapping:
 
     ready_conditions = [
         _get_status_ready_condition(
-            parent["status"], expected_replicas == ready_replicas
+            parent.get("status", {}), expected_replicas == ready_replicas
         )
     ]
 

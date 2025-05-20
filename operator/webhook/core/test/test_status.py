@@ -107,6 +107,18 @@ def test_status_with_child_deployment_missing_ready_replicas_field_default_to_un
     assert status["readyReplicas"] == 0
 
 
+def test_status_conditions_with_parent_missing_status_field_generate_new_status(
+    patch_datetime, full_route
+):
+    del full_route["parent"]["status"]
+
+    status = _compute_status(full_route["parent"], full_route["children"])
+
+    conditions = status["conditions"]
+    assert len(conditions) == 2
+    assert conditions[1] == STATUS_READY_CONDITION
+
+
 def test_ready_status_with_parent_missing_status_field_generate_new_status(
     patch_datetime,
 ):
