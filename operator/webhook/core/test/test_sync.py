@@ -420,6 +420,90 @@ def test_no_env_from(full_route):
     assert expected_response == actual_response
 
 
+def test_env_from_config_map_ref_optional_property_not_present(full_route):
+    expected_response = load_json_as_dict(
+        f"{os.path.dirname(os.path.abspath(__file__))}/json/full-response.json"
+    )
+    expected_response["children"][0]["spec"]["template"]["spec"]["containers"][0][
+        "envFrom"
+    ][0]["configMapRef"].pop("optional", None)
+
+    full_route["parent"]["spec"]["envFrom"][0]["configMapRef"].pop("optional", None)
+    actual_response = sync(full_route)
+
+    assert expected_response == actual_response
+
+
+def test_env_from_config_map_ref_optional_false(full_route):
+    expected_response = load_json_as_dict(
+        f"{os.path.dirname(os.path.abspath(__file__))}/json/full-response.json"
+    )
+    expected_response["children"][0]["spec"]["template"]["spec"]["containers"][0][
+        "envFrom"
+    ][0]["configMapRef"]["optional"] = False
+
+    full_route["parent"]["spec"]["envFrom"][0]["configMapRef"]["optional"] = False
+    actual_response = sync(full_route)
+
+    assert expected_response == actual_response
+
+
+def test_env_from_config_map_ref_optional_true(full_route):
+    expected_response = load_json_as_dict(
+        f"{os.path.dirname(os.path.abspath(__file__))}/json/full-response.json"
+    )
+    expected_response["children"][0]["spec"]["template"]["spec"]["containers"][0][
+        "envFrom"
+    ][0]["configMapRef"]["optional"] = True
+
+    full_route["parent"]["spec"]["envFrom"][0]["configMapRef"]["optional"] = True
+    actual_response = sync(full_route)
+
+    assert expected_response == actual_response
+
+
+def test_env_from_secret_ref_optional_property_not_present(full_route):
+    expected_response = load_json_as_dict(
+        f"{os.path.dirname(os.path.abspath(__file__))}/json/full-response.json"
+    )
+    expected_response["children"][0]["spec"]["template"]["spec"]["containers"][0][
+        "envFrom"
+    ][1]["secretRef"].pop("optional", None)
+
+    full_route["parent"]["spec"]["envFrom"][1]["secretRef"].pop("optional", None)
+    actual_response = sync(full_route)
+
+    assert expected_response == actual_response
+
+
+def test_env_from_secret_ref_optional_false(full_route):
+    expected_response = load_json_as_dict(
+        f"{os.path.dirname(os.path.abspath(__file__))}/json/full-response.json"
+    )
+    expected_response["children"][0]["spec"]["template"]["spec"]["containers"][0][
+        "envFrom"
+    ][1]["secretRef"]["optional"] = False
+
+    full_route["parent"]["spec"]["envFrom"][1]["secretRef"]["optional"] = False
+    actual_response = sync(full_route)
+
+    assert expected_response == actual_response
+
+
+def test_env_from_secret_ref_optional_true(full_route):
+    expected_response = load_json_as_dict(
+        f"{os.path.dirname(os.path.abspath(__file__))}/json/full-response.json"
+    )
+    expected_response["children"][0]["spec"]["template"]["spec"]["containers"][0][
+        "envFrom"
+    ][1]["secretRef"]["optional"] = True
+
+    full_route["parent"]["spec"]["envFrom"][1]["secretRef"]["optional"] = True
+    actual_response = sync(full_route)
+
+    assert expected_response == actual_response
+
+
 def test_deployment_missing_labels(full_route):
     del full_route["parent"]["spec"]["labels"]
 

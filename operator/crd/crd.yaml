@@ -106,11 +106,19 @@ spec:
                         properties:
                           name:
                             type: string
+                          optional:
+                            type: boolean
+                        required:
+                          - name
                       secretRef:
                         type: object
                         properties:
                           name:
                             type: string
+                          optional:
+                            type: boolean
+                        required:
+                          - name
                     oneOf:
                       - properties:
                         required:
